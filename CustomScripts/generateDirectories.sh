@@ -12,7 +12,7 @@ mkdir -p $BASE_DIR/organizations/cryptogen
 
 # Create the config files needed
 touch $BASE_DIR/organizations/cryptogen/crypto-config-orderer.yaml
-touch $BASE_DIR/organizations/crypto-config-org1.yaml
+touch $BASE_DIR/organizations/cryptogen/crypto-config-org1.yaml
 
 # Create compose directory for Docker Compose files
 mkdir -p $BASE_DIR/compose
