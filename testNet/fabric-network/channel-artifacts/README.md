@@ -1,1 +1,2 @@
-This directory stores the channel configuration artifacts, including the genesis block and anchor peer updates.
+# Channel Artifacts
+This directory stores channel artifacts like genesis block and channel configuration.

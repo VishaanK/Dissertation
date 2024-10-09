@@ -1,35 +1,18 @@
-#!/bin/bash
-
 # Base directory for the network
 BASE_DIR="./fabric-network"
 
 # Create base directories
 mkdir -p $BASE_DIR
 mkdir -p $BASE_DIR/crypto-config
-mkdir -p $BASE_DIR/configtx
-mkdir -p $BASE_DIR/channel-artifacts
 mkdir -p $BASE_DIR/scripts
-mkdir -p $BASE_DIR/chaincode/mychaincode
-
-# Create crypto-config subdirectories for orderer organization
-mkdir -p $BASE_DIR/crypto-config/ordererOrganizations/example.com/orderers/orderer1.example.com
-mkdir -p $BASE_DIR/crypto-config/ordererOrganizations/example.com/orderers/orderer2.example.com
-mkdir -p $BASE_DIR/crypto-config/ordererOrganizations/example.com/msp
-mkdir -p $BASE_DIR/crypto-config/ordererOrganizations/example.com/ca
-
-# Create crypto-config subdirectories for peer organization Org1
-mkdir -p $BASE_DIR/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com
-mkdir -p $BASE_DIR/crypto-config/peerOrganizations/org1.example.com/peers/peer1.org1.example.com
-mkdir -p $BASE_DIR/crypto-config/peerOrganizations/org1.example.com/peers/peer2.org1.example.com
-mkdir -p $BASE_DIR/crypto-config/peerOrganizations/org1.example.com/msp
-mkdir -p $BASE_DIR/crypto-config/peerOrganizations/org1.example.com/ca
-
-# Create organizations directory
 mkdir -p $BASE_DIR/organizations
-mkdir -p $BASE_DIR/organizations/ordererOrganizations
-mkdir -p $BASE_DIR/organizations/ordererOrganizations/example.com
-mkdir -p $BASE_DIR/organizations/peerOrganizations
-mkdir -p $BASE_DIR/organizations/peerOrganizations/org1.example.com
+mkdir -p $BASE_DIR/chaincode/mychaincode
+mkdir -p $BASE_DIR/channel-artifacts
+mkdir -p $BASE_DIR/organizations/cryptogen
+
+# Create the config files needed
+touch $BASE_DIR/organizations/cryptogen/crypto-config-orderer.yaml
+touch $BASE_DIR/organizations/crypto-config-org1.yaml
 
 # Create compose directory for Docker Compose files
 mkdir -p $BASE_DIR/compose
@@ -41,46 +24,35 @@ mkdir -p $BASE_DIR/channel-artifacts
 
 # Create configtx directory (for storing configtx.yaml and related files)
 mkdir -p $BASE_DIR/configtx
+touch $BASE_DIR/configtx/configtx.yaml
 
-# Create scripts directory (for storing network and channel scripts)
-mkdir -p $BASE_DIR/scripts
+# Create README.md files for documentation
+echo "# Fabric Network" > $BASE_DIR/README.md
+echo "This directory contains the base structure for a Hyperledger Fabric network." >> $BASE_DIR/README.md
 
-# Create chaincode directory structure
-mkdir -p $BASE_DIR/chaincode/mychaincode
+echo "# Crypto Config" > $BASE_DIR/crypto-config/README.md
+echo "This directory contains cryptographic material and configuration files for the network." >> $BASE_DIR/crypto-config/README.md
 
-# Adding README files to directories
+echo "# Scripts" > $BASE_DIR/scripts/README.md
+echo "This directory contains scripts for managing the Hyperledger Fabric network." >> $BASE_DIR/scripts/README.md
 
-# For the crypto-config directory
-echo "This directory stores all cryptographic material for the Fabric network (MSP, TLS certs)." > $BASE_DIR/crypto-config/README.md
+echo "# Organizations" > $BASE_DIR/organizations/README.md
+echo "This directory contains configurations for the organizations involved in the network." >> $BASE_DIR/organizations/README.md
 
-# For the orderer organizations
-echo "This directory contains cryptographic material for the orderer organization 'example.com'." > $BASE_DIR/crypto-config/ordererOrganizations/example.com/README.md
-echo "This directory contains cryptographic material for the first orderer node (orderer1.example.com)." > $BASE_DIR/crypto-config/ordererOrganizations/example.com/orderers/orderer1.example.com/README.md
-echo "This directory contains cryptographic material for the second orderer node (orderer2.example.com)." > $BASE_DIR/crypto-config/ordererOrganizations/example.com/orderers/orderer2.example.com/README.md
-echo "This directory contains the MSP (Membership Service Provider) information for the orderer organization." > $BASE_DIR/crypto-config/ordererOrganizations/example.com/msp/README.md
-echo "This directory stores the CA (Certificate Authority) certificates for the orderer organization." > $BASE_DIR/crypto-config/ordererOrganizations/example.com/ca/README.md
+echo "# Chaincode" > $BASE_DIR/chaincode/README.md
+echo "This directory contains the chaincode implementations for the Hyperledger Fabric network." >> $BASE_DIR/chaincode/README.md
 
-# For the peer organization Org1
-echo "This directory contains cryptographic material for the peer organization 'org1.example.com'." > $BASE_DIR/crypto-config/peerOrganizations/org1.example.com/README.md
-echo "This directory contains cryptographic material for the first peer node (peer0.org1.example.com)." > $BASE_DIR/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/README.md
-echo "This directory contains cryptographic material for the second peer node (peer1.org1.example.com)." > $BASE_DIR/crypto-config/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/README.md
-echo "This directory contains cryptographic material for the third peer node (peer2.org1.example.com)." > $BASE_DIR/crypto-config/peerOrganizations/org1.example.com/peers/peer2.org1.example.com/README.md
-echo "This directory contains the MSP (Membership Service Provider) information for the peer organization 'Org1'." > $BASE_DIR/crypto-config/peerOrganizations/org1.example.com/msp/README.md
-echo "This directory stores the CA (Certificate Authority) certificates for the peer organization 'Org1'." > $BASE_DIR/crypto-config/peerOrganizations/org1.example.com/ca/README.md
+echo "# Channel Artifacts" > $BASE_DIR/channel-artifacts/README.md
+echo "This directory stores channel artifacts like genesis block and channel configuration." >> $BASE_DIR/channel-artifacts/README.md
 
-# For the organizations directory
-echo "This directory contains organization-related configurations for the Fabric network." > $BASE_DIR/organizations/README.md
-echo "This directory contains configurations for orderer organizations." > $BASE_DIR/organizations/ordererOrganizations/README.md
-echo "This directory contains configurations for the orderer organization 'example.com'." > $BASE_DIR/organizations/ordererOrganizations/example.com/README.md
-echo "This directory contains configurations for peer organizations." > $BASE_DIR/organizations/peerOrganizations/README.md
-echo "This directory contains configurations for the peer organization 'org1.example.com'." > $BASE_DIR/organizations/peerOrganizations/org1.example.com/README.md
+echo "# Cryptogen" > $BASE_DIR/organizations/cryptogen/README.md
+echo "This directory contains configurations for generating cryptographic materials using cryptogen." >> $BASE_DIR/organizations/cryptogen/README.md
 
-# For the compose directory
-echo "This directory contains Docker Compose files used to deploy and manage the Hyperledger Fabric network." > $BASE_DIR/compose/README.md
-echo "This file defines the services, networks, and volumes for the Hyperledger Fabric network." > $BASE_DIR/compose/docker-compose.yaml
-echo "This file allows for overriding settings in the main docker-compose file." > $BASE_DIR/compose/docker-compose.override.yaml
+echo "# Compose" > $BASE_DIR/compose/README.md
+echo "This directory contains Docker Compose files to set up and manage the Hyperledger Fabric network." >> $BASE_DIR/compose/README.md
 
-# For the channel-artifacts directory
-echo "This directory stores the channel configuration artifacts, including the genesis block and anchor peer updates." > $BASE_DIR/channel-artifacts/README.md
+echo "# Configtx" > $BASE_DIR/configtx/README.md
+echo "This directory contains configuration transaction files used for channel management and network configuration." >> $BASE_DIR/configtx/README.md
 
-# For the
+# Print completion message
+echo "Directory structure for Hyperledger Fabric network has been created successfully."

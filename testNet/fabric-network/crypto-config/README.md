@@ -1,1 +1,2 @@
-This directory stores all cryptographic material for the Fabric network (MSP, TLS certs).
+# Crypto Config
+This directory contains cryptographic material and configuration files for the network.

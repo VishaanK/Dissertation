@@ -1,1 +1,2 @@
-This directory contains Docker Compose files used to deploy and manage the Hyperledger Fabric network.
+# Compose
+This directory contains Docker Compose files to set up and manage the Hyperledger Fabric network.

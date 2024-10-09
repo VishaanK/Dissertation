@@ -1,1 +1,2 @@
-This directory contains organization-related configurations for the Fabric network.
+# Organizations
+This directory contains configurations for the organizations involved in the network.
