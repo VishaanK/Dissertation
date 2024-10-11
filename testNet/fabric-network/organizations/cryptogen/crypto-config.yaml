@@ -1,3 +1,20 @@
+OrdererOrgs:
+  # ---------------------------------------------------------------------------
+  # Orderer
+  # ---------------------------------------------------------------------------
+  - Name: Orderer
+    Domain: example.com
+    EnableNodeOUs: true
+
+
+    # ---------------------------------------------------------------------------
+    # "Specs" - See PeerOrgs for complete description
+    # ---------------------------------------------------------------------------
+    Specs:
+      - Hostname: orderer
+        SANS:
+          - localhost
+
 # ---------------------------------------------------------------------------
 # "PeerOrgs" - Definition of organizations managing peer nodes and orderer node
 # ---------------------------------------------------------------------------
@@ -28,9 +45,6 @@ PeerOrgs:
     #     CommonName: foo27.org5.example.com # overrides Hostname-based FQDN set above
     #   - Hostname: bar
     #   - Hostname: baz
-    Specs:
-      - Hostname: orderer0 # explicitly define orderer0's hostname
-      - CommonName: orderer0.org1.example.com # overrides Hostname-based FQDN set above
     # ---------------------------------------------------------------------------
     # "Template"
     # ---------------------------------------------------------------------------
