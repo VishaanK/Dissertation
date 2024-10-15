@@ -14,3 +14,5 @@ if [ $res -ne 0 ]; then
     fatalln "Failed to generate certificates..."
 fi
 
+#set this vital env variable which the tool searches in for the config file
+export FABRIC_CFG_PATH=${PWD}/configtx
