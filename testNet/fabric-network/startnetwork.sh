@@ -6,7 +6,7 @@ CONTAINER_CLI_COMPOSE="docker-compose"
 SOCK="${DOCKER_HOST:-/var/run/docker.sock}"
 DOCKER_SOCK="${SOCK##unix://}"
 CONTAINER_CLI="docker"
-export FABRIC_CFG_PATH=${PWD}/configtx
+
 
 COMPOSE_FILES="-f compose/${COMPOSE_FILE_BASE} -f compose/${COMPOSE_FILE_BASE}"
 

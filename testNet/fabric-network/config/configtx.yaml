@@ -37,6 +37,7 @@ Organizations:
       Admins:
         Type: Signature
         Rule: "OR('OrdererMSP.admin')"
+    #define the endpoints of orderers in this organisation
     OrdererEndpoints:
       - orderer.example.com:7050
 
@@ -49,7 +50,7 @@ Organizations:
     #This ID is the organisations MSP ID -> unique id for the organisation
     ID: Org1MSP
 
-    MSPDir: ../organizations/peerOrganisations/org1.example.com/msp
+    MSPDir: ../organizations/peerOrganizations/org1.example.com/msp
 
     # Policies defines the set of policies at this level of the config tree
     # For organization policies, their canonical path is usually
@@ -67,6 +68,10 @@ Organizations:
         Endorsement:
             Type: Signature
             Rule: "OR('Org1MSP.peer')"
+
+    AnchorPeers:
+      - Host : peer0.org1.example.com
+        Port : 7051
 
 
 ################################################################################
@@ -264,4 +269,8 @@ Profiles:
       <<: *ApplicationDefaults
       Organizations:
         - *Org1
+        - *OrdererOrg
       Capabilities: *ApplicationCapabilities
+
+
+ 
