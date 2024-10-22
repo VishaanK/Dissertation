@@ -10,14 +10,22 @@ volumes:
   peer0.org1.example.com:
   peer1.org1.example.com:
   peer2.org1.example.com:
+  api:
+  database:
 
 
 networks:
   test:
     name: fabric_test
 
-services:
+  api_db:
+    name: api_db
 
+  bridge_network:
+    name: bridge_network
+    
+
+services:
   orderer.example.com:
     container_name: orderer.example.com
     image: hyperledger/fabric-orderer:3.0
@@ -75,6 +83,7 @@ services:
       - 9443:9443
     networks:
       - test
+     
 
   peer0.org1.example.com:
     container_name: peer0.org1.example.com
@@ -122,6 +131,7 @@ services:
       - 9444:9444
     networks:
       - test
+      - bridge_network
 
   peer1.org1.example.com:
     container_name: peer1.org1.example.com
@@ -211,3 +221,35 @@ services:
     networks:
       - test
 
+  database:
+    container_name: db_mongo
+    image: mongo:latest
+    restart: always
+    labels:
+      service: mongo_db
+
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME:root
+      - MONGO_INITDB_ROOT_PASSWORD:example
+    volumes:
+      - database:/data
+
+    ports:
+      - 27017:27017
+    networks:
+      - api_db
+  
+  api:
+    container_name: api
+    image: node:latest
+    labels:
+      service: api_server
+    
+    volumes:
+      - api:/data
+   
+    ports:
+      - 5080:5080
+    networks:
+      - api_db
+      - bridge_network
