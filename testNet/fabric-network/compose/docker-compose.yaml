@@ -231,24 +231,27 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME:admin
       - MONGO_INITDB_ROOT_PASSWORD:password
-      - MONGO_INITDB_DATABASE=test
+      - MONGO_INITDB_DATABASE=document_database
+
     volumes:
       - database:/data
+      - ../../db/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
 
     ports:
       - 27017:27017
     networks:
       - api_db
   
+#api needs to start after the db and the fabric network 
   api:
     build: 
       context: ../../api
       dockerfile: Dockerfile
-      
     container_name: api
     
     labels:
       service: api_server
+#note add depends on to entire fabric network
     depends_on:
       - database
     volumes:
