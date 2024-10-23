@@ -5,6 +5,6 @@ var app = express();
 app.listen(3000, () => {
     console.log("Server running on port 3000");
 });
-app.get("/url", (req, res, next) => {
+app.get("/healthcheck", (req, res) => {
     res.send(200);
 });

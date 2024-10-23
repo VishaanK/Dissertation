@@ -9,8 +9,8 @@ var app = express();app.listen(3000, () => {
  console.log("Server running on port 3000");
 });
 
-app.get("/url", (req:Request, res:Response, next:any) => {
-  res.send(200);
+app.get("/healthcheck", (req:Request, res:Response) => {
+  res.sendStatus(200);
 });
 
 
