@@ -229,8 +229,9 @@ services:
       service: mongo_db
 
     environment:
-      - MONGO_INITDB_ROOT_USERNAME:root
-      - MONGO_INITDB_ROOT_PASSWORD:example
+      - MONGO_INITDB_ROOT_USERNAME:admin
+      - MONGO_INITDB_ROOT_PASSWORD:password
+      - MONGO_INITDB_DATABASE=test
     volumes:
       - database:/data
 
@@ -240,16 +241,22 @@ services:
       - api_db
   
   api:
+    build: 
+      context: ../../api
+      dockerfile: Dockerfile
+      
     container_name: api
-    image: node:latest
+    
     labels:
       service: api_server
-    
+    depends_on:
+      - database
     volumes:
-      - api:/data
-   
+      - api:/app
+    restart:
+      always
     ports:
-      - 5080:5080
+      - 3000:3000
     networks:
       - api_db
       - bridge_network
