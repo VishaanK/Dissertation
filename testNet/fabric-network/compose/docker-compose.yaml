@@ -122,6 +122,7 @@ services:
       - ../config:/etc/hyperledger/peercfg
       - ../channel-artifacts/:/etc/hyperledger/fabric/genesisblocks
       - ../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/:/etc/hyperledger/admin
+      - ../chaincode/documentcc.tar.gz:/etc/hyperledger/fabric/chaincode/documentcc.tar.gz
     working_dir: /root
     command: peer node start
     # peer channel fetch newest  channel1.block -c channel1 --orderer orderer.example.com:7050
@@ -169,6 +170,7 @@ services:
       - ../config:/etc/hyperledger/peercfg
       - ../channel-artifacts/:/etc/hyperledger/fabric/genesisblocks
       - ../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/:/etc/hyperledger/admin
+      - ../chaincode/documentcc.tar.gz:/etc/hyperledger/fabric/chaincode/documentcc.tar.gz
     working_dir: /root
     command: peer node start
     ports:
@@ -213,6 +215,7 @@ services:
       - ../config:/etc/hyperledger/peercfg
       - ../channel-artifacts/:/etc/hyperledger/fabric/genesisblocks
       - ../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/:/etc/hyperledger/admin
+      - ../chaincode/documentcc.tar.gz:/etc/hyperledger/fabric/chaincode/documentcc.tar.gz
     working_dir: /root
     command: peer node start
     ports:
