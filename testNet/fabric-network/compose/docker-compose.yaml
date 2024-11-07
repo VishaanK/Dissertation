@@ -115,6 +115,8 @@ services:
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
       - ADMIN_TLS_SIGN_CERT=/etc/hyperledger/admin/tls/client.crt
       - ADMIN_TLS_PRIVATE_KEY=/etc/hyperledger/admin/tls/client.key
+      - DOCKER_SOCK=/var/run/docker.sock
+      - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:latest
     volumes:
 
       - ../organizations/peerOrganizations/org1.example.com:/etc/hyperledger/fabric
@@ -123,6 +125,8 @@ services:
       - ../channel-artifacts/:/etc/hyperledger/fabric/genesisblocks
       - ../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/:/etc/hyperledger/admin
       - ../chaincode/documentcc.tar.gz:/etc/hyperledger/fabric/chaincode/documentcc.tar.gz
+      - ${DOCKER_SOCK}:/var/run/docker.sock 
+
     working_dir: /root
     command: peer node start
     # peer channel fetch newest  channel1.block -c channel1 --orderer orderer.example.com:7050
