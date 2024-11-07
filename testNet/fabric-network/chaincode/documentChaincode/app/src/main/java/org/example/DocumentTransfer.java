@@ -40,6 +40,22 @@ public final class DocumentTransfer implements ContractInterface {
     }
 
 
+
+        /**
+     * Creates some initial assets on the ledger.
+     *
+     * @param ctx the transaction context
+     */
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
+    public void InitLedger(final Context ctx) {
+        ChaincodeStub stub = ctx.getStub();
+
+        CreateDocument(ctx, "doc1", "To Kill", "John2", "279o9ohuisdg78928h", "PDF",false);
+        CreateDocument(ctx, "doc2", "Some Legal Document", "Dave1", "8fjiruenguiu759uw", "Docx",false);
+
+
+    }
+
     /**
      * Create Document
      * @param ctx
