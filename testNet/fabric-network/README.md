@@ -18,18 +18,25 @@ peer lifecycle chaincode queryinstalled
 export CC_PACKAGE_ID= {ID}
 
 ## approve the chaincode 
-peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --channelID channel1 --name document --version 1.0 --package-id $CC_PACKAGE_ID --sequence 1 --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
+peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --channelID channel1 --name document --version 1.0 --package-id $CC_PACKAGE_ID --sequence 1 --tls --cafile $ORDERER_CA_FILE
+
+
+
+"${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
 
 # THE ABOVE PROCESS ONLY NEEDS TO HAPPEN FOR A MAJORITY OF THE ORGANISATIONS , IN THIS CASE THEREFORE JUST NEEDS TO BE DONE ONCE 
 
 
 ### check that the chaincode has been approved 
- peer lifecycle chaincode checkcommitreadiness --channelID channel1 --name document --version 1.0 --sequence 1 --tls --cafile "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" --output json
+ peer lifecycle chaincode checkcommitreadiness --channelID channel1 --name document --version 1.0 --sequence 1 --tls --cafile $ORDERER_CA_FILE --output json
+ 
+ "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" 
 
 
 
 ## command for peers to join the channel 
-peer channel join -b /etc/hyperledger/fabric/genesisblocks/genesis_block.pb
+peer channel join -b /etc/hyperledger/fabric/genesisblocks/genesis_block.pb --cafile /etc/hyperledger/admin/msp/cacerts/ca.org1.example.com-cert.pem
+testNet/fabric-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/cacerts/ca.org1.example.com-cert.pem
 
 ## command fo the orderer to start the channel
         osnadmin channel join --channelID channel1 --config-block /etc/hyperledger/fabric/genesisblocks/genesis_block.pb -o orderer.example.com:7053 --ca-file $OSN_TLS_CA_ROOT_CERT --client-cert $ADMIN_TLS_SIGN_CERT --client-key $ADMIN_TLS_PRIVATE_KEY || echo "Command failed"

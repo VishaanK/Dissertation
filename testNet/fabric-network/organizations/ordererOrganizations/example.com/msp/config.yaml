@@ -7,7 +7,7 @@ NodeOUs:
     Certificate: cacerts/ca.example.com-cert.pem
     OrganizationalUnitIdentifier: peer
   AdminOUIdentifier:
-    Certificate: cacerts/ca.example.com-cert.pem
+    Certificate: ../users/Admin@org1.example.com/msp/cacerts/ca.org1.example.com-cert.pem
     OrganizationalUnitIdentifier: admin
   OrdererOUIdentifier:
     Certificate: cacerts/ca.example.com-cert.pem

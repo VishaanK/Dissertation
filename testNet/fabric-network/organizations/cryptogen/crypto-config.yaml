@@ -72,3 +72,9 @@ PeerOrgs:
     # ---------------------------------------------------------------------------
     Users:
       Count: 1  # Specify 1 user in addition to Admin
+
+      Name: ADMIN
+      Type: ADMIN
+      Affiliation: org1
+      Certificate:
+        OU: ADMIN  # Ensure this is uppercase

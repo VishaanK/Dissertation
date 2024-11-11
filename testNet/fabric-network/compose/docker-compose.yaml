@@ -96,36 +96,38 @@ services:
       #- FABRIC_LOGGING_SPEC=DEBUG
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_PROFILE_ENABLED=false
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/peers/peer0.org1.example.com/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/peers/peer0.org1.example.com/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tlsca/tlsca.org1.example.com-cert.pem
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/org1.example.com/peers/peer0.org1.example.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/org1.example.com/peers/peer0.org1.example.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
       # Peer specific variables
       - CORE_PEER_ID=peer0.org1.example.com
       - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
       - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
       - CORE_PEER_CHAINCODEADDRESS=peer0.org1.example.com:7052
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
+      #- CORE_PEER_GOSSIP_BOOTSTRAP=""
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
       - CORE_PEER_LOCALMSPID=Org1MSP
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/admin/msp
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/org1.example.com/peers/peer0.org1.example.com/msp
       - CORE_OPERATIONS_LISTENADDRESS=peer0.org1.example.com:9444
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0org1"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
-      - ADMIN_TLS_SIGN_CERT=/etc/hyperledger/admin/tls/client.crt
-      - ADMIN_TLS_PRIVATE_KEY=/etc/hyperledger/admin/tls/client.key
+      - CORE_PEER_TLS_CLIENTCERT_FILE=/etc/hyperledger/admin/tls/client.crt
+      - CORE_PEER_TLS_CLIENTKEY_FILE=/etc/hyperledger/admin/tls/client.key
       - DOCKER_SOCK=/var/run/docker.sock
       - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:latest
+      - ORDERER_CA_FILE=/etc/hyperledger/fabric/orderer/msp/tlscacerts/tlsca.example.com-cert.pem
     volumes:
 
-      - ../organizations/peerOrganizations/org1.example.com:/etc/hyperledger/fabric
+      - ../organizations/peerOrganizations:/etc/hyperledger/fabric
       - peer0.org1.example.com:/var/hyperledger/production
       - ../config:/etc/hyperledger/peercfg
       - ../channel-artifacts/:/etc/hyperledger/fabric/genesisblocks
       - ../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/:/etc/hyperledger/admin
       - ../chaincode/documentcc.tar.gz:/etc/hyperledger/fabric/chaincode/documentcc.tar.gz
       - ${DOCKER_SOCK}:/var/run/docker.sock 
+      - ../organizations/ordererOrganizations/example.com:/etc/hyoerledger/fabric/orderer
 
     working_dir: /root
     command: peer node start
@@ -137,6 +139,7 @@ services:
     networks:
       - test
       - bridge_network
+    
 
   peer1.org1.example.com:
     container_name: peer1.org1.example.com
@@ -149,9 +152,9 @@ services:
       #- FABRIC_LOGGING_SPEC=DEBUG
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_PROFILE_ENABLED=false
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/peers/peer1.org1.example.com/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/peers/peer1.org1.example.com/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tlsca/tlsca.org1.example.com-cert.pem
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/org1.example.com/peers/peer1.org1.example.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/org1.example.com/peers/peer1.org1.example.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
       # Peer specific variables
       - CORE_PEER_ID=peer1.org1.example.com
       - CORE_PEER_ADDRESS=peer1.org1.example.com:7060
@@ -159,22 +162,27 @@ services:
       - CORE_PEER_CHAINCODEADDRESS=peer1.org1.example.com:7061
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7061
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org1.example.com:7060
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org1.example.com:7060
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
       - CORE_PEER_LOCALMSPID=Org1MSP
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/admin/msp
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/org1.example.com/peers/peer1.org1.example.com/msp
       - CORE_OPERATIONS_LISTENADDRESS=peer1.org1.example.com:9445
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer1org1"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
       - ADMIN_TLS_SIGN_CERT=/etc/hyperledger/admin/tls/client.crt
       - ADMIN_TLS_PRIVATE_KEY=/etc/hyperledger/admin/tls/client.key
+      - DOCKER_SOCK=/var/run/docker.sock
+      - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:latest
+      - ORDERER_CA_FILE=/etc/hyoerledger/fabric/orderer/msp/tlscacerts/tlsca.example.com-cert.pem
     volumes:
-      - ../organizations/peerOrganizations/org1.example.com:/etc/hyperledger/fabric
+      - ../organizations/peerOrganizations:/etc/hyperledger/fabric
       - peer1.org1.example.com:/var/hyperledger/production
       - ../config:/etc/hyperledger/peercfg
       - ../channel-artifacts/:/etc/hyperledger/fabric/genesisblocks
       - ../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/:/etc/hyperledger/admin
       - ../chaincode/documentcc.tar.gz:/etc/hyperledger/fabric/chaincode/documentcc.tar.gz
+      - ${DOCKER_SOCK}:/var/run/docker.sock 
+      - ../organizations/ordererOrganizations/example.com:/etc/hyoerledger/fabric/orderer
     working_dir: /root
     command: peer node start
     ports:
@@ -182,6 +190,8 @@ services:
       - 9445:9445
     networks:
       - test
+    depends_on:
+    - peer0.org1.example.com
 
   peer2.org1.example.com:
     container_name: peer2.org1.example.com
@@ -194,9 +204,9 @@ services:
       #- FABRIC_LOGGING_SPEC=DEBUG
       - CORE_PEER_TLS_ENABLED=true
       - CORE_PEER_PROFILE_ENABLED=false
-      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/peers/peer2.org1.example.com/tls/server.crt
-      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/peers/peer2.org1.example.com/tls/server.key
-      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tlsca/tlsca.org1.example.com-cert.pem
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/org1.example.com/peers/peer2.org1.example.com/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/org1.example.com/peers/peer2.org1.example.com/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
       # Peer specific variables
       - CORE_PEER_ID=peer2.org1.example.com
       - CORE_PEER_ADDRESS=peer2.org1.example.com:7057
@@ -204,22 +214,27 @@ services:
       - CORE_PEER_CHAINCODEADDRESS=peer2.org1.example.com:7058
       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7058
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer2.org1.example.com:7057
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer2.org1.example.com:7057
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
       - CORE_PEER_LOCALMSPID=Org1MSP
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/admin/msp
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/org1.example.com/peers/peer2.org1.example.com/msp
       - CORE_OPERATIONS_LISTENADDRESS=peer2.org1.example.com:9446
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer2org1"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
       - ADMIN_TLS_SIGN_CERT=/etc/hyperledger/admin/tls/client.crt
       - ADMIN_TLS_PRIVATE_KEY=/etc/hyperledger/admin/tls/client.key
+      - DOCKER_SOCK=/var/run/docker.sock
+      - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:latest
+      - ORDERER_CA_FILE=/etc/hyoerledger/fabric/orderer/msp/tlscacerts/tlsca.example.com-cert.pem
     volumes:
-      - ../organizations/peerOrganizations/org1.example.com:/etc/hyperledger/fabric
+      - ../organizations/peerOrganizations:/etc/hyperledger/fabric
       - peer2.org1.example.com:/var/hyperledger/production
       - ../config:/etc/hyperledger/peercfg
       - ../channel-artifacts/:/etc/hyperledger/fabric/genesisblocks
       - ../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/:/etc/hyperledger/admin
       - ../chaincode/documentcc.tar.gz:/etc/hyperledger/fabric/chaincode/documentcc.tar.gz
+      - ${DOCKER_SOCK}:/var/run/docker.sock 
+      - ../organizations/ordererOrganizations/example.com:/etc/hyoerledger/fabric/orderer
     working_dir: /root
     command: peer node start
     ports:
@@ -227,6 +242,8 @@ services:
       - 9446:9446
     networks:
       - test
+    depends_on:
+      - peer0.org1.example.com
 
   database:
     container_name: db_mongo
