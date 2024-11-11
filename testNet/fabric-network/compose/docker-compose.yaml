@@ -61,14 +61,7 @@ services:
       - ADMIN_TLS_SIGN_CERT=/etc/hyperledger/admin/tls/client.crt
       - ADMIN_TLS_PRIVATE_KEY=/etc/hyperledger/admin/tls/client.key
     working_dir: /root
-    command: 
-      - /bin/sh
-      - -c
-      - |
-        orderer 
-        echo "CHECLOGTHISN" 
-        osnadmin channel join --channelID channel1 --config-block /etc/hyperledger/fabric/genesisblocks/genesis_block.pb -o orderer.example.com:7053 --ca-file $OSN_TLS_CA_ROOT_CERT --client-cert $ADMIN_TLS_SIGN_CERT --client-key $ADMIN_TLS_PRIVATE_KEY || echo "Command failed"
-        echo "CHEKCING THIS WORKS" 
+    command: orderer 
     volumes:
       - ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/:/etc/hyperledger/orderer/msp
       - ../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/etc/hyperledger/orderer/tls
