@@ -33,7 +33,8 @@ peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameO
  "${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem" 
 
 
-
+## set the msp to admin : 
+CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/org1.example.com/peers/peer0.org1.example.com/msp
 ## command for peers to join the channel 
 peer channel join -b /etc/hyperledger/fabric/genesisblocks/genesis_block.pb --cafile /etc/hyperledger/admin/msp/cacerts/ca.org1.example.com-cert.pem
 testNet/fabric-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/cacerts/ca.org1.example.com-cert.pem

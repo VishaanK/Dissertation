@@ -92,6 +92,7 @@ services:
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/org1.example.com/peers/peer0.org1.example.com/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/org1.example.com/peers/peer0.org1.example.com/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+      
       # Peer specific variables
       - CORE_PEER_ID=peer0.org1.example.com
       - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
@@ -106,18 +107,19 @@ services:
       - CORE_METRICS_PROVIDER=prometheus
       - CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG={"peername":"peer0org1"}
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
-      - CORE_PEER_TLS_CLIENTCERT_FILE=/etc/hyperledger/admin/tls/client.crt
-      - CORE_PEER_TLS_CLIENTKEY_FILE=/etc/hyperledger/admin/tls/client.key
       - DOCKER_SOCK=/var/run/docker.sock
       - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:latest
       - ORDERER_CA_FILE=/etc/hyperledger/fabric/orderer/msp/tlscacerts/tlsca.example.com-cert.pem
+
+      - ADMIN_TLS_SIGN_CERT=/etc/hyperledger/fabric/org1.example.com/users/Admin@org1.example.com/tls/client.crt
+      - ADMIN_TLS_PRIVATE_KEY=/etc/hyperledger/fabric/org1.example.com/users/Admin@org1.example.com/tls/client.key
+    
     volumes:
 
       - ../organizations/peerOrganizations:/etc/hyperledger/fabric
       - peer0.org1.example.com:/var/hyperledger/production
       - ../config:/etc/hyperledger/peercfg
       - ../channel-artifacts/:/etc/hyperledger/fabric/genesisblocks
-      - ../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/:/etc/hyperledger/admin
       - ../chaincode/documentcc.tar.gz:/etc/hyperledger/fabric/chaincode/documentcc.tar.gz
       - ${DOCKER_SOCK}:/var/run/docker.sock 
       - ../organizations/ordererOrganizations/example.com:/etc/hyoerledger/fabric/orderer
