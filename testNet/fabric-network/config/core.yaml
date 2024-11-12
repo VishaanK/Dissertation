@@ -16,7 +16,7 @@ peer:
 
     # The networkId allows for logical separation of networks and is used when
     # naming docker resources.
-    networkId: dev
+    networkId: test
 
     # The Address at local network interface this Peer will listen on.
     # By default, it will listen on all network interfaces
@@ -542,7 +542,7 @@ vm:
         # https://docs.docker.com/engine/admin/logging/overview/
         # Note: Set LogConfig using Environment Variables is not supported.
         hostConfig:
-            NetworkMode: host
+            NetworkMode: test
             Dns:
                # - 192.168.0.1
             LogConfig:

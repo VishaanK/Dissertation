@@ -116,14 +116,16 @@ services:
 
       - ADMIN_TLS_SIGN_CERT=/etc/hyperledger/fabric/org1.example.com/users/Admin@org1.example.com/tls/client.crt
       - ADMIN_TLS_PRIVATE_KEY=/etc/hyperledger/fabric/org1.example.com/users/Admin@org1.example.com/tls/client.key
-      - REQUEST_TIMEOUT=60s
+#      - REQUEST_TIMEOUT=60s
+
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
     volumes:
 
       - ../organizations/peerOrganizations:/etc/hyperledger/fabric
       - peer0.org1.example.com:/var/hyperledger/production
       - ../config:/etc/hyperledger/peercfg
       - ${DOCKER_SOCK}:/var/run/docker.sock 
-      - ../organizations/ordererOrganizations/example.com:/etc/hyoerledger/fabric/orderer
+      - ../organizations/ordererOrganizations/example.com:/etc/hyperledger/fabric/orderer
 
     working_dir: /root
     command: peer node start
@@ -170,14 +172,15 @@ services:
       - DOCKER_SOCK=/var/run/docker.sock
       - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:latest
       - ORDERER_CA_FILE=/etc/hyoerledger/fabric/orderer/msp/tlscacerts/tlsca.example.com-cert.pem
-      - REQUEST_TIMEOUT=60s
+   #   - REQUEST_TIMEOUT=60s
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
     volumes:
       - ../organizations/peerOrganizations:/etc/hyperledger/fabric
       - peer1.org1.example.com:/var/hyperledger/production
       - ../config:/etc/hyperledger/peercfg
       - ../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/:/etc/hyperledger/admin
       - ${DOCKER_SOCK}:/var/run/docker.sock 
-      - ../organizations/ordererOrganizations/example.com:/etc/hyoerledger/fabric/orderer
+      - ../organizations/ordererOrganizations/example.com:/etc/hyperledger/fabric/orderer
     working_dir: /root
     command: peer node start
     ports:
@@ -221,14 +224,16 @@ services:
       - DOCKER_SOCK=/var/run/docker.sock
       - CORE_CHAINCODE_JAVA_RUNTIME=hyperledger/fabric-javaenv:latest
       - ORDERER_CA_FILE=/etc/hyoerledger/fabric/orderer/msp/tlscacerts/tlsca.example.com-cert.pem
-      - REQUEST_TIMEOUT=60s
+     # - REQUEST_TIMEOUT=60s
+
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=fabric_test
     volumes:
       - ../organizations/peerOrganizations:/etc/hyperledger/fabric
       - peer2.org1.example.com:/var/hyperledger/production
       - ../config:/etc/hyperledger/peercfg
       - ../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/:/etc/hyperledger/admin
       - ${DOCKER_SOCK}:/var/run/docker.sock 
-      - ../organizations/ordererOrganizations/example.com:/etc/hyoerledger/fabric/orderer
+      - ../organizations/ordererOrganizations/example.com:/etc/hyperledger/fabric/orderer
     working_dir: /root
     command: peer node start
     ports:

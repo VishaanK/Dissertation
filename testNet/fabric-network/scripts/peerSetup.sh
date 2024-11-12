@@ -28,17 +28,7 @@ for i in "${!peers[@]}"; do
     ../bin/peer channel join -b ../channel-artifacts/genesis_block.pb -o localhost:7050
     
     #install the chaincode 
-    response=$(../bin/peer lifecycle chaincode install ../chaincode/documentcc.tar.gz 2>&1)
-
-
-    export CC_PACKAGE_ID=$(echo "$response" | sed -n 's/.*\(documentcc1:[a-f0-9]*\).*/\1/p')
-
-    # Check if CC_PACKAGE_ID was extracted correctly
-    if [[ -z "$CC_PACKAGE_ID" ]]; then
-        echo "Error: Could not extract CC_PACKAGE_ID"
-    else
-        echo "Captured CC_PACKAGE_ID: $CC_PACKAGE_ID"
-    fi
+    ../bin/peer lifecycle chaincode install ../chaincode/documentcc.tar.gz
 
     #verify chaincode is installed 
     ../bin/peer lifecycle chaincode queryinstalled
