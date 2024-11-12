@@ -311,7 +311,7 @@ public final class DocumentTransfer implements ContractInterface {
         if (startKey.equals(endKey)) {
             String errorMessage = String.format("Entered two of the same key");
             System.out.println(errorMessage);
-            throw new ChaincodeException(errorMessage);
+            throw new ChaincodeException(errorMessage, DocumentTransferErrors.DOCUMENT_NOT_FOUND.toString());
         }
 
         List<Document> queryResults = new ArrayList<>();
