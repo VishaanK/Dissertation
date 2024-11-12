@@ -21,3 +21,4 @@ $CONTAINER_CLI ps -a
 if [ $? -ne 0 ]; then
 fatalln "Unable to start network"
 fi
+

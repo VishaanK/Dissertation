@@ -35,3 +35,4 @@ echo "ORDERER_LOGLEVEL=$ORDERER_LOGLEVEL"
 #../bin/peer channel list -o orderer.example.com:7050 --tls --cafile $OSN_TLS_CA_ROOT_CERT
 ../bin/osnadmin channel join --channelID channel1 --config-block ../channel-artifacts/genesis_block.pb -o localhost:7053 --ca-file $OSN_TLS_CA_ROOT_CERT --client-cert $ADMIN_TLS_SIGN_CERT --client-key $ADMIN_TLS_PRIVATE_KEY || echo "Command failed"
 # Example of joining the O
+
