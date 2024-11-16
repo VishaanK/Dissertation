@@ -18,4 +18,4 @@ COPY dist/* .
 EXPOSE 3000
 
 # Use the startup script to run the app
-CMD ["node", "start"]
+CMD ["node", "app.js"]

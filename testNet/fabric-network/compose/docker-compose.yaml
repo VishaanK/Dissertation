@@ -279,7 +279,7 @@ services:
       - database
     volumes:
       - api:/app
-      - ../organizations:/organizations
+      - ../organizations:/app/organizations
     restart:
       always
     ports:

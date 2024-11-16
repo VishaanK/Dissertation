@@ -8,11 +8,10 @@ export const mspId = envOrDefault('MSP_ID', 'Org1MSP');
 export const cryptoPath = envOrDefault('CRYPTO_PATH', path.resolve(__dirname, 'organizations', 'peerOrganizations', 'org1.example.com'));
 
 // Path to user private key directory.
-export const keyDirectoryPath = envOrDefault('KEY_DIRECTORY_PATH', path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore'));
+export const keyDirectoryPath = envOrDefault('KEY_DIRECTORY_PATH', path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore','priv_sk'));
 
 // Path to user certificate directory.
-export const certDirectoryPath = envOrDefault('CERT_DIRECTORY_PATH', path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts'));
-
+export const certDirectoryPath = envOrDefault('CERT_DIRECTORY_PATH', path.resolve(cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts','User1@org1.example.com-cert.pem'));
 // Path to peer TLS certificate.
 export const tlsCertPath = envOrDefault('TLS_CERT_PATH', path.resolve(cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt'));
 
@@ -32,3 +31,7 @@ export function envOrDefault(key: string, defaultValue: string): string {
 
 //decoder
 export const utf8Decoder = new TextDecoder();
+
+export const dbConnString="mongodb+srv://<username>:<password>@sandbox.jadwj.mongodb.net"
+export const dbName="gamesDB"
+export const collectionNAme="games"

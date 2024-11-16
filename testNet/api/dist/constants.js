@@ -12,9 +12,9 @@ exports.mspId = envOrDefault('MSP_ID', 'Org1MSP');
 // Path to crypto materials.
 exports.cryptoPath = envOrDefault('CRYPTO_PATH', path_1.default.resolve(__dirname, 'organizations', 'peerOrganizations', 'org1.example.com'));
 // Path to user private key directory.
-exports.keyDirectoryPath = envOrDefault('KEY_DIRECTORY_PATH', path_1.default.resolve(exports.cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore'));
+exports.keyDirectoryPath = envOrDefault('KEY_DIRECTORY_PATH', path_1.default.resolve(exports.cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore', 'priv_sk'));
 // Path to user certificate directory.
-exports.certDirectoryPath = envOrDefault('CERT_DIRECTORY_PATH', path_1.default.resolve(exports.cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts'));
+exports.certDirectoryPath = envOrDefault('CERT_DIRECTORY_PATH', path_1.default.resolve(exports.cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts', 'User1@org1.example.com-cert.pem'));
 // Path to peer TLS certificate.
 exports.tlsCertPath = envOrDefault('TLS_CERT_PATH', path_1.default.resolve(exports.cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt'));
 // Gateway peer endpoint.
