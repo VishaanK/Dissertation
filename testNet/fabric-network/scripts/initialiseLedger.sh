@@ -10,7 +10,6 @@ export CORE_PEER_ADDRESS="localhost:$peerPort"
 export CORE_PEER_ID=$peer
 export CORE_PEER_TLS_ROOTCERT_FILE=../organizations/peerOrganizations/org1.example.com/peers/$peer/tls/ca.crt
 export CORE_PEER_TLS_ENABLED=true
-#export CORE_PEER_MSPCONFIGPATH=../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
 export CORE_PEER_MSPCONFIGPATH=../organizations/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp
 export ORDERER_GENERAL_TLS_ROOTCAS=../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt
 
