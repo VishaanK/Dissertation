@@ -4,13 +4,12 @@ import { generateAssetId } from "./utils";
 import { sign } from "crypto";
 
 /**
- * This type of transaction would typically only be run once by an application the first time it was started after its
- * initial deployment. A new version of the chaincode deployed later would likely not need to run an "init" function.
+ * Healthcheck function tried to fetch all documents on the ledger 
  */
-export async function initLedger(contract: Contract): Promise<void> {
-    console.log('\n--> Submit Transaction: InitLedger, function creates the initial set of assets on the ledger');
+export async function ledgerHealthCheck(contract: Contract): Promise<void> {
+    console.log('\n--> Submit Transaction: GetAllDocuments, retrieve all on ledger to check gateway is functioning');
 
-    await contract.submitTransaction('InitLedger');
+    await contract.submitTransaction('GetAllDocuments');
 
     console.log('*** Transaction committed successfully');
 }

@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { newGrpcConnection, newIdentity, newSigner } from "./gateway";
 import { Client } from "@grpc/grpc-js";
 import { chaincodeName, channelName } from "./constants";
-import { initLedger, ledgerCreateDocument } from "./documentInterface";
+import { ledgerCreateDocument, ledgerHealthCheck } from "./documentInterface";
 const crypto = require('crypto');
 let express = require("express");
 //hyperledger connection detials to make available is different files 
@@ -31,8 +31,16 @@ app.use((req:Request, res:Response, next:NextFunction) => {
 
 
 app.get("/healthcheck", (req:Request, res:Response) => {
-  initLedger(contract).then(value => {console.log("Ledger Initid ... Init")})
-  res.sendStatus(200);
+  console.log("/healthcheck pinged ")
+  ledgerHealthCheck(contract).then(value => {
+    console.log("Ledger Initid ... Init");
+    res.json(value); 
+    res.sendStatus(200);
+  }).catch((error: Error) => {
+    console.log("error %s",error);
+    res.status(500).json({error: error})
+  })
+  
 });
 
 /**
@@ -62,17 +70,17 @@ app.get("/documents/:id", (req:Request, res:Response) => {
  * send the file to the db 
  * log the file in the ledger 
  */
-app.post("/documents", (req:Request, res:Response) => {
-  const docname = req.body.documentName;
-  const creatorID = req.body.creatorID;
-  const document = req.body.document;
-  const documentType = req.body.documentType;
-  const signable = req.body.signable;
+// app.post("/documents", (req:Request, res:Response) => {
+//   const docname = req.body.documentName;
+//   const creatorID = req.body.creatorID;
+//   const document = req.body.document;
+//   const documentType = req.body.documentType;
+//   const signable = req.body.signable;
 
-  const hashValue = await getHash('path/to/file');
-  ledgerCreateDocument(contract,docname,creatorID,)
-  res.sendStatus(200);
-});
+//   const hashValue = await getHash('path/to/file');
+//   ledgerCreateDocument(contract,docname,creatorID,)
+//   res.sendStatus(200);
+// });
 
 /**Edit a document 
  * 

@@ -22,3 +22,7 @@ if [ $? -ne 0 ]; then
 fatalln "Unable to start network"
 fi
 
+cd ./scripts
+
+source networkSetup.sh
+

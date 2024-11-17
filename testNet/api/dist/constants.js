@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.utf8Decoder = exports.peerHostAlias = exports.peerEndpoint = exports.tlsCertPath = exports.certDirectoryPath = exports.keyDirectoryPath = exports.cryptoPath = exports.mspId = exports.chaincodeName = exports.channelName = void 0;
+exports.collectionNAme = exports.dbName = exports.dbConnString = exports.utf8Decoder = exports.peerHostAlias = exports.peerEndpoint = exports.tlsCertPath = exports.certDirectoryPath = exports.keyDirectoryPath = exports.cryptoPath = exports.mspId = exports.chaincodeName = exports.channelName = void 0;
 exports.envOrDefault = envOrDefault;
 const path_1 = __importDefault(require("path"));
 exports.channelName = envOrDefault('CHANNEL_NAME', 'channel1');
@@ -30,3 +30,6 @@ function envOrDefault(key, defaultValue) {
 }
 //decoder
 exports.utf8Decoder = new TextDecoder();
+exports.dbConnString = "mongodb+srv://<username>:<password>@sandbox.jadwj.mongodb.net";
+exports.dbName = "gamesDB";
+exports.collectionNAme = "games";

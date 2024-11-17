@@ -6,4 +6,4 @@ source ./peerSetup.sh
 
 source ./approveChaincode.sh
 
-source ./testChaincode.sh
+source ./initialiseLedger.sh
