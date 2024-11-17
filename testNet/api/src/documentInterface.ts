@@ -1,31 +1,46 @@
 import { Contract } from "@hyperledger/fabric-gateway";
 import { certDirectoryPath, chaincodeName, cryptoPath, keyDirectoryPath, mspId, peerEndpoint, peerHostAlias, tlsCertPath, utf8Decoder } from "./constants";
-import { generateAssetId } from "./utils";
+import { DocumentLedger, generateAssetId } from "./utils";
 import { sign } from "crypto";
+
 
 /**
  * Healthcheck function tried to fetch all documents on the ledger 
  */
-export async function ledgerHealthCheck(contract: Contract): Promise<void> {
+export async function ledgerHealthCheck(contract: Contract): Promise<DocumentLedger[]> {
     console.log('\n--> Submit Transaction: GetAllDocuments, retrieve all on ledger to check gateway is functioning');
 
-    await contract.submitTransaction('GetAllDocuments');
+    const resultBytes = await contract.evaluateTransaction('GetAllDocuments');
+
+    const resultJson = utf8Decoder.decode(resultBytes);
+    const result: DocumentLedger[] = JSON.parse(resultJson);
+    return result;
+}
+
+/**
+ * Healthcheck function tried to fetch all documents on the ledger 
+ */
+export async function initLedger(contract: Contract): Promise<void> {
+    console.log('\n--> Submit Transaction: initLedger, retrieve all on ledger to check gateway is functioning');
+
+    await contract.submitTransaction('InitLedger');
 
     console.log('*** Transaction committed successfully');
 }
+
 
 /**
  * Evaluate a getAllDocuments transaction to query ledger state.
  * 
  */
-export async function logGetAllDocuments(contract: Contract): Promise<void> {
+export async function logGetAllDocuments(contract: Contract): Promise< DocumentLedger[]> {
     console.log('\n--> Evaluate Transaction: GetAllDocuments, function returns all the current documents on the ledger');
 
     const resultBytes = await contract.evaluateTransaction('GetAllDocuments');
 
     const resultJson = utf8Decoder.decode(resultBytes);
-    const result: unknown = JSON.parse(resultJson);
-    console.log('*** Result:', result);
+    const result:  DocumentLedger[] = JSON.parse(resultJson);
+    return result;
 }
 
 /**
@@ -71,7 +86,7 @@ export async function logReadDocument(contract: Contract,docID : string): Promis
 export async function logUpdateDocumentHash(contract: Contract,docID : string,newHash : string): Promise<void> {
     console.log('\n--> Evaluate Transaction: UpdateDocumentHash, updates the hash to a new value to factor in changes');
 
-    const resultBytes = await contract.evaluateTransaction('UpdateDocumentHash', docID,newHash);
+    const resultBytes = await contract.submitTransaction('UpdateDocumentHash', docID,newHash);
 
     const resultJson = utf8Decoder.decode(resultBytes);
     const result: unknown = JSON.parse(resultJson);
@@ -87,7 +102,7 @@ export async function logUpdateDocumentHash(contract: Contract,docID : string,ne
 export async function logRenameDocument(contract: Contract,docID : string,newName : string): Promise<void> {
     console.log('\n--> Evaluate Transaction: UpdateDocumentName, updates the hash to a new value to factor in changes');
 
-    const resultBytes = await contract.evaluateTransaction('UpdateDocumentName', docID,newName);
+    const resultBytes = await contract.submitTransaction('UpdateDocumentName', docID,newName);
 
     const resultJson = utf8Decoder.decode(resultBytes);
     const result: unknown = JSON.parse(resultJson);
@@ -103,7 +118,7 @@ export async function logRenameDocument(contract: Contract,docID : string,newNam
 export async function logUpdateSignable(contract: Contract,docID : string,signable : boolean): Promise<void> {
     console.log('\n--> Evaluate Transaction: UpdateDocumentSignable, updates the hash to a new value to factor in changes');
 
-    const resultBytes = await contract.evaluateTransaction('UpdateDocumentSignable', docID,signable.toString());
+    const resultBytes = await contract.submitTransaction('UpdateDocumentSignable', docID,signable.toString());
 
     const resultJson = utf8Decoder.decode(resultBytes);
     const result: unknown = JSON.parse(resultJson);
@@ -118,7 +133,7 @@ export async function logUpdateSignable(contract: Contract,docID : string,signab
 export async function logDelete(contract: Contract,docID : string): Promise<void> {
     console.log('\n--> Evaluate Transaction: DeleteDocument, updates the hash to a new value to factor in changes');
 
-    const resultBytes = await contract.evaluateTransaction('DeleteDocument', docID);
+    const resultBytes = await contract.submitTransaction('DeleteDocument', docID);
 
     const resultJson = utf8Decoder.decode(resultBytes);
     const result: unknown = JSON.parse(resultJson);

@@ -21,9 +21,19 @@ app.use((req, res, next) => {
 app.get("/healthcheck", (req, res) => {
     console.log("/healthcheck pinged ");
     (0, documentInterface_1.ledgerHealthCheck)(exports.contract).then(value => {
+        console.log("Ledger healthchecked");
+        console.log(value);
+        res.status(200).json(value);
+    }).catch((error) => {
+        console.log("error %s", error);
+        res.status(500).json({ error: error });
+    });
+});
+app.get("/init", (req, res) => {
+    console.log("/init pinged ");
+    (0, documentInterface_1.initLedger)(exports.contract).then(value => {
         console.log("Ledger Initid ... Init");
-        res.json(value);
-        res.sendStatus(200);
+        res.status(200).json(value);
     }).catch((error) => {
         console.log("error %s", error);
         res.status(500).json({ error: error });

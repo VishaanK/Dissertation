@@ -12,7 +12,7 @@ export CORE_PEER_TLS_ROOTCERT_FILE=../organizations/peerOrganizations/org1.examp
 export CORE_PEER_TLS_ENABLED=true
 export CORE_PEER_MSPCONFIGPATH=../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
 export ORDERER_GENERAL_TLS_ROOTCAS=../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt
-
+export ORDERER_CA_FILE=../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 
 # get the id of the chaincode
 
@@ -27,7 +27,7 @@ export CC_PACKAGE_ID=$(echo "$response" | sed -n 's/.*Package ID: \(documentcc1:
 
 #check commit
 ../bin/peer lifecycle chaincode checkcommitreadiness -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com \
-    --channelID channel1 --name document --version "1.0" --sequence 1 --tls --cafile $ $ORDERER_GENERAL_TLS_ROOTCAS --output json
+    --channelID channel1 --name document --version "1.0" --sequence 1 --tls --cafile $ORDERER_GENERAL_TLS_ROOTCAS --output json
 
 #commit the chaincode to each peer on the channel
 ../bin/peer lifecycle chaincode commit -o localhost:7050 \

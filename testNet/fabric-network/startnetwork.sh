@@ -1,3 +1,9 @@
+#!/bin/bash
+#recompile the api
+cd ../api
+npx tsc 
+cd ../fabric-network
+
 # use this as the default docker-compose yaml definition
 COMPOSE_FILE_BASE=docker-compose.yaml
 #this can be configured for docker or podman
@@ -21,6 +27,8 @@ $CONTAINER_CLI ps -a
 if [ $? -ne 0 ]; then
 fatalln "Unable to start network"
 fi
+
+sleep 1
 
 cd ./scripts
 

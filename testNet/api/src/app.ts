@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { newGrpcConnection, newIdentity, newSigner } from "./gateway";
 import { Client } from "@grpc/grpc-js";
 import { chaincodeName, channelName } from "./constants";
-import { ledgerCreateDocument, ledgerHealthCheck } from "./documentInterface";
+import { initLedger, ledgerCreateDocument, ledgerHealthCheck } from "./documentInterface";
 const crypto = require('crypto');
 let express = require("express");
 //hyperledger connection detials to make available is different files 
@@ -33,9 +33,22 @@ app.use((req:Request, res:Response, next:NextFunction) => {
 app.get("/healthcheck", (req:Request, res:Response) => {
   console.log("/healthcheck pinged ")
   ledgerHealthCheck(contract).then(value => {
+    console.log("Result :" , value);
+    res.status(200).json(value); 
+
+  }).catch((error: Error) => {
+    console.log("error %s",error);
+    res.status(500).json({error: error})
+  })
+  
+});
+
+app.get("/init", (req:Request, res:Response) => {
+  console.log("/init pinged ")
+  initLedger(contract).then(value => {
     console.log("Ledger Initid ... Init");
-    res.json(value); 
-    res.sendStatus(200);
+    res.status(200).json(value); 
+
   }).catch((error: Error) => {
     console.log("error %s",error);
     res.status(500).json({error: error})
