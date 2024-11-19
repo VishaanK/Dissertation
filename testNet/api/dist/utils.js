@@ -1,16 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateAssetId = generateAssetId;
+exports.calculateHash = calculateHash;
+const app_1 = require("./app");
+const fs = require('fs');
 function generateAssetId() {
     return "";
 }
-//database structure
-//TODO CHANGE TO MATCH THE STRUCTURE I HAVE GIVEN THE DB
-class DocumentDB {
-    constructor(file, category, docID) {
-        this.file = file;
-        this.category = category;
-        this.docID = docID;
+/**
+* hashes a file in sync
+* @param filePath to file to hash
+* @returns
+*/
+function calculateHash(filePath) {
+    try {
+        const fileBuffer = fs.readFileSync(filePath);
+        const digest = app_1.hashingAlgo.update(fileBuffer).digest('base64');
+        return digest;
+    }
+    catch (err) {
+        console.error('Error reading or hashing file:', err);
+        return "";
     }
 }
-exports.default = DocumentDB;

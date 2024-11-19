@@ -3,17 +3,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.highestAssetId = exports.db = exports.contract = exports.network = exports.client = exports.gateway = void 0;
+exports.highestAssetId = exports.hashingAlgo = exports.db = exports.contract = exports.network = exports.client = exports.gateway = void 0;
 const fabric_gateway_1 = require("@hyperledger/fabric-gateway");
 const gateway_1 = require("./gateway");
 const constants_1 = require("./constants");
 const documentInterface_1 = require("./documentInterface");
 const mongodb_1 = require("mongodb");
 const multer_1 = __importDefault(require("multer"));
+const crypto_1 = require("crypto");
+const utils_1 = require("./utils");
+const fs = require('fs');
 const crypto = require('crypto');
-let express = require("express");
-// Set up multer storage configuration
-const upload = (0, multer_1.default)({ dest: 'uploads/' });
+const express = require("express");
+//configure multer to use in memory buffers 
+const storage = multer_1.default.memoryStorage();
+const upload = (0, multer_1.default)({ storage: storage });
+exports.hashingAlgo = (0, crypto_1.createHash)('sha256');
+function generatedNewID() {
+    exports.highestAssetId = exports.highestAssetId + 1;
+    return "doc" + exports.highestAssetId.toString();
+}
+//set the id back if the function fails 
+function undoNewID() {
+    exports.highestAssetId = exports.highestAssetId - 1;
+}
 var app = express();
 //enable logging each request that turns up 
 app.use((req, res, next) => {
@@ -21,20 +34,12 @@ app.use((req, res, next) => {
     next();
 });
 app.use(express.json());
+/**
+ * Healthcheck endpoint
+ */
 app.get("/healthcheck", (req, res) => {
-    console.log("/healthcheck pinged ");
     (0, documentInterface_1.ledgerHealthCheck)(exports.contract).then(value => {
         console.log("Result :", value);
-        res.status(200).json({ Result: value });
-    }).catch((error) => {
-        console.log("error %s", error);
-        res.status(500).json({ error: error });
-    });
-});
-app.get("/init", (req, res) => {
-    console.log("/init pinged ");
-    (0, documentInterface_1.initLedger)(exports.contract).then(value => {
-        console.log("Ledger Initid ... Init");
         res.status(200).json({ Result: value });
     }).catch((error) => {
         console.log("error %s", error);
@@ -64,16 +69,35 @@ app.get("/documents/:id", (req, res) => {
  * log the file in the ledger
  */
 app.post("/documents", upload.single('file'), (req, res) => {
-    const docname = req.body.documentName;
-    const creatorID = req.body.creatorID;
-    const document = req.body.document;
-    const documentType = req.body.documentType;
-    const signable = req.body.signable;
     console.log(req.file, req.body);
-    //create an id 
-    //cnst hashValue = await getHash('path/to/file');
-    //ledgerCreateDocument(contract,docname,creatorID,)
-    res.sendStatus(200);
+    if (!req.file) {
+        console.error("NO FILE ATTACHED TO REQUEST");
+        res.status(400).json({ Result: "error no file in request" });
+    }
+    //send file to data base 
+    let document = {
+        "documentID": generatedNewID(),
+        "creatorID": req.body.creatorID,
+        "documentName": req.body.documentName,
+        "documentType": req.body.documentType,
+        "signable": req.body.signable,
+        "documentHash": (0, utils_1.calculateHash)(req.file.path),
+        "file": req.file.buffer
+    };
+    console.log("saving file to db", document);
+    exports.db.collection(constants_1.collectionName).insertOne(document).then((result) => {
+        console.log("inserted obj id", result);
+        //update the ledger now that the file has successfully been stored 
+        (0, documentInterface_1.ledgerCreateDocument)(exports.contract, document.documentID, document.documentName, document.creatorID, document.documentHash, document.documentType, document.signable).then(() => {
+            res.sendStatus(200);
+        }).catch((err) => {
+            console.error("error logging in ledger", err);
+            res.status(500).json({ Error: err });
+        });
+    }).catch((err) => {
+        console.error("error saving in database", err);
+        res.status(500).json({ Error: err });
+    });
 });
 /**Edit a document
  *
@@ -146,7 +170,7 @@ function setupAPI() {
             console.log('Connected to MongoDB');
             //only need the db as its extracted from the client 
             exports.db = client.db(constants_1.DATABASE_NAME);
-        }).then((client) => {
+        }).then(() => {
             //get the highest id 
             exports.db.collection(constants_1.collectionName).aggregate([
                 {

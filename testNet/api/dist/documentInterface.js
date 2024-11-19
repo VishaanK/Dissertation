@@ -20,7 +20,6 @@ exports.logUpdateSignable = logUpdateSignable;
 exports.logDelete = logDelete;
 exports.logReadInRange = logReadInRange;
 const constants_1 = require("./constants");
-const utils_1 = require("./utils");
 /**
  * Healthcheck function tried to fetch all documents on the ledger
  */
@@ -59,10 +58,10 @@ function logGetAllDocuments(contract) {
 /**
  * create the document on the ledger
  */
-function ledgerCreateDocument(contract, documentName, creatorID, documentHash, documentType, signable) {
+function ledgerCreateDocument(contract, documentID, documentName, creatorID, documentHash, documentType, signable) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Submit Transaction: CreateAsset, creates new asset with name : %s,creator : %s ,hash %s , type %s, signable %s', documentName, creatorID, documentHash, documentType, signable);
-        yield contract.submitTransaction('CreateDocument', (0, utils_1.generateAssetId)(), documentName, creatorID, documentHash, documentType, signable.toString());
+        yield contract.submitTransaction('CreateDocument', documentID, documentName, creatorID, documentHash, documentType, signable.toString());
         console.log('*** Transaction committed successfully');
     });
 }
