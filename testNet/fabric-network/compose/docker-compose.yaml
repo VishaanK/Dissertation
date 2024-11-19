@@ -254,7 +254,6 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME:admin
       - MONGO_INITDB_ROOT_PASSWORD:password
-      - MONGO_INITDB_DATABASE=document_database
 
     volumes:
       - database:/data
@@ -274,9 +273,16 @@ services:
     
     labels:
       service: api_server
-#note add depends on to entire fabric network
+    environment:
+      - MONGO_URL=mongodb://myuser:mypassword@database:27017/document_database
+      - DATABASE_NAME=document_database
+#ensure the api starts last so everything else can initialise before its startup 
     depends_on:
       - database
+      - orderer.example.com
+      - peer2.org1.example.com
+      - peer1.org1.example.com
+      - peer0.org1.example.com
     volumes:
       - api:/app
       - ../organizations:/app/organizations

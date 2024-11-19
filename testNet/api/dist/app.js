@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.highestAssetId = exports.contract = exports.network = exports.client = exports.gateway = void 0;
+exports.highestAssetId = exports.db = exports.contract = exports.network = exports.client = exports.gateway = void 0;
 exports.getHighestAssetId = getHighestAssetId;
 const fabric_gateway_1 = require("@hyperledger/fabric-gateway");
 const gateway_1 = require("./gateway");
 const constants_1 = require("./constants");
 const documentInterface_1 = require("./documentInterface");
+const mongodb_1 = require("mongodb");
 const crypto = require('crypto');
 let express = require("express");
 exports.highestAssetId = getHighestAssetId;
@@ -21,9 +22,8 @@ app.use((req, res, next) => {
 app.get("/healthcheck", (req, res) => {
     console.log("/healthcheck pinged ");
     (0, documentInterface_1.ledgerHealthCheck)(exports.contract).then(value => {
-        console.log("Ledger healthchecked");
-        console.log(value);
-        res.status(200).json(value);
+        console.log("Result :", value);
+        res.status(200).json({ Result: value });
     }).catch((error) => {
         console.log("error %s", error);
         res.status(500).json({ error: error });
@@ -33,7 +33,7 @@ app.get("/init", (req, res) => {
     console.log("/init pinged ");
     (0, documentInterface_1.initLedger)(exports.contract).then(value => {
         console.log("Ledger Initid ... Init");
-        res.status(200).json(value);
+        res.status(200).json({ Result: value });
     }).catch((error) => {
         console.log("error %s", error);
         res.status(500).json({ error: error });
@@ -61,16 +61,16 @@ app.get("/documents/:id", (req, res) => {
  * send the file to the db
  * log the file in the ledger
  */
-// app.post("/documents", (req:Request, res:Response) => {
-//   const docname = req.body.documentName;
-//   const creatorID = req.body.creatorID;
-//   const document = req.body.document;
-//   const documentType = req.body.documentType;
-//   const signable = req.body.signable;
-//   const hashValue = await getHash('path/to/file');
-//   ledgerCreateDocument(contract,docname,creatorID,)
-//   res.sendStatus(200);
-// });
+app.post("/documents", upload.single('file'), (req, res) => {
+    const docname = req.body.documentName;
+    const creatorID = req.body.creatorID;
+    const document = req.body.document;
+    const documentType = req.body.documentType;
+    const signable = req.body.signable;
+    //cnst hashValue = await getHash('path/to/file');
+    //ledgerCreateDocument(contract,docname,creatorID,)
+    res.sendStatus(200);
+});
 /**Edit a document
  *
  */
@@ -135,4 +135,18 @@ function setupAPI() {
         process.exitCode = 1;
     }
     //connect to database 
+    try {
+        // Connect to MongoDB
+        mongodb_1.MongoClient.connect(constants_1.MONGO_URL)
+            .then((client) => {
+            console.log('Connected to MongoDB');
+            //only need the db as its extracted from the client 
+            exports.db = client.db(constants_1.DATABASE_NAME);
+        });
+    }
+    catch (error) {
+        console.error('Failed to connect to MongoDB', error);
+        console.log('Failed to connect to MongoDB');
+        process.exitCode = 1;
+    }
 }

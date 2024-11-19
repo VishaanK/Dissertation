@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.collectionNAme = exports.dbName = exports.dbConnString = exports.utf8Decoder = exports.peerHostAlias = exports.peerEndpoint = exports.tlsCertPath = exports.certDirectoryPath = exports.keyDirectoryPath = exports.cryptoPath = exports.mspId = exports.chaincodeName = exports.channelName = void 0;
+exports.collectionNAme = exports.dbName = exports.dbConnString = exports.utf8Decoder = exports.DATABASE_NAME = exports.MONGO_URL = exports.peerHostAlias = exports.peerEndpoint = exports.tlsCertPath = exports.certDirectoryPath = exports.keyDirectoryPath = exports.cryptoPath = exports.mspId = exports.chaincodeName = exports.channelName = void 0;
 exports.envOrDefault = envOrDefault;
 const path_1 = __importDefault(require("path"));
 exports.channelName = envOrDefault('CHANNEL_NAME', 'channel1');
@@ -22,6 +22,9 @@ exports.tlsCertPath = envOrDefault('TLS_CERT_PATH', path_1.default.resolve(expor
 exports.peerEndpoint = envOrDefault('PEER_ENDPOINT', 'peer0.org1.example.com:7051');
 // Gateway peer SSL host name override.
 exports.peerHostAlias = envOrDefault('PEER_HOST_ALIAS', 'peer0.org1.example.com');
+//mongo db constants from env variables in docker compose
+exports.MONGO_URL = envOrDefault('MONGO_URL', '');
+exports.DATABASE_NAME = envOrDefault('DATABASE_NAME', '');
 /**
  * envOrDefault() will return the value of an environment variable, or a default value if the variable is undefined.
  */

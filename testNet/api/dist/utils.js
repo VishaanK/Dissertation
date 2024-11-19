@@ -5,11 +5,11 @@ function generateAssetId() {
     return "";
 }
 //database structure
-class Document {
+class DocumentDB {
     constructor(file, category, docID) {
         this.file = file;
         this.category = category;
         this.docID = docID;
     }
 }
-exports.default = Document;
+exports.default = DocumentDB;

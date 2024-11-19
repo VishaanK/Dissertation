@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { Request } from 'express';
 
 export function generateAssetId():string{
     return "";
@@ -19,3 +20,17 @@ export interface DocumentLedger {
     documentType: string | null;
     signable: boolean;
 }
+
+
+// data type for sending requests to the server 
+// has a file but no ID as that is created when the data is inserted
+export interface createDocumentRequest extends Request {
+    file: Express.Multer.File; // file data from multer
+    body: {
+      creatorID: string;
+      documentHash: string;
+      documentName: string;
+      documentType: string;
+      signable: boolean;
+    };
+  }

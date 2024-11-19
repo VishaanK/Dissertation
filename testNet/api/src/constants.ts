@@ -22,6 +22,11 @@ export const peerEndpoint = envOrDefault('PEER_ENDPOINT', 'peer0.org1.example.co
 // Gateway peer SSL host name override.
 export const peerHostAlias = envOrDefault('PEER_HOST_ALIAS', 'peer0.org1.example.com');
 
+
+//mongo db constants from env variables in docker compose
+export const MONGO_URL = envOrDefault('MONGO_URL','') ;
+export const DATABASE_NAME = envOrDefault('DATABASE_NAME','');
+
 /**
  * envOrDefault() will return the value of an environment variable, or a default value if the variable is undefined.
  */

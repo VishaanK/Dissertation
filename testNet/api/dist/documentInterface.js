@@ -30,7 +30,7 @@ function ledgerHealthCheck(contract) {
         const resultBytes = yield contract.evaluateTransaction('GetAllDocuments');
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
-        console.log('*** Result:', result);
+        return result;
     });
 }
 /**
@@ -53,7 +53,7 @@ function logGetAllDocuments(contract) {
         const resultBytes = yield contract.evaluateTransaction('GetAllDocuments');
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
-        console.log('*** Result:', result);
+        return result;
     });
 }
 /**

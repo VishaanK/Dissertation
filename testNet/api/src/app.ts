@@ -2,16 +2,23 @@ import { connect, Contract, Gateway, hash, Network } from "@hyperledger/fabric-g
 import { NextFunction, Request, Response } from "express";
 import { newGrpcConnection, newIdentity, newSigner } from "./gateway";
 import { Client } from "@grpc/grpc-js";
-import { chaincodeName, channelName } from "./constants";
+import { chaincodeName, channelName, DATABASE_NAME, MONGO_URL } from "./constants";
 import { initLedger, ledgerCreateDocument, ledgerHealthCheck } from "./documentInterface";
+import { Db, MongoClient } from "mongodb";
+import multer, { FileFilterCallback } from 'multer';
+
 const crypto = require('crypto');
 let express = require("express");
+
+// Set up multer storage configuration
+const upload = multer({ dest: 'uploads/' });
+
 //hyperledger connection detials to make available is different files 
 export let gateway: Gateway;
 export let client:Client;
 export let network:Network;
 export let contract:Contract;
-
+export let db:Db;
 
 
 export const highestAssetId = getHighestAssetId;
@@ -34,7 +41,7 @@ app.get("/healthcheck", (req:Request, res:Response) => {
   console.log("/healthcheck pinged ")
   ledgerHealthCheck(contract).then(value => {
     console.log("Result :" , value);
-    res.status(200).json(value); 
+    res.status(200).json({Result:value}); 
 
   }).catch((error: Error) => {
     console.log("error %s",error);
@@ -47,7 +54,7 @@ app.get("/init", (req:Request, res:Response) => {
   console.log("/init pinged ")
   initLedger(contract).then(value => {
     console.log("Ledger Initid ... Init");
-    res.status(200).json(value); 
+    res.status(200).json({Result:value}); 
 
   }).catch((error: Error) => {
     console.log("error %s",error);
@@ -83,17 +90,21 @@ app.get("/documents/:id", (req:Request, res:Response) => {
  * send the file to the db 
  * log the file in the ledger 
  */
-// app.post("/documents", (req:Request, res:Response) => {
-//   const docname = req.body.documentName;
-//   const creatorID = req.body.creatorID;
-//   const document = req.body.document;
-//   const documentType = req.body.documentType;
-//   const signable = req.body.signable;
+ app.post("/documents", upload.single('file') ,(req:Request, res:Response) => {
+   const docname = req.body.documentName;
+   const creatorID = req.body.creatorID;
+   const document = req.body.document;
+   const documentType = req.body.documentType;
+   const signable = req.body.signable;
 
-//   const hashValue = await getHash('path/to/file');
-//   ledgerCreateDocument(contract,docname,creatorID,)
-//   res.sendStatus(200);
-// });
+   console.log(req.file, req.body)
+
+   //create an id 
+   
+   //cnst hashValue = await getHash('path/to/file');
+   //ledgerCreateDocument(contract,docname,creatorID,)
+   res.sendStatus(200);
+ });
 
 /**Edit a document 
  * 
@@ -171,7 +182,22 @@ function setupAPI(){
     process.exitCode = 1;
   }
 
-  //connect to database 
 
+  //connect to database 
+  try{
+    // Connect to MongoDB
+    MongoClient.connect(MONGO_URL)
+    .then((client) => {
+      console.log('Connected to MongoDB');
+      //only need the db as its extracted from the client 
+      db = client.db(DATABASE_NAME);
+    })
+
+
+  }catch (error) {
+    console.error('Failed to connect to MongoDB', error);
+    console.log('Failed to connect to MongoDB');
+    process.exitCode = 1;
+  }
 
 }
