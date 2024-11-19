@@ -5,6 +5,7 @@ function generateAssetId() {
     return "";
 }
 //database structure
+//TODO CHANGE TO MATCH THE STRUCTURE I HAVE GIVEN THE DB
 class DocumentDB {
     constructor(file, category, docID) {
         this.file = file;

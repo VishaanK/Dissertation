@@ -2,16 +2,22 @@ import { connect, Contract, Gateway, hash, Network } from "@hyperledger/fabric-g
 import { NextFunction, Request, Response } from "express";
 import { newGrpcConnection, newIdentity, newSigner } from "./gateway";
 import { Client } from "@grpc/grpc-js";
-import { chaincodeName, channelName, DATABASE_NAME, MONGO_URL } from "./constants";
+import { chaincodeName, channelName, collectionName, DATABASE_NAME, MONGO_URL } from "./constants";
 import { initLedger, ledgerCreateDocument, ledgerHealthCheck } from "./documentInterface";
 import { Db, MongoClient } from "mongodb";
 import multer, { FileFilterCallback } from 'multer';
+import { error } from "console";
+import { createHash, Hash } from "crypto";
+import path from "path";
+import { calculateHash, DocumentDB } from "./utils";
 
+const fs = require('fs')
 const crypto = require('crypto');
-let express = require("express");
+const express = require("express");
 
-// Set up multer storage configuration
-const upload = multer({ dest: 'uploads/' });
+//configure multer to use in memory buffers 
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 //hyperledger connection detials to make available is different files 
 export let gateway: Gateway;
@@ -20,13 +26,21 @@ export let network:Network;
 export let contract:Contract;
 export let db:Db;
 
+export const hashingAlgo:Hash = createHash('sha256');
 
-export const highestAssetId = getHighestAssetId;
+export let highestAssetId:number;
 
-//connect to db, get highest asset ID 
 
-export function getHighestAssetId(){
 
+
+function generatedNewID() : string{
+  highestAssetId = highestAssetId + 1;
+  return "doc"+highestAssetId.toString();
+}
+
+//set the id back if the function fails 
+function undoNewID():void{
+  highestAssetId = highestAssetId - 1;
 }
 
 var app = express();
@@ -36,24 +50,13 @@ app.use((req:Request, res:Response, next:NextFunction) => {
   next();
 });
 
-
+app.use(express.json());
+/**
+ * Healthcheck endpoint
+ */
 app.get("/healthcheck", (req:Request, res:Response) => {
-  console.log("/healthcheck pinged ")
   ledgerHealthCheck(contract).then(value => {
     console.log("Result :" , value);
-    res.status(200).json({Result:value}); 
-
-  }).catch((error: Error) => {
-    console.log("error %s",error);
-    res.status(500).json({error: error})
-  })
-  
-});
-
-app.get("/init", (req:Request, res:Response) => {
-  console.log("/init pinged ")
-  initLedger(contract).then(value => {
-    console.log("Ledger Initid ... Init");
     res.status(200).json({Result:value}); 
 
   }).catch((error: Error) => {
@@ -90,20 +93,47 @@ app.get("/documents/:id", (req:Request, res:Response) => {
  * send the file to the db 
  * log the file in the ledger 
  */
- app.post("/documents", upload.single('file') ,(req:Request, res:Response) => {
-   const docname = req.body.documentName;
-   const creatorID = req.body.creatorID;
-   const document = req.body.document;
-   const documentType = req.body.documentType;
-   const signable = req.body.signable;
+ app.post("/documents", upload.single('file') , (req:Request, res:Response) => {
 
-   console.log(req.file, req.body)
+    console.log(req.file, req.body)
 
-   //create an id 
-   
-   //cnst hashValue = await getHash('path/to/file');
-   //ledgerCreateDocument(contract,docname,creatorID,)
-   res.sendStatus(200);
+    if(!req.file){
+      console.error("NO FILE ATTACHED TO REQUEST")
+      res.status(400).json({Result:"error no file in request"});
+    }
+    
+    //send file to data base 
+    let document: DocumentDB = {
+      "documentID":generatedNewID(),
+      "creatorID" : req.body.creatorID,
+      "documentName" : req.body.documentName,
+      "documentType":req.body.documentType,
+      "signable":req.body.signable,
+      "documentHash":calculateHash(req.file!.path),
+      "file":req.file!.buffer
+    }
+
+    console.log("saving file to db",document);
+
+    db.collection(collectionName).insertOne(document).then((result) =>{
+      
+      console.log("inserted obj id",result);
+
+      //update the ledger now that the file has successfully been stored 
+      ledgerCreateDocument(contract,document.documentID,document.documentName,document.creatorID,document.documentHash,document.documentType,document.signable).then(()=>{
+        res.sendStatus(200);
+      }).catch((err)=>{
+
+        console.error("error logging in ledger",err);
+        res.status(500).json({Error:err});
+      })
+
+    }).catch((err)=>{
+      console.error("error saving in database",err)
+      res.status(500).json({Error:err});
+      
+    })
+
  });
 
 /**Edit a document 
@@ -146,6 +176,8 @@ app.listen(3000, () => {
  */
 function setupAPI(){
   client =  newGrpcConnection()
+
+
 
   gateway = connect({
     client,
@@ -191,6 +223,47 @@ function setupAPI(){
       console.log('Connected to MongoDB');
       //only need the db as its extracted from the client 
       db = client.db(DATABASE_NAME);
+    }).then(() => {
+      
+      //get the highest id 
+
+      db.collection(collectionName).aggregate([
+        {
+          // Step 1: Add a new field that extracts the numeric part from `documentID`
+          $addFields: {
+            numericPart: {
+              $toInt: {
+                $arrayElemAt: [
+                  {
+                    $regexFind: {
+                      input: "$documentID",
+                      regex: /(\d+)$/, // Match digits at the end of the string
+                    },
+                  },
+                  0,
+                ],
+              },
+            },
+          },
+        },
+        {
+          // Step 2: Sort the documents in descending order based on the numeric part
+          $sort: { numericPart: -1 },
+        },
+        {
+          // Step 3: Limit the result to just one document (the one with the highest number)
+          $limit: 1,
+        },
+      ]).toArray().then((result) =>{
+        if(result.length > 0){
+          highestAssetId = result[0].numericPart;
+        }else{
+          highestAssetId = 0;
+        }
+        console.log("HighestId found",highestAssetId);
+      }).catch((error) =>{
+        console.error("error getting highest ID",error);
+      });
     })
 
 
@@ -199,5 +272,9 @@ function setupAPI(){
     console.log('Failed to connect to MongoDB');
     process.exitCode = 1;
   }
+
+  
+  
+ 
 
 }

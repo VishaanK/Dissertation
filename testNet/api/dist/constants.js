@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.collectionNAme = exports.dbName = exports.dbConnString = exports.utf8Decoder = exports.DATABASE_NAME = exports.MONGO_URL = exports.peerHostAlias = exports.peerEndpoint = exports.tlsCertPath = exports.certDirectoryPath = exports.keyDirectoryPath = exports.cryptoPath = exports.mspId = exports.chaincodeName = exports.channelName = void 0;
+exports.utf8Decoder = exports.collectionName = exports.DATABASE_NAME = exports.MONGO_URL = exports.peerHostAlias = exports.peerEndpoint = exports.tlsCertPath = exports.certDirectoryPath = exports.keyDirectoryPath = exports.cryptoPath = exports.mspId = exports.chaincodeName = exports.channelName = void 0;
 exports.envOrDefault = envOrDefault;
 const path_1 = __importDefault(require("path"));
 exports.channelName = envOrDefault('CHANNEL_NAME', 'channel1');
@@ -25,6 +25,7 @@ exports.peerHostAlias = envOrDefault('PEER_HOST_ALIAS', 'peer0.org1.example.com'
 //mongo db constants from env variables in docker compose
 exports.MONGO_URL = envOrDefault('MONGO_URL', '');
 exports.DATABASE_NAME = envOrDefault('DATABASE_NAME', '');
+exports.collectionName = "documents";
 /**
  * envOrDefault() will return the value of an environment variable, or a default value if the variable is undefined.
  */
@@ -33,6 +34,3 @@ function envOrDefault(key, defaultValue) {
 }
 //decoder
 exports.utf8Decoder = new TextDecoder();
-exports.dbConnString = "mongodb+srv://<username>:<password>@sandbox.jadwj.mongodb.net";
-exports.dbName = "gamesDB";
-exports.collectionNAme = "games";

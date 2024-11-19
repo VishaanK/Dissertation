@@ -1,15 +1,22 @@
 import { ObjectId } from "mongodb";
 import { Request } from 'express';
-
+import { hashingAlgo, highestAssetId } from "./app";
+const fs = require('fs')
 export function generateAssetId():string{
     return "";
 }
+
 //database structure
-export default class DocumentDB {
-    constructor(public file: File, 
-                public category: string, 
-                public docID?: ObjectId
-    ){}
+//TODO CHANGE TO MATCH THE STRUCTURE I HAVE GIVEN THE DB
+export interface DocumentDB {
+    file: BinaryData, 
+    creatorID: string,
+    documentHash: string,
+    documentID: string,
+    documentName: string,
+    documentType: string,
+    signable: boolean
+
 }
 
 export interface DocumentLedger {
@@ -34,3 +41,20 @@ export interface createDocumentRequest extends Request {
       signable: boolean;
     };
   }
+
+  /**
+ * hashes a file in sync 
+ * @param filePath to file to hash
+ * @returns 
+ */
+export function calculateHash(filePath:string) : string {
+    try{
+      const fileBuffer = fs.readFileSync(filePath);
+      const digest:string = hashingAlgo.update(fileBuffer).digest('base64');
+      return digest
+    }catch(err){
+      console.error('Error reading or hashing file:', err);
+      return "";
+    }
+  }
+

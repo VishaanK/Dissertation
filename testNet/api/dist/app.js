@@ -1,24 +1,26 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.highestAssetId = exports.db = exports.contract = exports.network = exports.client = exports.gateway = void 0;
-exports.getHighestAssetId = getHighestAssetId;
 const fabric_gateway_1 = require("@hyperledger/fabric-gateway");
 const gateway_1 = require("./gateway");
 const constants_1 = require("./constants");
 const documentInterface_1 = require("./documentInterface");
 const mongodb_1 = require("mongodb");
+const multer_1 = __importDefault(require("multer"));
 const crypto = require('crypto');
 let express = require("express");
-exports.highestAssetId = getHighestAssetId;
-//connect to db, get highest asset ID 
-function getHighestAssetId() {
-}
+// Set up multer storage configuration
+const upload = (0, multer_1.default)({ dest: 'uploads/' });
 var app = express();
 //enable logging each request that turns up 
 app.use((req, res, next) => {
     console.log('Time: ', Date.now());
     next();
 });
+app.use(express.json());
 app.get("/healthcheck", (req, res) => {
     console.log("/healthcheck pinged ");
     (0, documentInterface_1.ledgerHealthCheck)(exports.contract).then(value => {
@@ -67,6 +69,8 @@ app.post("/documents", upload.single('file'), (req, res) => {
     const document = req.body.document;
     const documentType = req.body.documentType;
     const signable = req.body.signable;
+    console.log(req.file, req.body);
+    //create an id 
     //cnst hashValue = await getHash('path/to/file');
     //ledgerCreateDocument(contract,docname,creatorID,)
     res.sendStatus(200);
@@ -142,6 +146,46 @@ function setupAPI() {
             console.log('Connected to MongoDB');
             //only need the db as its extracted from the client 
             exports.db = client.db(constants_1.DATABASE_NAME);
+        }).then((client) => {
+            //get the highest id 
+            exports.db.collection(constants_1.collectionName).aggregate([
+                {
+                    // Step 1: Add a new field that extracts the numeric part from `documentID`
+                    $addFields: {
+                        numericPart: {
+                            $toInt: {
+                                $arrayElemAt: [
+                                    {
+                                        $regexFind: {
+                                            input: "$documentID",
+                                            regex: /(\d+)$/, // Match digits at the end of the string
+                                        },
+                                    },
+                                    0,
+                                ],
+                            },
+                        },
+                    },
+                },
+                {
+                    // Step 2: Sort the documents in descending order based on the numeric part
+                    $sort: { numericPart: -1 },
+                },
+                {
+                    // Step 3: Limit the result to just one document (the one with the highest number)
+                    $limit: 1,
+                },
+            ]).toArray().then((result) => {
+                if (result.length > 0) {
+                    exports.highestAssetId = result[0].numericPart;
+                }
+                else {
+                    exports.highestAssetId = 0;
+                }
+                console.log("HighestId found", exports.highestAssetId);
+            }).catch((error) => {
+                console.error("error getting highest ID", error);
+            });
         });
     }
     catch (error) {

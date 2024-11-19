@@ -46,12 +46,12 @@ export async function logGetAllDocuments(contract: Contract): Promise< DocumentL
 /**
  * create the document on the ledger
  */
-export async function ledgerCreateDocument(contract: Contract,documentName:string, creatorID:string, documentHash:string, documentType:string, signable:boolean): Promise<void> {
+export async function ledgerCreateDocument(contract: Contract,documentID:string,documentName:string, creatorID:string, documentHash:string, documentType:string, signable:boolean): Promise<void> {
     console.log('\n--> Submit Transaction: CreateAsset, creates new asset with name : %s,creator : %s ,hash %s , type %s, signable %s', documentName, creatorID, documentHash, documentType, signable);
 
     await contract.submitTransaction(
         'CreateDocument',
-        generateAssetId(),
+        documentID,
         documentName,
         creatorID,
         documentHash,
