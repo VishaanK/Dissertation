@@ -71,7 +71,7 @@ public final class Document {
     */
     public Document(@JsonProperty("documentID") final String documentID, @JsonProperty("creatorID") final String creatorID, 
                     @JsonProperty("documentName") final String documentName,@JsonProperty("documentHash") final String documentHash,
-                    @JsonProperty("docType") final String documentType,@JsonProperty("signable") final boolean signable){
+                    @JsonProperty("documentType") final String documentType,@JsonProperty("signable") final boolean signable){
         
         this.documentID = documentID;
         this.creatorID = creatorID;
@@ -111,7 +111,7 @@ public final class Document {
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) +"documentID=" + getDocumentID() + "creatorID=" + getCreatorID() + ", documentName=" + getDocumentName() 
-                + ", documentHash=" + getDocumentHash() + ", docType=" + getDocumentType() + "signable=" + String.valueOf(getSignable()) + "]";
+                + ", documentHash=" + getDocumentHash() + ", documentType=" + getDocumentType() + "signable=" + String.valueOf(getSignable()) + "]";
     }
     
 

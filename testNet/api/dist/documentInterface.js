@@ -28,6 +28,7 @@ function ledgerHealthCheck(contract) {
         console.log('\n--> Submit Transaction: GetAllDocuments, retrieve all on ledger to check gateway is functioning');
         const resultBytes = yield contract.evaluateTransaction('GetAllDocuments');
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
+        console.log("BEFORE BEING CAST", resultJson);
         const result = JSON.parse(resultJson);
         return result;
     });

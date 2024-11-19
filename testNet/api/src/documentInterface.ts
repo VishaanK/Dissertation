@@ -13,6 +13,7 @@ export async function ledgerHealthCheck(contract: Contract): Promise<DocumentLed
     const resultBytes = await contract.evaluateTransaction('GetAllDocuments');
 
     const resultJson = utf8Decoder.decode(resultBytes);
+    console.log("BEFORE BEING CAST",resultJson)
     const result: DocumentLedger[] = JSON.parse(resultJson);
     return result;
 }
