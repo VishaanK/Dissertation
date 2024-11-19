@@ -73,6 +73,7 @@ app.post("/documents", upload.single('file'), (req, res) => {
     if (!req.file) {
         console.error("NO FILE ATTACHED TO REQUEST");
         res.status(400).json({ Result: "error no file in request" });
+        return;
     }
     //send file to data base 
     let document = {
