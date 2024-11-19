@@ -24,7 +24,7 @@ export interface DocumentLedger {
     documentHash: string;
     documentID: string;
     documentName: string;
-    documentType: string | null;
+    documentType: string;
     signable: boolean;
 }
 

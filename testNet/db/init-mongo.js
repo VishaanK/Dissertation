@@ -25,7 +25,7 @@ db.createCollection('documents', {
           description: "Must be a string and is required"
         },
         documentType: {
-          bsonType: ["string", "null"],
+          bsonType: ["string"],
           description: "Can be a string or null to represent the type of the document"
         },
         signable: {

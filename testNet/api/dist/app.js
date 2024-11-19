@@ -75,6 +75,7 @@ app.post("/documents", upload.single('file'), (req, res) => {
         res.status(400).json({ Result: "error no file in request" });
         return;
     }
+    console.log("the document type is ", req.body.documentType);
     //send file to data base 
     let document = {
         "documentID": generatedNewID(),
