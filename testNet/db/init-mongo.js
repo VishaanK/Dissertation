@@ -29,7 +29,7 @@ db.createCollection('documents', {
           description: "Can be a string or null to represent the type of the document"
         },
         signable: {
-          bsonType: "bool",
+          bsonType: "string",
           description: "Must be a boolean indicating if the document is signable"
         },
         file: {
