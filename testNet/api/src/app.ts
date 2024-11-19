@@ -100,6 +100,7 @@ app.get("/documents/:id", (req:Request, res:Response) => {
     if(!req.file){
       console.error("NO FILE ATTACHED TO REQUEST")
       res.status(400).json({Result:"error no file in request"});
+      return;
     }
     
     //send file to data base 
@@ -116,7 +117,7 @@ app.get("/documents/:id", (req:Request, res:Response) => {
     console.log("saving file to db",document);
 
     db.collection(collectionName).insertOne(document).then((result) =>{
-      
+
       console.log("inserted obj id",result);
 
       //update the ledger now that the file has successfully been stored 
