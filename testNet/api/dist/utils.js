@@ -12,10 +12,9 @@ function generateAssetId() {
 * @param filePath to file to hash
 * @returns
 */
-function calculateHash(filePath) {
+function calculateHash(file) {
     try {
-        const fileBuffer = fs.readFileSync(filePath);
-        const digest = app_1.hashingAlgo.update(fileBuffer).digest('base64');
+        const digest = app_1.hashingAlgo.update(file).digest('base64');
         return digest;
     }
     catch (err) {

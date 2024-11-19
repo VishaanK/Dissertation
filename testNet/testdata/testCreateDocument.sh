@@ -6,7 +6,7 @@ FILE_PATH="Vishaan_Khanna_CV-4.pdf"
 
 # Set the request body parameters
 CREATOR_ID="vk60"
-DOCUMENT_NAME="Vishaan_Khanna_CV-4"
+
 DOCUMENT_TYPE="pdf"
 SIGNABLE="false"
 
@@ -14,7 +14,6 @@ SIGNABLE="false"
 curl -X POST $URL \
   -H "Content-Type: multipart/form-data" \
   -F "creatorID=$CREATOR_ID" \
-  -F "documentName=$DOCUMENT_NAME" \
   -F "documentType=$DOCUMENT_TYPE" \
   -F "signable=$SIGNABLE" \
   -F "file=@$FILE_PATH"

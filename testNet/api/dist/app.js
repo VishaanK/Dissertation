@@ -69,7 +69,7 @@ app.get("/documents/:id", (req, res) => {
  * log the file in the ledger
  */
 app.post("/documents", upload.single('file'), (req, res) => {
-    console.log(req.file, req.body);
+    console.log("in /documents", req.file, req.body);
     if (!req.file) {
         console.error("NO FILE ATTACHED TO REQUEST");
         res.status(400).json({ Result: "error no file in request" });
@@ -79,10 +79,10 @@ app.post("/documents", upload.single('file'), (req, res) => {
     let document = {
         "documentID": generatedNewID(),
         "creatorID": req.body.creatorID,
-        "documentName": req.body.documentName,
+        "documentName": req.file.originalname,
         "documentType": req.body.documentType,
         "signable": req.body.signable,
-        "documentHash": (0, utils_1.calculateHash)(req.file.path),
+        "documentHash": (0, utils_1.calculateHash)(req.file.buffer),
         "file": req.file.buffer
     };
     console.log("saving file to db", document);

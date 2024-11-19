@@ -95,22 +95,21 @@ app.get("/documents/:id", (req:Request, res:Response) => {
  */
  app.post("/documents", upload.single('file') , (req:Request, res:Response) => {
 
-    console.log(req.file, req.body)
+    console.log("in /documents", req.file, req.body)
 
     if(!req.file){
       console.error("NO FILE ATTACHED TO REQUEST")
       res.status(400).json({Result:"error no file in request"});
       return;
     }
-    
     //send file to data base 
     let document: DocumentDB = {
       "documentID":generatedNewID(),
       "creatorID" : req.body.creatorID,
-      "documentName" : req.body.documentName,
+      "documentName" : req.file.originalname,
       "documentType":req.body.documentType,
       "signable":req.body.signable,
-      "documentHash":calculateHash(req.file!.path),
+      "documentHash":calculateHash(req.file!.buffer),
       "file":req.file!.buffer
     }
 

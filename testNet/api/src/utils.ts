@@ -47,10 +47,9 @@ export interface createDocumentRequest extends Request {
  * @param filePath to file to hash
  * @returns 
  */
-export function calculateHash(filePath:string) : string {
+export function calculateHash(file:Buffer) : string {
     try{
-      const fileBuffer = fs.readFileSync(filePath);
-      const digest:string = hashingAlgo.update(fileBuffer).digest('base64');
+      const digest:string = hashingAlgo.update(file).digest('base64');
       return digest
     }catch(err){
       console.error('Error reading or hashing file:', err);
