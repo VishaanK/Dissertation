@@ -3,13 +3,13 @@ import { NextFunction, Request, Response } from "express";
 import { newGrpcConnection, newIdentity, newSigner } from "./gateway";
 import { Client } from "@grpc/grpc-js";
 import { chaincodeName, channelName, collectionName, DATABASE_NAME, MONGO_URL } from "./constants";
-import { initLedger, ledgerCreateDocument, ledgerHealthCheck } from "./documentInterface";
-import { Db, MongoClient } from "mongodb";
+import { initLedger, ledgerCreateDocument, ledgerGetAllDocuments, ledgerHealthCheck, ledgerReadDocument, ledgerUpdateDocumentHash } from "./documentInterface";
+import { Db, MongoClient, WithId } from "mongodb";
 import multer, { FileFilterCallback } from 'multer';
 import { error } from "console";
 import { createHash, Hash } from "crypto";
 import path from "path";
-import { calculateHash, DocumentDB } from "./utils";
+import { calculateHash, DocumentDB, DocumentLedger } from "./utils";
 
 const fs = require('fs')
 const crypto = require('crypto');
@@ -67,15 +67,21 @@ app.get("/healthcheck", (req:Request, res:Response) => {
 });
 
 /**
- * Fetch all documents
+ * Fetch all document states from ledger 
  */
-app.get("/documents", (req:Request, res:Response) => {
-  res.sendStatus(200);
+app.get("/documents/ledger", (req:Request, res:Response) => {
+  ledgerGetAllDocuments(contract).then(value => {
+    console.log("Result :" , value);
+    res.status(200).json({Result:value}); 
+  }).catch((err : Error) => {
+    console.log("error %s",error);
+    res.status(500).json({error: error})
+  })
   
 });
 
 /**
- * Fetch a specific document 
+ * Fetch a specific documents info from ledger
  * 
  */
 app.get("/documents/:id", (req:Request, res:Response) => {
@@ -85,6 +91,12 @@ app.get("/documents/:id", (req:Request, res:Response) => {
   res.sendStatus(200);
   
 });
+
+/**
+ * read a specific document from the db 
+ * log the file has been read by updating the  
+ * 
+ */
 
 /**
  * Creating a document
@@ -102,7 +114,6 @@ app.get("/documents/:id", (req:Request, res:Response) => {
       res.status(400).json({Result:"error no file in request"});
       return;
     }
-    console.log("the document type is ",req.body.documentType)
     //send file to data base 
     let document: DocumentDB = {
       "documentID":generatedNewID(),
@@ -137,11 +148,57 @@ app.get("/documents/:id", (req:Request, res:Response) => {
 
  });
 
-/**Edit a document 
- * 
+/**Edit a document or its properties 
+ * need to reupload the document to recalculate the hash 
  */
-app.put("/documents/:id",(req:Request,res:Response) => {
+app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res:Response) => {
 
+  console.log("in /documents", req.file, req.body)
+
+  if(!req.file){
+    console.error("NO FILE ATTACHED TO REQUEST")
+    res.status(400).json({Result:"error no file in request"});
+    return;
+  }
+
+  //check the entered id is in the database 
+  let dbEntry = await db.collection(collectionName).findOne({documentID:req.params.documentid});
+  if(!dbEntry){
+    res.status(404).json({Result:"No entry in the database"});
+    return;
+  }
+  //check the id exists in the ledger
+  let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.params.documentid);
+  if(!checkLedgerEntryExists){
+    res.status(404).json({Result:"No id found in ledger"});
+    return;
+  }
+
+  //send file to data base 
+  let document: DocumentDB = {
+    "documentID":req.params.documentid,
+    "creatorID" :dbEntry.creatorID,//not allowed to update the creator id 
+    "documentName" : req.file.originalname,//name always pulled from the file itself 
+    "documentType":req.body.documentType || dbEntry.documentType ,
+    "signable":req.body.signable || dbEntry.signable,
+    "documentHash":calculateHash(req.file!.buffer),
+    "file":req.file!.buffer
+  }
+  //update the hash of the file in the ledger and in the database
+  db.collection(collectionName).updateOne({documentID:req.params.documentid},{$set:document});
+
+  //ledger updates 
+  await ledgerUpdateDocumentHash(contract,req.params.documentid,document.documentHash);
+  //if signable has changed 
+  if (req.body.signable != dbEntry.signable){
+
+  }
+
+  if(req.file.originalname != checkLedgerEntryExists.documentName){
+    
+  }
+
+  console.log("saving file to db",document);
 
   res.sendStatus(200);
 })

@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -10,6 +19,7 @@ const constants_1 = require("./constants");
 const documentInterface_1 = require("./documentInterface");
 const mongodb_1 = require("mongodb");
 const multer_1 = __importDefault(require("multer"));
+const console_1 = require("console");
 const crypto_1 = require("crypto");
 const utils_1 = require("./utils");
 const fs = require('fs');
@@ -47,13 +57,19 @@ app.get("/healthcheck", (req, res) => {
     });
 });
 /**
- * Fetch all documents
+ * Fetch all document states from ledger
  */
-app.get("/documents", (req, res) => {
-    res.sendStatus(200);
+app.get("/documents/ledger", (req, res) => {
+    (0, documentInterface_1.ledgerGetAllDocuments)(exports.contract).then(value => {
+        console.log("Result :", value);
+        res.status(200).json({ Result: value });
+    }).catch((err) => {
+        console.log("error %s", console_1.error);
+        res.status(500).json({ error: console_1.error });
+    });
 });
 /**
- * Fetch a specific document
+ * Fetch a specific documents info from ledger
  *
  */
 app.get("/documents/:id", (req, res) => {
@@ -61,6 +77,11 @@ app.get("/documents/:id", (req, res) => {
     console.log("Fetching doc %s", docID);
     res.sendStatus(200);
 });
+/**
+ * read a specific document from the db
+ * log the file has been read by updating the
+ *
+ */
 /**
  * Creating a document
  * Document to store and register is in the payload
@@ -75,7 +96,6 @@ app.post("/documents", upload.single('file'), (req, res) => {
         res.status(400).json({ Result: "error no file in request" });
         return;
     }
-    console.log("the document type is ", req.body.documentType);
     //send file to data base 
     let document = {
         "documentID": generatedNewID(),
@@ -101,12 +121,50 @@ app.post("/documents", upload.single('file'), (req, res) => {
         res.status(500).json({ Error: err });
     });
 });
-/**Edit a document
- *
+/**Edit a document or its properties
+ * need to reupload the document to recalculate the hash
  */
-app.put("/documents/:id", (req, res) => {
+app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("in /documents", req.file, req.body);
+    if (!req.file) {
+        console.error("NO FILE ATTACHED TO REQUEST");
+        res.status(400).json({ Result: "error no file in request" });
+        return;
+    }
+    //check the entered id is in the database 
+    let dbEntry = yield exports.db.collection(constants_1.collectionName).findOne({ documentID: req.params.documentid });
+    if (!dbEntry) {
+        res.status(404).json({ Result: "No entry in the database" });
+        return;
+    }
+    //check the id exists in the ledger
+    let checkLedgerEntryExists = yield (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.params.documentid);
+    if (!checkLedgerEntryExists) {
+        res.status(404).json({ Result: "No id found in ledger" });
+        return;
+    }
+    //send file to data base 
+    let document = {
+        "documentID": req.params.documentid,
+        "creatorID": dbEntry.creatorID, //not allowed to update the creator id 
+        "documentName": req.file.originalname, //name always pulled from the file itself 
+        "documentType": req.body.documentType || dbEntry.documentType,
+        "signable": req.body.signable || dbEntry.signable,
+        "documentHash": (0, utils_1.calculateHash)(req.file.buffer),
+        "file": req.file.buffer
+    };
+    //update the hash of the file in the ledger and in the database
+    exports.db.collection(constants_1.collectionName).updateOne({ documentID: req.params.documentid }, { $set: document });
+    //ledger updates 
+    yield (0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash);
+    //if signable has changed 
+    if (req.body.signable != dbEntry.signable) {
+    }
+    if (req.file.originalname != checkLedgerEntryExists.documentName) {
+    }
+    console.log("saving file to db", document);
     res.sendStatus(200);
-});
+}));
 /**rename
  *
  */

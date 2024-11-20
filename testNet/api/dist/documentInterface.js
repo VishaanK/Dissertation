@@ -11,12 +11,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ledgerHealthCheck = ledgerHealthCheck;
 exports.initLedger = initLedger;
-exports.logGetAllDocuments = logGetAllDocuments;
+exports.ledgerGetAllDocuments = ledgerGetAllDocuments;
 exports.ledgerCreateDocument = ledgerCreateDocument;
-exports.logReadDocument = logReadDocument;
-exports.logUpdateDocumentHash = logUpdateDocumentHash;
-exports.logRenameDocument = logRenameDocument;
-exports.logUpdateSignable = logUpdateSignable;
+exports.ledgerReadDocument = ledgerReadDocument;
+exports.ledgerUpdateDocumentHash = ledgerUpdateDocumentHash;
+exports.ledgerRenameDocument = ledgerRenameDocument;
+exports.ledgerUpdateSignable = ledgerUpdateSignable;
 exports.logDelete = logDelete;
 exports.logReadInRange = logReadInRange;
 const constants_1 = require("./constants");
@@ -28,7 +28,6 @@ function ledgerHealthCheck(contract) {
         console.log('\n--> Submit Transaction: GetAllDocuments, retrieve all on ledger to check gateway is functioning');
         const resultBytes = yield contract.evaluateTransaction('GetAllDocuments');
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
-        console.log("BEFORE BEING CAST", resultJson);
         const result = JSON.parse(resultJson);
         return result;
     });
@@ -47,7 +46,7 @@ function initLedger(contract) {
  * Evaluate a getAllDocuments transaction to query ledger state.
  *
  */
-function logGetAllDocuments(contract) {
+function ledgerGetAllDocuments(contract) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: GetAllDocuments, function returns all the current documents on the ledger');
         const resultBytes = yield contract.evaluateTransaction('GetAllDocuments');
@@ -71,13 +70,14 @@ function ledgerCreateDocument(contract, documentID, documentName, creatorID, doc
  * @param contract contract object
  * @param docID document ID
  */
-function logReadDocument(contract, docID) {
+function ledgerReadDocument(contract, docID) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: ReadDocument, function returns asset attributes');
         const resultBytes = yield contract.evaluateTransaction('ReadDocument', docID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);
+        return result;
     });
 }
 /**
@@ -86,7 +86,7 @@ function logReadDocument(contract, docID) {
  * @param docID Id of doc to change
  * @param newHash New hash of the document
  */
-function logUpdateDocumentHash(contract, docID, newHash) {
+function ledgerUpdateDocumentHash(contract, docID, newHash) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: UpdateDocumentHash, updates the hash to a new value to factor in changes');
         const resultBytes = yield contract.submitTransaction('UpdateDocumentHash', docID, newHash);
@@ -101,7 +101,7 @@ function logUpdateDocumentHash(contract, docID, newHash) {
  * @param docID Document ID
  * @param newName New Name of document
  */
-function logRenameDocument(contract, docID, newName) {
+function ledgerRenameDocument(contract, docID, newName) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: UpdateDocumentName, updates the hash to a new value to factor in changes');
         const resultBytes = yield contract.submitTransaction('UpdateDocumentName', docID, newName);
@@ -116,7 +116,7 @@ function logRenameDocument(contract, docID, newName) {
  * @param docID
  * @param signable
  */
-function logUpdateSignable(contract, docID, signable) {
+function ledgerUpdateSignable(contract, docID, signable) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: UpdateDocumentSignable, updates the hash to a new value to factor in changes');
         const resultBytes = yield contract.submitTransaction('UpdateDocumentSignable', docID, signable.toString());

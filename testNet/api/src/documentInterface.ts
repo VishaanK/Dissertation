@@ -13,7 +13,6 @@ export async function ledgerHealthCheck(contract: Contract): Promise<DocumentLed
     const resultBytes = await contract.evaluateTransaction('GetAllDocuments');
 
     const resultJson = utf8Decoder.decode(resultBytes);
-    console.log("BEFORE BEING CAST",resultJson)
     const result: DocumentLedger[] = JSON.parse(resultJson);
     return result;
 }
@@ -34,7 +33,7 @@ export async function initLedger(contract: Contract): Promise<void> {
  * Evaluate a getAllDocuments transaction to query ledger state.
  * 
  */
-export async function logGetAllDocuments(contract: Contract): Promise< DocumentLedger[]> {
+export async function ledgerGetAllDocuments(contract: Contract): Promise< DocumentLedger[]> {
     console.log('\n--> Evaluate Transaction: GetAllDocuments, function returns all the current documents on the ledger');
 
     const resultBytes = await contract.evaluateTransaction('GetAllDocuments');
@@ -68,14 +67,16 @@ export async function ledgerCreateDocument(contract: Contract,documentID:string,
  * @param contract contract object 
  * @param docID document ID 
  */
-export async function logReadDocument(contract: Contract,docID : string): Promise<void> {
+export async function ledgerReadDocument(contract: Contract,docID : string): Promise<DocumentLedger> {
     console.log('\n--> Evaluate Transaction: ReadDocument, function returns asset attributes');
 
     const resultBytes = await contract.evaluateTransaction('ReadDocument', docID);
 
     const resultJson = utf8Decoder.decode(resultBytes);
-    const result: unknown = JSON.parse(resultJson);
+    const result: DocumentLedger = JSON.parse(resultJson);
     console.log('*** Result:', result);
+    return result;
+    
 }
 
 /**
@@ -84,7 +85,7 @@ export async function logReadDocument(contract: Contract,docID : string): Promis
  * @param docID Id of doc to change 
  * @param newHash New hash of the document 
  */
-export async function logUpdateDocumentHash(contract: Contract,docID : string,newHash : string): Promise<void> {
+export async function ledgerUpdateDocumentHash(contract: Contract,docID : string,newHash : string): Promise<void> {
     console.log('\n--> Evaluate Transaction: UpdateDocumentHash, updates the hash to a new value to factor in changes');
 
     const resultBytes = await contract.submitTransaction('UpdateDocumentHash', docID,newHash);
@@ -100,7 +101,7 @@ export async function logUpdateDocumentHash(contract: Contract,docID : string,ne
  * @param docID Document ID
  * @param newName New Name of document
  */
-export async function logRenameDocument(contract: Contract,docID : string,newName : string): Promise<void> {
+export async function ledgerRenameDocument(contract: Contract,docID : string,newName : string): Promise<void> {
     console.log('\n--> Evaluate Transaction: UpdateDocumentName, updates the hash to a new value to factor in changes');
 
     const resultBytes = await contract.submitTransaction('UpdateDocumentName', docID,newName);
@@ -116,7 +117,7 @@ export async function logRenameDocument(contract: Contract,docID : string,newNam
  * @param docID 
  * @param signable 
  */
-export async function logUpdateSignable(contract: Contract,docID : string,signable : boolean): Promise<void> {
+export async function ledgerUpdateSignable(contract: Contract,docID : string,signable : boolean): Promise<void> {
     console.log('\n--> Evaluate Transaction: UpdateDocumentSignable, updates the hash to a new value to factor in changes');
 
     const resultBytes = await contract.submitTransaction('UpdateDocumentSignable', docID,signable.toString());
