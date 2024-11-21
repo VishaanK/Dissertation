@@ -2,13 +2,14 @@
 
 # Set the endpoint and file path
 URL="http://localhost:3000/documents"
-FILE_PATH="Vishaan_Khanna_CV-4.pdf"
+FILE_PATH="Vishaan_Khanna_CV-3.pdf"
 
 # Set the request body parameters
 CREATOR_ID="vk60"
 
 DOCUMENT_TYPE="pdf"
 SIGNABLE="false"
+echo before create 
 
 # Execute the curl command to send the POST request
 curl -X POST $URL \
@@ -24,3 +25,7 @@ if [ $? -eq 0 ]; then
 else
   echo "Error: Failed to send the request."
 fi
+
+sleep 2 
+echo checking created 
+curl -X GET "http://localhost:3000/documents/doc1"

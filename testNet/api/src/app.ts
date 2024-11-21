@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { newGrpcConnection, newIdentity, newSigner } from "./gateway";
 import { Client } from "@grpc/grpc-js";
 import { chaincodeName, channelName, collectionName, DATABASE_NAME, MONGO_URL } from "./constants";
-import { initLedger, ledgerCreateDocument, ledgerGetAllDocuments, ledgerHealthCheck, ledgerReadDocument, ledgerUpdateDocumentHash } from "./documentInterface";
+import { initLedger, ledgerCreateDocument, ledgerDelete, ledgerGetAllDocuments, ledgerHealthCheck, ledgerReadDocument, ledgerRenameDocument, ledgerUpdateDocumentHash, ledgerUpdateSignable } from "./documentInterface";
 import { Db, MongoClient, WithId } from "mongodb";
 import multer, { FileFilterCallback } from 'multer';
 import { error } from "console";
@@ -57,14 +57,17 @@ app.use(express.json());
 app.get("/healthcheck", (req:Request, res:Response) => {
   ledgerHealthCheck(contract).then(value => {
     console.log("Result :" , value);
-    res.status(200).json({Result:value}); 
+    res.status(200).json({"Result":value}); 
 
   }).catch((error: Error) => {
     console.log("error %s",error);
-    res.status(500).json({error: error})
+    res.status(500).json({"Error": error})
+    
   })
   
 });
+//this is a test
+app.get();
 
 /**
  * Fetch all document states from ledger 
@@ -72,31 +75,59 @@ app.get("/healthcheck", (req:Request, res:Response) => {
 app.get("/documents/ledger", (req:Request, res:Response) => {
   ledgerGetAllDocuments(contract).then(value => {
     console.log("Result :" , value);
-    res.status(200).json({Result:value}); 
+    res.status(200).json({"Result":value}); 
   }).catch((err : Error) => {
-    console.log("error %s",error);
-    res.status(500).json({error: error})
+    console.log("error %s",err);
+    res.status(500).json({"Error": err})
   })
   
 });
 
 /**
  * Fetch a specific documents info from ledger
+ * also fetches the file from the database 
  * 
  */
-app.get("/documents/:id", (req:Request, res:Response) => {
-  const docID = req.query.id;
-  console.log("Fetching doc %s", docID)
+app.get("/documents/:documentid",async (req:Request, res:Response) => {
 
-  res.sendStatus(200);
+  //confirm the id exists 
+  //check the entered id is in the database 
+  let dbEntry = await db.collection(collectionName).findOne({documentID:req.params.documentid});
+  if(!dbEntry){
+    res.status(404).json({"Result":"No entry in the database"});
+    return;
+  }
+  //check the id exists in the ledger
+  let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.params.documentid);
+  if(!checkLedgerEntryExists){
+    res.status(404).json({"Result":"No id found in ledger"});
+    return;
+  }
+
+  console.log("Fetching doc %s", req.params.documentid);
+
+  ledgerReadDocument(contract,req.params.documentid).then((ledgerResult) => {
+
+    //fetch from database 
+    db.collection(collectionName).findOne({"documentID":req.params.documentid}).then((result) =>{
+
+      console.log("Read document",result)
+      // Include the raw file data as a Base64 string in the response
+      const encodedFile = dbEntry.file.toString('base64'); // Encode binary to Base64
+      res.status(200).json({"LedgerData":ledgerResult,"fileData":encodedFile})
+
+    }).catch((err:Error) => {
+
+      console.log("error fetching file from database",err)
+      res.status(404).json({"Error":err})
+    })
+    
+  }).catch((err:Error) => {
+    console.log("error reading file",err)
+    res.status(404).json({"Error":err})
+  })
   
 });
-
-/**
- * read a specific document from the db 
- * log the file has been read by updating the  
- * 
- */
 
 /**
  * Creating a document
@@ -111,7 +142,7 @@ app.get("/documents/:id", (req:Request, res:Response) => {
 
     if(!req.file){
       console.error("NO FILE ATTACHED TO REQUEST")
-      res.status(400).json({Result:"error no file in request"});
+      res.status(400).json({"Result":"error no file in request"});
       return;
     }
     //send file to data base 
@@ -137,13 +168,16 @@ app.get("/documents/:id", (req:Request, res:Response) => {
       }).catch((err)=>{
 
         console.error("error logging in ledger",err);
-        res.status(500).json({Error:err});
+        res.status(500).json({"Error":err});
+        //UNDO THE INCREMENT
+        undoNewID()
       })
 
     }).catch((err)=>{
       console.error("error saving in database",err)
-      res.status(500).json({Error:err});
-      
+      res.status(500).json({"Error":err});
+      //UNDO THE INCREMENT
+      undoNewID();
     })
 
  });
@@ -157,20 +191,20 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
 
   if(!req.file){
     console.error("NO FILE ATTACHED TO REQUEST")
-    res.status(400).json({Result:"error no file in request"});
+    res.status(400).json({"Result":"error no file in request"});
     return;
   }
 
   //check the entered id is in the database 
   let dbEntry = await db.collection(collectionName).findOne({documentID:req.params.documentid});
   if(!dbEntry){
-    res.status(404).json({Result:"No entry in the database"});
+    res.status(404).json({"Result":"No entry in the database"});
     return;
   }
   //check the id exists in the ledger
   let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.params.documentid);
   if(!checkLedgerEntryExists){
-    res.status(404).json({Result:"No id found in ledger"});
+    res.status(404).json({"Result":"No id found in ledger"});
     return;
   }
 
@@ -187,27 +221,43 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
   //update the hash of the file in the ledger and in the database
   db.collection(collectionName).updateOne({documentID:req.params.documentid},{$set:document});
 
-  //ledger updates 
-  await ledgerUpdateDocumentHash(contract,req.params.documentid,document.documentHash);
+  //ledger updates
+  if(document.documentHash != checkLedgerEntryExists.documentID){
+    ledgerUpdateDocumentHash(contract,req.params.documentid,document.documentHash).catch((err) => {
+      res.status(500).json({"Error updating hash":err})
+      return;
+    })
+  }
+  
   //if signable has changed 
   if (req.body.signable != dbEntry.signable){
-
-  }
-
-  if(req.file.originalname != checkLedgerEntryExists.documentName){
+    ledgerUpdateSignable(contract,req.params.documentid,req.body.signable).catch((err) => {
+      res.status(500).json({"Error updating signable":err})
+      return;
+      
+    })
     
   }
+  //if the name has changed 
+  if(req.file.originalname != checkLedgerEntryExists.documentName){
+    ledgerRenameDocument(contract,req.params.documentid,req.file.originalname).catch((err) => {
+      res.status(500).json({"Error updating name ":err})
+      return;
+    })
+  }
 
-  console.log("saving file to db",document);
-
-  res.sendStatus(200);
+  res.status(200).json({"Result":"Updates made"});
 })
 
 /**rename
  * 
  */
-app.put("/documents/rename/:id",(req:Request,res:Response) => {
+app.put("/documents/rename/:documentid",(req:Request,res:Response) => {
 
+  ledgerRenameDocument(contract,req.params.documentid,req.params.originalname).catch((err) => {
+    res.status(500).json({"Error updating name ":err})
+    return;
+  })
   res.sendStatus(200);
 })
 
@@ -215,10 +265,15 @@ app.put("/documents/rename/:id",(req:Request,res:Response) => {
  * Deleting a document 
  * :id is the id of the document 
  */
-app.delete("/documents/:id", (req:Request, res:Response) => {
-  const docID = req.query.id;
-  console.log("Deleting doc %s", docID)
-  res.sendStatus(200);
+app.delete("/documents/:documentid", (req:Request, res:Response) => {
+  
+  console.log("Deleting doc %s", req.params.documentid)
+
+  ledgerDelete(contract,req.params.documentid).then(()=>{}).catch((err)=>{
+    res.status(500).json({"Error deleting document":err,"DocID":req.params.id})
+    return;
+  })
+  res.status(200).json({"DeleteStatus":"Successful"});
 });
 
 
