@@ -27,5 +27,4 @@ else
 fi
 
 sleep 2 
-echo checking created 
-curl -X GET "http://localhost:3000/documents/doc1"
+curl localhost:3000/healthcheck

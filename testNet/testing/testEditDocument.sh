@@ -1,7 +1,7 @@
 #!/bin/bash
 ####This test renames the file and changes its contents i.e the hash 
 # Set the endpoint and file path
-URL="http://localhost:3000/documents/doc1"
+URL="http://localhost:3000/documents/doc3"
 FILE_PATH="Vishaan_Khanna_CV-4.pdf"
 echo making edit 
 # Execute the curl command to send the POST request

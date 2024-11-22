@@ -1,7 +1,7 @@
 import { certDirectoryPath, keyDirectoryPath, peerEndpoint, peerHostAlias, tlsCertPath } from "./constants";
 import * as grpc from '@grpc/grpc-js';
 import * as fs from 'fs';
-import { connect, Contract, Identity, Signer, signers } from '@hyperledger/fabric-gateway';
+import {Identity, Signer, signers } from '@hyperledger/fabric-gateway';
 import * as crypto from 'crypto';
 
 

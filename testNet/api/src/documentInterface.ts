@@ -1,7 +1,7 @@
 import { Contract } from "@hyperledger/fabric-gateway";
-import { certDirectoryPath, chaincodeName, cryptoPath, keyDirectoryPath, mspId, peerEndpoint, peerHostAlias, tlsCertPath, utf8Decoder } from "./constants";
-import { DocumentLedger, generateAssetId } from "./utils";
-import { sign } from "crypto";
+import { utf8Decoder } from "./constants";
+import { DocumentLedger} from "./utils";
+
 
 
 /**

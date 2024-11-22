@@ -25,9 +25,7 @@ export let db:Db;
 
 let hashingAlgo:Hash = createHash('sha256');
 
-export let highestAssetId:number;
-
-
+let highestAssetId:number=0;
 
 
 function generatedNewID() : string{
@@ -210,37 +208,38 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
     "file":req.file!.buffer
   }
 
-  let promises :Promise<UpdateResult<Document>|DocumentLedger>[] = [];
-
-  //update the hash of the file in the ledger and in the database
-  promises.push(db.collection(collectionName).updateOne({documentID:req.params.documentid},{$set:document}));
-
-  
-  //ledger updates
-  if(document.documentHash != checkLedgerEntryExists.documentID){
-    promises.push(ledgerUpdateDocumentHash(contract,req.params.documentid,document.documentHash));
-  }
-  
-  //if signable has changed 
-  if(req.body.signable){
-    if (req.body.signable != dbEntry.signable){
-      promises.push(ledgerUpdateSignable(contract,req.params.documentid,req.body.signable));
+  // Update the hash of the file in the ledger and database
+  db.collection(collectionName).updateOne({ documentID: req.params.documentid }, { $set: document })
+  .then(() => {
+    // Check if the document hash needs updating in the ledger
+    if (document.documentHash !== checkLedgerEntryExists.documentID) {
+      return ledgerUpdateDocumentHash(contract, req.params.documentid, document.documentHash);
     }
-  }
-
-  //if the name has changed 
-  if(req.file.originalname != checkLedgerEntryExists.documentName){
-    promises.push(ledgerRenameDocument(contract,req.params.documentid,req.file.originalname))
-  }
-
-  //collect the promises 
-  Promise.all(promises).then(()=>{
-    //send success
-    res.status(200).json({"Result":"Success"})
-  }).catch((err:Error)=>{
-    console.log("Error",err);
-    res.status(400).json({"Error":err})
   })
+  .then(() => {
+    // Check if the signable flag has changed
+    if(req.body.signable){
+      if (req.body.signable !== dbEntry.signable) {
+        return ledgerUpdateSignable(contract, req.params.documentid, req.body.signable);
+      }
+    }
+
+  })
+  .then(() => {
+    // Check if the name has changed
+    if (req.file!.originalname !== checkLedgerEntryExists.documentName) {
+      return ledgerRenameDocument(contract, req.params.documentid, req.file!.originalname);
+    }
+  })
+  .then(() => {
+    // Send the 200 response after all updates are successful
+    res.status(200).json({ "Result": "Updates made" });
+  })
+  .catch((err) => {
+    // Handle any errors from any of the promises
+    res.status(500).json({ "Error": err.message || "An error occurred during the update process" });
+  });
+
   
 })
 
@@ -253,9 +252,12 @@ app.delete("/documents/:documentid", (req:Request, res:Response) => {
   console.log("Deleting doc %s", req.params.documentid)
 
   ledgerDelete(contract,req.params.documentid).then(()=>{
+
     res.status(200).json({"DeleteStatus":"Successful"});
-    }).catch((err)=>{
-    res.status(500).json({"Error deleting document":err,"DocID":req.params.id})
+
+  }).catch((err:Error)=>{
+    console.log("error")
+    res.status(500).json({"Error deleting document":err.message,"DocID":req.params.id})
   })
   
 });

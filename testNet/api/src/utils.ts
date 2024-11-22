@@ -1,11 +1,6 @@
 
 import { Request } from 'express';
 
-const fs = require('fs')
-export function generateAssetId():string{
-    return "";
-}
-
 //database structure
 //TODO CHANGE TO MATCH THE STRUCTURE I HAVE GIVEN THE DB
 export interface DocumentDB {

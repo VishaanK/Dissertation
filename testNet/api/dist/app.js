@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.highestAssetId = exports.db = exports.contract = exports.network = exports.client = exports.gateway = void 0;
+exports.db = exports.contract = exports.network = exports.client = exports.gateway = void 0;
 const fabric_gateway_1 = require("@hyperledger/fabric-gateway");
 const gateway_1 = require("./gateway");
 const constants_1 = require("./constants");
@@ -26,9 +26,11 @@ const express = require("express");
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage: storage });
 let hashingAlgo = (0, crypto_1.createHash)('sha256');
+let highestAssetId = 0;
 function generatedNewID() {
-    exports.highestAssetId = exports.highestAssetId + 1;
-    return "doc" + exports.highestAssetId.toString();
+    highestAssetId = highestAssetId + 1;
+    console.log("highest id", highestAssetId);
+    return "doc" + highestAssetId.toString();
 }
 var app = express();
 //enable logging each request that turns up 
@@ -168,30 +170,35 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
         "documentHash": calculateHash(req.file.buffer),
         "file": req.file.buffer
     };
-    let promises = [];
-    //update the hash of the file in the ledger and in the database
-    promises.push(exports.db.collection(constants_1.collectionName).updateOne({ documentID: req.params.documentid }, { $set: document }));
-    //ledger updates
-    if (document.documentHash != checkLedgerEntryExists.documentID) {
-        promises.push((0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash));
-    }
-    //if signable has changed 
-    if (req.body.signable) {
-        if (req.body.signable != dbEntry.signable) {
-            promises.push((0, documentInterface_1.ledgerUpdateSignable)(exports.contract, req.params.documentid, req.body.signable));
+    // Update the hash of the file in the ledger and database
+    exports.db.collection(constants_1.collectionName).updateOne({ documentID: req.params.documentid }, { $set: document })
+        .then(() => {
+        // Check if the document hash needs updating in the ledger
+        if (document.documentHash !== checkLedgerEntryExists.documentID) {
+            return (0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash);
         }
-    }
-    //if the name has changed 
-    if (req.file.originalname != checkLedgerEntryExists.documentName) {
-        promises.push((0, documentInterface_1.ledgerRenameDocument)(exports.contract, req.params.documentid, req.file.originalname));
-    }
-    //collect the promises 
-    Promise.all(promises).then(() => {
-        //send success
-        res.status(200).json({ "Result": "Success" });
-    }).catch((err) => {
-        console.log("Error", err);
-        res.status(400).json({ "Error": err });
+    })
+        .then(() => {
+        // Check if the signable flag has changed
+        if (req.body.signable) {
+            if (req.body.signable !== dbEntry.signable) {
+                return (0, documentInterface_1.ledgerUpdateSignable)(exports.contract, req.params.documentid, req.body.signable);
+            }
+        }
+    })
+        .then(() => {
+        // Check if the name has changed
+        if (req.file.originalname !== checkLedgerEntryExists.documentName) {
+            return (0, documentInterface_1.ledgerRenameDocument)(exports.contract, req.params.documentid, req.file.originalname);
+        }
+    })
+        .then(() => {
+        // Send the 200 response after all updates are successful
+        res.status(200).json({ "Result": "Updates made" });
+    })
+        .catch((err) => {
+        // Handle any errors from any of the promises
+        res.status(500).json({ "Error": err.message || "An error occurred during the update process" });
     });
 }));
 /**
@@ -203,7 +210,8 @@ app.delete("/documents/:documentid", (req, res) => {
     (0, documentInterface_1.ledgerDelete)(exports.contract, req.params.documentid).then(() => {
         res.status(200).json({ "DeleteStatus": "Successful" });
     }).catch((err) => {
-        res.status(500).json({ "Error deleting document": err, "DocID": req.params.id });
+        console.log("error");
+        res.status(500).json({ "Error deleting document": err.message, "DocID": req.params.id });
     });
 });
 //set the api server listening 
@@ -287,12 +295,12 @@ function setupAPI() {
                 },
             ]).toArray().then((result) => {
                 if (result.length > 0) {
-                    exports.highestAssetId = result[0].numericPart;
+                    highestAssetId = result[0].numericPart;
                 }
                 else {
-                    exports.highestAssetId = 0;
+                    highestAssetId = 0;
                 }
-                console.log("HighestId found", exports.highestAssetId);
+                console.log("HighestId found", highestAssetId);
             }).catch((error) => {
                 console.error("error getting highest ID", error);
             });
