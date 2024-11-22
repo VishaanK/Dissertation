@@ -135,7 +135,7 @@ function ledgerUpdateSignable(contract, docID, signable) {
  */
 function ledgerDelete(contract, docID) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('\n--> Evaluate Transaction: DeleteDocument, updates the hash to a new value to factor in changes');
+        console.log('\n--> Evaluate Transaction: DeleteDocument,deletes document');
         const resultBytes = yield contract.submitTransaction('DeleteDocument', docID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);

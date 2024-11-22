@@ -4,7 +4,7 @@ import { newGrpcConnection, newIdentity, newSigner } from "./gateway";
 import { Client } from "@grpc/grpc-js";
 import { chaincodeName, channelName, collectionName, DATABASE_NAME, MONGO_URL } from "./constants";
 import { initLedger, ledgerCreateDocument, ledgerDelete, ledgerGetAllDocuments, ledgerHealthCheck, ledgerReadDocument, ledgerRenameDocument, ledgerUpdateDocumentHash, ledgerUpdateSignable } from "./documentInterface";
-import { Db, MongoClient, WithId } from "mongodb";
+import { Db, MongoClient, UpdateResult, WithId } from "mongodb";
 import multer, { FileFilterCallback } from 'multer';
 import { createHash, Hash } from "crypto";
 import { DocumentDB, DocumentLedger } from "./utils";
@@ -208,35 +208,36 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
     "documentHash":calculateHash(req.file!.buffer),
     "file":req.file!.buffer
   }
-  //update the hash of the file in the ledger and in the database
-  db.collection(collectionName).updateOne({documentID:req.params.documentid},{$set:document});
 
+  let promises :Promise<UpdateResult<Document>|DocumentLedger>[] = [];
+
+  //update the hash of the file in the ledger and in the database
+  promises.push(db.collection(collectionName).updateOne({documentID:req.params.documentid},{$set:document}));
+
+  
   //ledger updates
   if(document.documentHash != checkLedgerEntryExists.documentID){
-    ledgerUpdateDocumentHash(contract,req.params.documentid,document.documentHash).catch((err) => {
-      res.status(500).json({"Error updating hash":err})
-      return;
-    })
+    promises.push(ledgerUpdateDocumentHash(contract,req.params.documentid,document.documentHash));
   }
   
   //if signable has changed 
   if (req.body.signable != dbEntry.signable){
-    ledgerUpdateSignable(contract,req.params.documentid,req.body.signable).catch((err) => {
-      res.status(500).json({"Error updating signable":err})
-      return;
-      
-    })
-    
+    promises.push(ledgerUpdateSignable(contract,req.params.documentid,req.body.signable));
   }
   //if the name has changed 
   if(req.file.originalname != checkLedgerEntryExists.documentName){
-    ledgerRenameDocument(contract,req.params.documentid,req.file.originalname).catch((err) => {
-      res.status(500).json({"Error updating name ":err})
-      return;
-    })
+    promises.push(ledgerRenameDocument(contract,req.params.documentid,req.file.originalname))
   }
 
-  res.status(200).json({"Result":"Updates made"});
+  //collect the promises 
+  Promise.all(promises).then(()=>{
+    //send success
+    res.status(200).json({"Result":"Success"})
+  }).catch((err:Error)=>{
+    console.log("Error",err);
+    res.status(400).json({"Error":err})
+  })
+  
 })
 
 /**
@@ -247,11 +248,12 @@ app.delete("/documents/:documentid", (req:Request, res:Response) => {
   
   console.log("Deleting doc %s", req.params.documentid)
 
-  ledgerDelete(contract,req.params.documentid).then(()=>{}).catch((err)=>{
+  ledgerDelete(contract,req.params.documentid).then(()=>{
+    res.status(200).json({"DeleteStatus":"Successful"});
+    }).catch((err)=>{
     res.status(500).json({"Error deleting document":err,"DocID":req.params.id})
-    return;
   })
-  res.status(200).json({"DeleteStatus":"Successful"});
+  
 });
 
 

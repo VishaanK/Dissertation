@@ -168,30 +168,29 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
         "documentHash": calculateHash(req.file.buffer),
         "file": req.file.buffer
     };
+    let promises = [];
     //update the hash of the file in the ledger and in the database
-    exports.db.collection(constants_1.collectionName).updateOne({ documentID: req.params.documentid }, { $set: document });
+    promises.push(exports.db.collection(constants_1.collectionName).updateOne({ documentID: req.params.documentid }, { $set: document }));
     //ledger updates
     if (document.documentHash != checkLedgerEntryExists.documentID) {
-        (0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash).catch((err) => {
-            res.status(500).json({ "Error updating hash": err });
-            return;
-        });
+        promises.push((0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash));
     }
     //if signable has changed 
     if (req.body.signable != dbEntry.signable) {
-        (0, documentInterface_1.ledgerUpdateSignable)(exports.contract, req.params.documentid, req.body.signable).catch((err) => {
-            res.status(500).json({ "Error updating signable": err });
-            return;
-        });
+        promises.push((0, documentInterface_1.ledgerUpdateSignable)(exports.contract, req.params.documentid, req.body.signable));
     }
     //if the name has changed 
     if (req.file.originalname != checkLedgerEntryExists.documentName) {
-        (0, documentInterface_1.ledgerRenameDocument)(exports.contract, req.params.documentid, req.file.originalname).catch((err) => {
-            res.status(500).json({ "Error updating name ": err });
-            return;
-        });
+        promises.push((0, documentInterface_1.ledgerRenameDocument)(exports.contract, req.params.documentid, req.file.originalname));
     }
-    res.status(200).json({ "Result": "Updates made" });
+    //collect the promises 
+    Promise.all(promises).then(() => {
+        //send success
+        res.status(200).json({ "Result": "Success" });
+    }).catch((err) => {
+        console.log("Error", err);
+        res.status(400).json({ "Error": err });
+    });
 }));
 /**
  * Deleting a document
@@ -199,11 +198,11 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
  */
 app.delete("/documents/:documentid", (req, res) => {
     console.log("Deleting doc %s", req.params.documentid);
-    (0, documentInterface_1.ledgerDelete)(exports.contract, req.params.documentid).then(() => { }).catch((err) => {
+    (0, documentInterface_1.ledgerDelete)(exports.contract, req.params.documentid).then(() => {
+        res.status(200).json({ "DeleteStatus": "Successful" });
+    }).catch((err) => {
         res.status(500).json({ "Error deleting document": err, "DocID": req.params.id });
-        return;
     });
-    res.status(200).json({ "DeleteStatus": "Successful" });
 });
 //set the api server listening 
 app.listen(3000, () => {

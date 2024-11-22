@@ -137,7 +137,7 @@ export async function ledgerUpdateSignable(contract: Contract,docID : string,sig
  * @param docID 
  */
 export async function ledgerDelete(contract: Contract,docID : string): Promise<void> {
-    console.log('\n--> Evaluate Transaction: DeleteDocument, updates the hash to a new value to factor in changes');
+    console.log('\n--> Evaluate Transaction: DeleteDocument,deletes document');
 
     const resultBytes = await contract.submitTransaction('DeleteDocument', docID);
 
