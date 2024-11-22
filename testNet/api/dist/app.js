@@ -176,8 +176,10 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
         promises.push((0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash));
     }
     //if signable has changed 
-    if (req.body.signable != dbEntry.signable) {
-        promises.push((0, documentInterface_1.ledgerUpdateSignable)(exports.contract, req.params.documentid, req.body.signable));
+    if (req.body.signable) {
+        if (req.body.signable != dbEntry.signable) {
+            promises.push((0, documentInterface_1.ledgerUpdateSignable)(exports.contract, req.params.documentid, req.body.signable));
+        }
     }
     //if the name has changed 
     if (req.file.originalname != checkLedgerEntryExists.documentName) {

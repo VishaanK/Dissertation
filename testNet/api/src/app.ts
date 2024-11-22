@@ -157,6 +157,7 @@ app.get("/documents/:documentid",async (req:Request, res:Response) => {
       //update the ledger now that the file has successfully been stored 
       ledgerCreateDocument(contract,document.documentID,document.documentName,document.creatorID,document.documentHash,document.documentType,document.signable).then(()=>{
         res.sendStatus(200);
+
       }).catch((err)=>{
 
         console.error("error logging in ledger",err);
@@ -221,9 +222,12 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
   }
   
   //if signable has changed 
-  if (req.body.signable != dbEntry.signable){
-    promises.push(ledgerUpdateSignable(contract,req.params.documentid,req.body.signable));
+  if(req.body.signable){
+    if (req.body.signable != dbEntry.signable){
+      promises.push(ledgerUpdateSignable(contract,req.params.documentid,req.body.signable));
+    }
   }
+
   //if the name has changed 
   if(req.file.originalname != checkLedgerEntryExists.documentName){
     promises.push(ledgerRenameDocument(contract,req.params.documentid,req.file.originalname))
