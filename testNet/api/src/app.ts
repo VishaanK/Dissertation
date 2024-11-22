@@ -6,12 +6,9 @@ import { chaincodeName, channelName, collectionName, DATABASE_NAME, MONGO_URL } 
 import { initLedger, ledgerCreateDocument, ledgerDelete, ledgerGetAllDocuments, ledgerHealthCheck, ledgerReadDocument, ledgerRenameDocument, ledgerUpdateDocumentHash, ledgerUpdateSignable } from "./documentInterface";
 import { Db, MongoClient, WithId } from "mongodb";
 import multer, { FileFilterCallback } from 'multer';
-import { error } from "console";
 import { createHash, Hash } from "crypto";
-import path from "path";
-import { calculateHash, DocumentDB, DocumentLedger } from "./utils";
+import { DocumentDB, DocumentLedger } from "./utils";
 
-const fs = require('fs')
 const crypto = require('crypto');
 const express = require("express");
 
@@ -26,7 +23,7 @@ export let network:Network;
 export let contract:Contract;
 export let db:Db;
 
-export const hashingAlgo:Hash = createHash('sha256');
+let hashingAlgo:Hash = createHash('sha256');
 
 export let highestAssetId:number;
 
@@ -38,10 +35,6 @@ function generatedNewID() : string{
   return "doc"+highestAssetId.toString();
 }
 
-//set the id back if the function fails 
-function undoNewID():void{
-  highestAssetId = highestAssetId - 1;
-}
 
 var app = express();
 //enable logging each request that turns up 
@@ -66,8 +59,7 @@ app.get("/healthcheck", (req:Request, res:Response) => {
   })
   
 });
-//this is a test
-app.get();
+
 
 /**
  * Fetch all document states from ledger 
@@ -169,15 +161,13 @@ app.get("/documents/:documentid",async (req:Request, res:Response) => {
 
         console.error("error logging in ledger",err);
         res.status(500).json({"Error":err});
-        //UNDO THE INCREMENT
-        undoNewID()
+        
       })
 
     }).catch((err)=>{
       console.error("error saving in database",err)
       res.status(500).json({"Error":err});
-      //UNDO THE INCREMENT
-      undoNewID();
+      
     })
 
  });
@@ -249,21 +239,9 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
   res.status(200).json({"Result":"Updates made"});
 })
 
-/**rename
- * 
- */
-app.put("/documents/rename/:documentid",(req:Request,res:Response) => {
-
-  ledgerRenameDocument(contract,req.params.documentid,req.params.originalname).catch((err) => {
-    res.status(500).json({"Error updating name ":err})
-    return;
-  })
-  res.sendStatus(200);
-})
-
 /**
  * Deleting a document 
- * :id is the id of the document 
+ * :id is the id of the document  
  */
 app.delete("/documents/:documentid", (req:Request, res:Response) => {
   
@@ -391,3 +369,21 @@ function setupAPI(){
  
 
 }
+
+
+  /**
+ * hashes a file in sync 
+ * @param filePath to file to hash
+ * @returns 
+ */
+  function calculateHash(file:Buffer) : string {
+    try{
+      const digest:string = hashingAlgo.update(file).digest('base64');
+      //reset the object 
+      hashingAlgo = crypto.createHash('sha256');
+      return digest
+    }catch(err){
+      console.error('Error reading or hashing file:', err);
+      return "";
+    }
+  }

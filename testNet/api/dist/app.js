@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.highestAssetId = exports.hashingAlgo = exports.db = exports.contract = exports.network = exports.client = exports.gateway = void 0;
+exports.highestAssetId = exports.db = exports.contract = exports.network = exports.client = exports.gateway = void 0;
 const fabric_gateway_1 = require("@hyperledger/fabric-gateway");
 const gateway_1 = require("./gateway");
 const constants_1 = require("./constants");
@@ -20,21 +20,15 @@ const documentInterface_1 = require("./documentInterface");
 const mongodb_1 = require("mongodb");
 const multer_1 = __importDefault(require("multer"));
 const crypto_1 = require("crypto");
-const utils_1 = require("./utils");
-const fs = require('fs');
 const crypto = require('crypto');
 const express = require("express");
 //configure multer to use in memory buffers 
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage: storage });
-exports.hashingAlgo = (0, crypto_1.createHash)('sha256');
+let hashingAlgo = (0, crypto_1.createHash)('sha256');
 function generatedNewID() {
     exports.highestAssetId = exports.highestAssetId + 1;
     return "doc" + exports.highestAssetId.toString();
-}
-//set the id back if the function fails 
-function undoNewID() {
-    exports.highestAssetId = exports.highestAssetId - 1;
 }
 var app = express();
 //enable logging each request that turns up 
@@ -55,8 +49,6 @@ app.get("/healthcheck", (req, res) => {
         res.status(500).json({ "Error": error });
     });
 });
-//this is a test
-app.get();
 /**
  * Fetch all document states from ledger
  */
@@ -126,7 +118,7 @@ app.post("/documents", upload.single('file'), (req, res) => {
         "documentName": req.file.originalname,
         "documentType": req.body.documentType,
         "signable": req.body.signable,
-        "documentHash": (0, utils_1.calculateHash)(req.file.buffer),
+        "documentHash": calculateHash(req.file.buffer),
         "file": req.file.buffer
     };
     console.log("saving file to db", document);
@@ -138,14 +130,10 @@ app.post("/documents", upload.single('file'), (req, res) => {
         }).catch((err) => {
             console.error("error logging in ledger", err);
             res.status(500).json({ "Error": err });
-            //UNDO THE INCREMENT
-            undoNewID();
         });
     }).catch((err) => {
         console.error("error saving in database", err);
         res.status(500).json({ "Error": err });
-        //UNDO THE INCREMENT
-        undoNewID();
     });
 });
 /**Edit a document or its properties
@@ -177,7 +165,7 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
         "documentName": req.file.originalname, //name always pulled from the file itself 
         "documentType": req.body.documentType || dbEntry.documentType,
         "signable": req.body.signable || dbEntry.signable,
-        "documentHash": (0, utils_1.calculateHash)(req.file.buffer),
+        "documentHash": calculateHash(req.file.buffer),
         "file": req.file.buffer
     };
     //update the hash of the file in the ledger and in the database
@@ -205,16 +193,6 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
     }
     res.status(200).json({ "Result": "Updates made" });
 }));
-/**rename
- *
- */
-app.put("/documents/rename/:documentid", (req, res) => {
-    (0, documentInterface_1.ledgerRenameDocument)(exports.contract, req.params.documentid, req.params.originalname).catch((err) => {
-        res.status(500).json({ "Error updating name ": err });
-        return;
-    });
-    res.sendStatus(200);
-});
 /**
  * Deleting a document
  * :id is the id of the document
@@ -323,5 +301,22 @@ function setupAPI() {
         console.error('Failed to connect to MongoDB', error);
         console.log('Failed to connect to MongoDB');
         process.exitCode = 1;
+    }
+}
+/**
+* hashes a file in sync
+* @param filePath to file to hash
+* @returns
+*/
+function calculateHash(file) {
+    try {
+        const digest = hashingAlgo.update(file).digest('base64');
+        //reset the object 
+        hashingAlgo = crypto.createHash('sha256');
+        return digest;
+    }
+    catch (err) {
+        console.error('Error reading or hashing file:', err);
+        return "";
     }
 }

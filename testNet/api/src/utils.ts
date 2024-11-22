@@ -1,6 +1,6 @@
-import { ObjectId } from "mongodb";
+
 import { Request } from 'express';
-import { hashingAlgo, highestAssetId } from "./app";
+
 const fs = require('fs')
 export function generateAssetId():string{
     return "";
@@ -42,18 +42,4 @@ export interface createDocumentRequest extends Request {
     };
   }
 
-  /**
- * hashes a file in sync 
- * @param filePath to file to hash
- * @returns 
- */
-export function calculateHash(file:Buffer) : string {
-    try{
-      const digest:string = hashingAlgo.update(file).digest('base64');
-      return digest
-    }catch(err){
-      console.error('Error reading or hashing file:', err);
-      return "";
-    }
-  }
 
