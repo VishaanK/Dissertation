@@ -17,7 +17,7 @@ exports.ledgerReadDocument = ledgerReadDocument;
 exports.ledgerUpdateDocumentHash = ledgerUpdateDocumentHash;
 exports.ledgerRenameDocument = ledgerRenameDocument;
 exports.ledgerUpdateSignable = ledgerUpdateSignable;
-exports.logDelete = logDelete;
+exports.ledgerDelete = ledgerDelete;
 exports.logReadInRange = logReadInRange;
 const constants_1 = require("./constants");
 /**
@@ -93,6 +93,7 @@ function ledgerUpdateDocumentHash(contract, docID, newHash) {
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);
+        return result;
     });
 }
 /**
@@ -108,6 +109,7 @@ function ledgerRenameDocument(contract, docID, newName) {
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);
+        return result;
     });
 }
 /**
@@ -123,6 +125,7 @@ function ledgerUpdateSignable(contract, docID, signable) {
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);
+        return result;
     });
 }
 /**
@@ -130,7 +133,7 @@ function ledgerUpdateSignable(contract, docID, signable) {
  * @param contract
  * @param docID
  */
-function logDelete(contract, docID) {
+function ledgerDelete(contract, docID) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: DeleteDocument, updates the hash to a new value to factor in changes');
         const resultBytes = yield contract.submitTransaction('DeleteDocument', docID);
@@ -153,5 +156,6 @@ function logReadInRange(contract, docID, startKey, endKey) {
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);
+        return result;
     });
 }

@@ -19,7 +19,6 @@ const constants_1 = require("./constants");
 const documentInterface_1 = require("./documentInterface");
 const mongodb_1 = require("mongodb");
 const multer_1 = __importDefault(require("multer"));
-const console_1 = require("console");
 const crypto_1 = require("crypto");
 const utils_1 = require("./utils");
 const fs = require('fs');
@@ -50,38 +49,62 @@ app.use(express.json());
 app.get("/healthcheck", (req, res) => {
     (0, documentInterface_1.ledgerHealthCheck)(exports.contract).then(value => {
         console.log("Result :", value);
-        res.status(200).json({ Result: value });
+        res.status(200).json({ "Result": value });
     }).catch((error) => {
         console.log("error %s", error);
-        res.status(500).json({ error: error });
+        res.status(500).json({ "Error": error });
     });
 });
+//this is a test
+app.get();
 /**
  * Fetch all document states from ledger
  */
 app.get("/documents/ledger", (req, res) => {
     (0, documentInterface_1.ledgerGetAllDocuments)(exports.contract).then(value => {
         console.log("Result :", value);
-        res.status(200).json({ Result: value });
+        res.status(200).json({ "Result": value });
     }).catch((err) => {
-        console.log("error %s", console_1.error);
-        res.status(500).json({ error: console_1.error });
+        console.log("error %s", err);
+        res.status(500).json({ "Error": err });
     });
 });
 /**
  * Fetch a specific documents info from ledger
+ * also fetches the file from the database
  *
  */
-app.get("/documents/:id", (req, res) => {
-    const docID = req.query.id;
-    console.log("Fetching doc %s", docID);
-    res.sendStatus(200);
-});
-/**
- * read a specific document from the db
- * log the file has been read by updating the
- *
- */
+app.get("/documents/:documentid", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //confirm the id exists 
+    //check the entered id is in the database 
+    let dbEntry = yield exports.db.collection(constants_1.collectionName).findOne({ documentID: req.params.documentid });
+    if (!dbEntry) {
+        res.status(404).json({ "Result": "No entry in the database" });
+        return;
+    }
+    //check the id exists in the ledger
+    let checkLedgerEntryExists = yield (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.params.documentid);
+    if (!checkLedgerEntryExists) {
+        res.status(404).json({ "Result": "No id found in ledger" });
+        return;
+    }
+    console.log("Fetching doc %s", req.params.documentid);
+    (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.params.documentid).then((ledgerResult) => {
+        //fetch from database 
+        exports.db.collection(constants_1.collectionName).findOne({ "documentID": req.params.documentid }).then((result) => {
+            console.log("Read document", result);
+            // Include the raw file data as a Base64 string in the response
+            const encodedFile = dbEntry.file.toString('base64'); // Encode binary to Base64
+            res.status(200).json({ "LedgerData": ledgerResult, "fileData": encodedFile });
+        }).catch((err) => {
+            console.log("error fetching file from database", err);
+            res.status(404).json({ "Error": err });
+        });
+    }).catch((err) => {
+        console.log("error reading file", err);
+        res.status(404).json({ "Error": err });
+    });
+}));
 /**
  * Creating a document
  * Document to store and register is in the payload
@@ -93,7 +116,7 @@ app.post("/documents", upload.single('file'), (req, res) => {
     console.log("in /documents", req.file, req.body);
     if (!req.file) {
         console.error("NO FILE ATTACHED TO REQUEST");
-        res.status(400).json({ Result: "error no file in request" });
+        res.status(400).json({ "Result": "error no file in request" });
         return;
     }
     //send file to data base 
@@ -114,11 +137,15 @@ app.post("/documents", upload.single('file'), (req, res) => {
             res.sendStatus(200);
         }).catch((err) => {
             console.error("error logging in ledger", err);
-            res.status(500).json({ Error: err });
+            res.status(500).json({ "Error": err });
+            //UNDO THE INCREMENT
+            undoNewID();
         });
     }).catch((err) => {
         console.error("error saving in database", err);
-        res.status(500).json({ Error: err });
+        res.status(500).json({ "Error": err });
+        //UNDO THE INCREMENT
+        undoNewID();
     });
 });
 /**Edit a document or its properties
@@ -128,19 +155,19 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
     console.log("in /documents", req.file, req.body);
     if (!req.file) {
         console.error("NO FILE ATTACHED TO REQUEST");
-        res.status(400).json({ Result: "error no file in request" });
+        res.status(400).json({ "Result": "error no file in request" });
         return;
     }
     //check the entered id is in the database 
     let dbEntry = yield exports.db.collection(constants_1.collectionName).findOne({ documentID: req.params.documentid });
     if (!dbEntry) {
-        res.status(404).json({ Result: "No entry in the database" });
+        res.status(404).json({ "Result": "No entry in the database" });
         return;
     }
     //check the id exists in the ledger
     let checkLedgerEntryExists = yield (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.params.documentid);
     if (!checkLedgerEntryExists) {
-        res.status(404).json({ Result: "No id found in ledger" });
+        res.status(404).json({ "Result": "No id found in ledger" });
         return;
     }
     //send file to data base 
@@ -155,30 +182,50 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
     };
     //update the hash of the file in the ledger and in the database
     exports.db.collection(constants_1.collectionName).updateOne({ documentID: req.params.documentid }, { $set: document });
-    //ledger updates 
-    yield (0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash);
+    //ledger updates
+    if (document.documentHash != checkLedgerEntryExists.documentID) {
+        (0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash).catch((err) => {
+            res.status(500).json({ "Error updating hash": err });
+            return;
+        });
+    }
     //if signable has changed 
     if (req.body.signable != dbEntry.signable) {
+        (0, documentInterface_1.ledgerUpdateSignable)(exports.contract, req.params.documentid, req.body.signable).catch((err) => {
+            res.status(500).json({ "Error updating signable": err });
+            return;
+        });
     }
+    //if the name has changed 
     if (req.file.originalname != checkLedgerEntryExists.documentName) {
+        (0, documentInterface_1.ledgerRenameDocument)(exports.contract, req.params.documentid, req.file.originalname).catch((err) => {
+            res.status(500).json({ "Error updating name ": err });
+            return;
+        });
     }
-    console.log("saving file to db", document);
-    res.sendStatus(200);
+    res.status(200).json({ "Result": "Updates made" });
 }));
 /**rename
  *
  */
-app.put("/documents/rename/:id", (req, res) => {
+app.put("/documents/rename/:documentid", (req, res) => {
+    (0, documentInterface_1.ledgerRenameDocument)(exports.contract, req.params.documentid, req.params.originalname).catch((err) => {
+        res.status(500).json({ "Error updating name ": err });
+        return;
+    });
     res.sendStatus(200);
 });
 /**
  * Deleting a document
  * :id is the id of the document
  */
-app.delete("/documents/:id", (req, res) => {
-    const docID = req.query.id;
-    console.log("Deleting doc %s", docID);
-    res.sendStatus(200);
+app.delete("/documents/:documentid", (req, res) => {
+    console.log("Deleting doc %s", req.params.documentid);
+    (0, documentInterface_1.ledgerDelete)(exports.contract, req.params.documentid).then(() => { }).catch((err) => {
+        res.status(500).json({ "Error deleting document": err, "DocID": req.params.id });
+        return;
+    });
+    res.status(200).json({ "DeleteStatus": "Successful" });
 });
 //set the api server listening 
 app.listen(3000, () => {
