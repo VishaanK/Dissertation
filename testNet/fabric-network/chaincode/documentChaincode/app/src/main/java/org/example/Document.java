@@ -7,6 +7,8 @@ import org.hyperledger.fabric.contract.annotation.Property;
 
 import com.owlike.genson.annotation.JsonProperty;
 
+
+
 @DataType()
 public final class Document {
 
@@ -27,6 +29,19 @@ public final class Document {
 
     @Property()
     private boolean  signable;
+
+    @Property()
+    private String lastInteractedWithID;
+
+    //most recent action on the document can be 
+    //created
+    //read
+    //edited
+    //deleted
+    //when combined with lastInteractedWithID provides a picture of who 
+    //did what 
+    @Property()
+    private DocumentAction lastAction;
 
     public String getDocumentID(){
         return documentID;
@@ -64,6 +79,22 @@ public final class Document {
         this.documentName = newName;
     }
 
+    public String getLastAction() {
+        return lastAction.toString();
+    }
+
+    public void setLastAction(DocumentAction lastAction) {
+        this.lastAction = lastAction;
+    }
+
+    public String getLastInteractedWithID() {
+        return lastInteractedWithID;
+    }
+
+    public void setLastInteractedWithID(String lastInteractedWithID) {
+        this.lastInteractedWithID = lastInteractedWithID;
+    }
+    
 
     /*
     Constructor
@@ -79,6 +110,9 @@ public final class Document {
         this.documentHash = documentHash;
         this.documentType = documentType;
         this.signable = signable;
+        this.lastAction=DocumentAction.CREATED;
+        this.lastInteractedWithID = creatorID;
+
         
     }
 
@@ -95,8 +129,8 @@ public final class Document {
         Document other = (Document) obj;
 
         return Objects.deepEquals(
-            new String[]{getDocumentID(), getCreatorID(), getDocumentName(), getDocumentHash(), getDocumentType(),String.valueOf(getSignable())},
-            new String[]{other.getDocumentID(),other.getCreatorID(), other.getDocumentName(), other.getDocumentHash(), other.getDocumentType(),String.valueOf(other.getSignable())}
+            new String[]{getDocumentID(), getCreatorID(), getDocumentName(), getDocumentHash(), getDocumentType(),String.valueOf(getSignable()),this.lastAction.toString(),this.lastInteractedWithID},
+            new String[]{other.getDocumentID(),other.getCreatorID(), other.getDocumentName(), other.getDocumentHash(), other.getDocumentType(),String.valueOf(other.getSignable()),other.lastAction.toString(),other.lastInteractedWithID}
     );
         
         
@@ -105,15 +139,16 @@ public final class Document {
     @Override
     public int hashCode() {
         
-        return Objects.hash(getDocumentID(),getCreatorID(), getDocumentName(), getDocumentHash(), getDocumentType(),String.valueOf(getSignable()));
+        return Objects.hash(getDocumentID(),getCreatorID(), getDocumentName(), getDocumentHash(), getDocumentType(),String.valueOf(getSignable()),getLastAction(),getLastInteractedWithID());
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) +"documentID=" + getDocumentID() + "creatorID=" + getCreatorID() + ", documentName=" + getDocumentName() 
-                + ", documentHash=" + getDocumentHash() + ", documentType=" + getDocumentType() + "signable=" + String.valueOf(getSignable()) + "]";
+                + ", documentHash=" + getDocumentHash() + ", documentType=" + getDocumentType() + "signable=" + String.valueOf(getSignable()) + 
+                "Last Action" + getLastAction() + "LastInteractedID" + getLastInteractedWithID()  + "]";
     }
-    
+
 
 
     

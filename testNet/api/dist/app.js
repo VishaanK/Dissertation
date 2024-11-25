@@ -29,7 +29,6 @@ let hashingAlgo = (0, crypto_1.createHash)('sha256');
 let highestAssetId = 0;
 function generatedNewID() {
     highestAssetId = highestAssetId + 1;
-    console.log("highest id", highestAssetId);
     return "doc" + highestAssetId.toString();
 }
 var app = express();

@@ -371,11 +371,7 @@ function setupAPI(){
     console.log('Failed to connect to MongoDB');
     process.exitCode = 1;
   }
-
-  
-  
  
-
 }
 
 

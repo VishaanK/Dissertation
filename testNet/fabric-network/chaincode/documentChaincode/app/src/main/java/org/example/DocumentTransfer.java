@@ -53,12 +53,7 @@ public final class DocumentTransfer implements ContractInterface {
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
     public void InitLedger(final Context ctx) {
-        ChaincodeStub stub = ctx.getStub();
-
-        CreateDocument(ctx, "doc1", "To Kill", "John2", "279o9ohuisdg78928h", "PDF",false);
-        CreateDocument(ctx, "doc2", "Some Legal Document", "Dave1", "8fjiruenguiu759uw", "Docx",false);
-
-
+        System.out.println("Initialising ledger with no assets ");
     }
 
     /**
@@ -145,10 +140,11 @@ public final class DocumentTransfer implements ContractInterface {
      * Read a document
      * @param ctx
      * @param documentName
+     * @param userID
      * @return
      */
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public Document ReadDocument(final Context ctx, final String documentID){
+    public Document ReadDocument(final Context ctx, final String documentID,final String userID){
         ChaincodeStub stub = ctx.getStub();
         String documentJSON = stub.getStringState(documentID);
 
@@ -160,6 +156,14 @@ public final class DocumentTransfer implements ContractInterface {
         // Convert the JSON string to a JSONObject
         Document fetchedDoc = genson.deserialize(documentJSON,Document.class);
         
+        //update last action and ID of reader
+        fetchedDoc.setLastAction(DocumentAction.READ);
+        fetchedDoc.setLastInteractedWithID(userID);
+
+        String sortedJson = genson.serialize(fetchedDoc);
+
+        stub.putStringState(documentID, sortedJson);
+
         return fetchedDoc;
 
     }
@@ -169,10 +173,11 @@ public final class DocumentTransfer implements ContractInterface {
      * @param ctx
      * @param documentName
      * @param hash
+     * @param userID
      * @return
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public Document UpdateDocumentHash(Context ctx, final String documentID, final String hash){
+    public Document UpdateDocumentHash(Context ctx, final String documentID, final String hash,final String userID){
         ChaincodeStub stub = ctx.getStub();
 
         String documentJSON = stub.getStringState(documentID);
@@ -185,6 +190,11 @@ public final class DocumentTransfer implements ContractInterface {
         // Convert the JSON string to a JSONObject
         Document doc = genson.deserialize(documentJSON,Document.class);
         doc.setHash(hash);
+
+        //update last action and ID of reader
+        doc.setLastAction(DocumentAction.EDITED);
+        doc.setLastInteractedWithID(userID);
+
         String sortedJson = genson.serialize(doc);
 
         stub.putStringState(documentID, sortedJson);
@@ -197,10 +207,11 @@ public final class DocumentTransfer implements ContractInterface {
      * @param ctx
      * @param documentName
      * @param hash
+     * @param userID
      * @return
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public Document UpdateDocumentName(Context ctx, final String documentID, final String newdocumentName){
+    public Document UpdateDocumentName(Context ctx, final String documentID, final String newdocumentName,final String userID){
         ChaincodeStub stub = ctx.getStub();
 
         String documentJSON = stub.getStringState(documentID);
@@ -213,6 +224,11 @@ public final class DocumentTransfer implements ContractInterface {
         // Convert the JSON string to a JSONObject
         Document doc = genson.deserialize(documentJSON,Document.class);
         doc.setName(newdocumentName);
+         //update last action and ID of reader
+        doc.setLastAction(DocumentAction.EDITED);
+        doc.setLastInteractedWithID(userID);
+
+         
         String sortedJson = genson.serialize(doc);
 
         stub.putStringState(documentID, sortedJson);
@@ -224,10 +240,11 @@ public final class DocumentTransfer implements ContractInterface {
      * @param ctx
      * @param documentName
      * @param hash
+     * @param userID
      * @return
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public Document UpdateDocumentSignable(Context ctx, final String documentID, final boolean signable){
+    public Document UpdateDocumentSignable(Context ctx, final String documentID, final boolean signable,final String userID){
         ChaincodeStub stub = ctx.getStub();
 
         String documentJSON = stub.getStringState(documentID);
@@ -240,6 +257,10 @@ public final class DocumentTransfer implements ContractInterface {
         // Convert the JSON string to a JSONObject
         Document doc = genson.deserialize(documentJSON,Document.class);
         doc.setSignable(signable);
+        //update last action and ID of reader
+        doc.setLastAction(DocumentAction.EDITED);
+        doc.setLastInteractedWithID(userID);
+
         String sortedJson = genson.serialize(doc);
 
         stub.putStringState(documentID, sortedJson);
@@ -251,9 +272,10 @@ public final class DocumentTransfer implements ContractInterface {
      *
      * @param ctx the transaction context
      * @param assetID the ID of the asset being deleted
+     * @param userID
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public void DeleteDocument(final Context ctx, final String documentID) {
+    public void DeleteDocument(final Context ctx, final String documentID,final String userID) {
         ChaincodeStub stub = ctx.getStub();
 
         if (!CheckDocumentExists(ctx, documentID)) {
@@ -262,6 +284,17 @@ public final class DocumentTransfer implements ContractInterface {
             throw new ChaincodeException(errorMessage, DocumentTransferErrors.DOCUMENT_NOT_FOUND.toString());
         }
 
+        String documentJSON = stub.getStringState(documentID);
+        Document doc = genson.deserialize(documentJSON,Document.class);
+        //update last action and ID of reader
+        doc.setLastAction(DocumentAction.DELETED);
+        doc.setLastInteractedWithID(userID);
+
+        //write the changes 
+        String sortedJson = genson.serialize(doc);
+        stub.putStringState(documentID, sortedJson);
+
+        //delete the item
         stub.delState(documentID);
     }
 
@@ -269,10 +302,11 @@ public final class DocumentTransfer implements ContractInterface {
      * Retrieves all assets from the ledger.
      *
      * @param ctx the transaction context
+     * @param userID
      * @return array of assets found on the ledger
      */
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public String GetAllDocuments(final Context ctx) {
+    public String GetAllDocuments(final Context ctx,final String userID) {
         ChaincodeStub stub = ctx.getStub();
 
         List<Document> queryResults = new ArrayList<>();
@@ -285,8 +319,14 @@ public final class DocumentTransfer implements ContractInterface {
 
         for (KeyValue result: results) {
             Document document = genson.deserialize(result.getStringValue(), Document.class);
-            System.out.println(document);
             queryResults.add(document);
+
+            //update who has read it and that it has been read 
+            document.setLastAction(DocumentAction.READ);
+            document.setLastInteractedWithID(userID);
+            String sortedJson = genson.serialize(document);
+            stub.putStringState(document.getDocumentID(), sortedJson);
+            
         }
 
         final String response = genson.serialize(queryResults);
@@ -302,10 +342,11 @@ public final class DocumentTransfer implements ContractInterface {
      * @param ctx the transaction context
      * @param startKey the start key for the range (inclusive)
      * @param endKey the end key for the range (exclusive)
+     * @param userID
      * @return JSON array of documents found within the range
      */
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public String GetAllDocumentsInRange(final Context ctx, final String startKey, final String endKey) {
+    public String GetAllDocumentsInRange(final Context ctx, final String startKey, final String endKey,final String userID) {
         ChaincodeStub stub = ctx.getStub();
 
         if (startKey.equals(endKey)) {
@@ -323,7 +364,17 @@ public final class DocumentTransfer implements ContractInterface {
         // Iterate through the results and deserialize each document
         for (KeyValue result : results) {
             Document document = genson.deserialize(result.getStringValue(), Document.class);
+
             queryResults.add(document);
+
+            //update who has read it and that it has been read 
+            document.setLastAction(DocumentAction.READ);
+            document.setLastInteractedWithID(userID);
+            String sortedJson = genson.serialize(document);
+            stub.putStringState(document.getDocumentID(), sortedJson);
+            
+
+
         }
 
         // Serialize the list of documents to JSON and return

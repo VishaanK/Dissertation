@@ -13,7 +13,3 @@ source ./approveChaincode.sh
 sleep 2
 
 source ./initialiseLedger.sh
-
-sleep 2
-
-source ./deleteAssets.sh
