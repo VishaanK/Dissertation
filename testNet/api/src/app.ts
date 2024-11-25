@@ -62,8 +62,8 @@ app.get("/healthcheck", (req:Request, res:Response) => {
 /**
  * Fetch all document states from ledger 
  */
-app.get("/documents/ledger", (req:Request, res:Response) => {
-  ledgerGetAllDocuments(contract).then(value => {
+app.post("/documents/ledger", (req:Request, res:Response) => {
+  ledgerGetAllDocuments(contract,req.body.userID).then(value => {
     console.log("Result :" , value);
     res.status(200).json({"Result":value}); 
   }).catch((err : Error) => {
@@ -78,7 +78,7 @@ app.get("/documents/ledger", (req:Request, res:Response) => {
  * also fetches the file from the database 
  * 
  */
-app.get("/documents/:documentid",async (req:Request, res:Response) => {
+app.post("/documents/read/:documentid",async (req:Request, res:Response) => {
 
   //confirm the id exists 
   //check the entered id is in the database 
@@ -88,7 +88,7 @@ app.get("/documents/:documentid",async (req:Request, res:Response) => {
     return;
   }
   //check the id exists in the ledger
-  let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.params.documentid);
+  let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.params.documentid,req.body.userID);
   if(!checkLedgerEntryExists){
     res.status(404).json({"Result":"No id found in ledger"});
     return;
@@ -96,7 +96,7 @@ app.get("/documents/:documentid",async (req:Request, res:Response) => {
 
   console.log("Fetching doc %s", req.params.documentid);
 
-  ledgerReadDocument(contract,req.params.documentid).then((ledgerResult) => {
+  ledgerReadDocument(contract,req.params.documentid,req.body.userID).then((ledgerResult) => {
 
     //fetch from database 
     db.collection(collectionName).findOne({"documentID":req.params.documentid}).then((result) =>{
@@ -127,8 +127,6 @@ app.get("/documents/:documentid",async (req:Request, res:Response) => {
  * log the file in the ledger 
  */
  app.post("/documents", upload.single('file') , (req:Request, res:Response) => {
-
-    console.log("in /documents", req.file, req.body)
 
     if(!req.file){
       console.error("NO FILE ATTACHED TO REQUEST")
@@ -191,7 +189,7 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
     return;
   }
   //check the id exists in the ledger
-  let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.params.documentid);
+  let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.params.documentid,req.body.userID);
   if(!checkLedgerEntryExists){
     res.status(404).json({"Result":"No id found in ledger"});
     return;
@@ -213,14 +211,14 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
   .then(() => {
     // Check if the document hash needs updating in the ledger
     if (document.documentHash !== checkLedgerEntryExists.documentID) {
-      return ledgerUpdateDocumentHash(contract, req.params.documentid, document.documentHash);
+      return ledgerUpdateDocumentHash(contract, req.params.documentid, document.documentHash,req.body.userID);
     }
   })
   .then(() => {
     // Check if the signable flag has changed
     if(req.body.signable){
       if (req.body.signable !== dbEntry.signable) {
-        return ledgerUpdateSignable(contract, req.params.documentid, req.body.signable);
+        return ledgerUpdateSignable(contract, req.params.documentid, req.body.signable,req.body.userID);
       }
     }
 
@@ -228,7 +226,7 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
   .then(() => {
     // Check if the name has changed
     if (req.file!.originalname !== checkLedgerEntryExists.documentName) {
-      return ledgerRenameDocument(contract, req.params.documentid, req.file!.originalname);
+      return ledgerRenameDocument(contract, req.params.documentid, req.file!.originalname,req.body.userID);
     }
   })
   .then(() => {
@@ -251,7 +249,7 @@ app.delete("/documents/:documentid", (req:Request, res:Response) => {
   
   console.log("Deleting doc %s", req.params.documentid)
 
-  ledgerDelete(contract,req.params.documentid).then(()=>{
+  ledgerDelete(contract,req.params.documentid,req.body.userID).then(()=>{
 
     res.status(200).json({"DeleteStatus":"Successful"});
 

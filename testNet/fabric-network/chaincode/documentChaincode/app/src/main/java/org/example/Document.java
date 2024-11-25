@@ -33,13 +33,6 @@ public final class Document {
     @Property()
     private String lastInteractedWithID;
 
-    //most recent action on the document can be 
-    //created
-    //read
-    //edited
-    //deleted
-    //when combined with lastInteractedWithID provides a picture of who 
-    //did what 
     @Property()
     private DocumentAction lastAction;
 

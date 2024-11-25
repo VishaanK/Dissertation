@@ -26,7 +26,7 @@ const constants_1 = require("./constants");
 function ledgerHealthCheck(contract) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Submit Transaction: GetAllDocuments, retrieve all on ledger to check gateway is functioning');
-        const resultBytes = yield contract.evaluateTransaction('GetAllDocuments');
+        const resultBytes = yield contract.submitTransaction('GetAllDocuments', "healthCheckID");
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         return result;
@@ -46,10 +46,10 @@ function initLedger(contract) {
  * Evaluate a getAllDocuments transaction to query ledger state.
  *
  */
-function ledgerGetAllDocuments(contract) {
+function ledgerGetAllDocuments(contract, userID) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: GetAllDocuments, function returns all the current documents on the ledger');
-        const resultBytes = yield contract.evaluateTransaction('GetAllDocuments');
+        const resultBytes = yield contract.submitTransaction('GetAllDocuments', userID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         return result;
@@ -70,10 +70,10 @@ function ledgerCreateDocument(contract, documentID, documentName, creatorID, doc
  * @param contract contract object
  * @param docID document ID
  */
-function ledgerReadDocument(contract, docID) {
+function ledgerReadDocument(contract, docID, userID) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: ReadDocument, function returns asset attributes');
-        const resultBytes = yield contract.evaluateTransaction('ReadDocument', docID);
+        const resultBytes = yield contract.submitTransaction('ReadDocument', docID, userID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);
@@ -86,10 +86,10 @@ function ledgerReadDocument(contract, docID) {
  * @param docID Id of doc to change
  * @param newHash New hash of the document
  */
-function ledgerUpdateDocumentHash(contract, docID, newHash) {
+function ledgerUpdateDocumentHash(contract, docID, newHash, userID) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: UpdateDocumentHash, updates the hash to a new value to factor in changes');
-        const resultBytes = yield contract.submitTransaction('UpdateDocumentHash', docID, newHash);
+        const resultBytes = yield contract.submitTransaction('UpdateDocumentHash', docID, newHash, userID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);
@@ -102,10 +102,10 @@ function ledgerUpdateDocumentHash(contract, docID, newHash) {
  * @param docID Document ID
  * @param newName New Name of document
  */
-function ledgerRenameDocument(contract, docID, newName) {
+function ledgerRenameDocument(contract, docID, newName, userID) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: UpdateDocumentName, updates the hash to a new value to factor in changes');
-        const resultBytes = yield contract.submitTransaction('UpdateDocumentName', docID, newName);
+        const resultBytes = yield contract.submitTransaction('UpdateDocumentName', docID, newName, userID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);
@@ -118,10 +118,10 @@ function ledgerRenameDocument(contract, docID, newName) {
  * @param docID
  * @param signable
  */
-function ledgerUpdateSignable(contract, docID, signable) {
+function ledgerUpdateSignable(contract, docID, signable, userID) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: UpdateDocumentSignable, updates the hash to a new value to factor in changes');
-        const resultBytes = yield contract.submitTransaction('UpdateDocumentSignable', docID, signable.toString());
+        const resultBytes = yield contract.submitTransaction('UpdateDocumentSignable', docID, signable.toString(), userID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);
@@ -133,10 +133,10 @@ function ledgerUpdateSignable(contract, docID, signable) {
  * @param contract
  * @param docID
  */
-function ledgerDelete(contract, docID) {
+function ledgerDelete(contract, docID, userID) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: DeleteDocument,deletes document');
-        const resultBytes = yield contract.submitTransaction('DeleteDocument', docID);
+        const resultBytes = yield contract.submitTransaction('DeleteDocument', docID, userID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);
@@ -149,10 +149,10 @@ function ledgerDelete(contract, docID) {
  * @param startKey
  * @param endKey
  */
-function logReadInRange(contract, docID, startKey, endKey) {
+function logReadInRange(contract, docID, startKey, endKey, userID) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: GetAllDocumentsInRange, updates the hash to a new value to factor in changes');
-        const resultBytes = yield contract.evaluateTransaction('DeleteDocument', docID, startKey, endKey);
+        const resultBytes = yield contract.submitTransaction('DeleteDocument', docID, startKey, endKey, userID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);

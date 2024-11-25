@@ -53,8 +53,8 @@ app.get("/healthcheck", (req, res) => {
 /**
  * Fetch all document states from ledger
  */
-app.get("/documents/ledger", (req, res) => {
-    (0, documentInterface_1.ledgerGetAllDocuments)(exports.contract).then(value => {
+app.post("/documents/ledger", (req, res) => {
+    (0, documentInterface_1.ledgerGetAllDocuments)(exports.contract, req.body.userID).then(value => {
         console.log("Result :", value);
         res.status(200).json({ "Result": value });
     }).catch((err) => {
@@ -67,7 +67,7 @@ app.get("/documents/ledger", (req, res) => {
  * also fetches the file from the database
  *
  */
-app.get("/documents/:documentid", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post("/documents/read/:documentid", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //confirm the id exists 
     //check the entered id is in the database 
     let dbEntry = yield exports.db.collection(constants_1.collectionName).findOne({ documentID: req.params.documentid });
@@ -76,13 +76,13 @@ app.get("/documents/:documentid", (req, res) => __awaiter(void 0, void 0, void 0
         return;
     }
     //check the id exists in the ledger
-    let checkLedgerEntryExists = yield (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.params.documentid);
+    let checkLedgerEntryExists = yield (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.params.documentid, req.body.userID);
     if (!checkLedgerEntryExists) {
         res.status(404).json({ "Result": "No id found in ledger" });
         return;
     }
     console.log("Fetching doc %s", req.params.documentid);
-    (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.params.documentid).then((ledgerResult) => {
+    (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.params.documentid, req.body.userID).then((ledgerResult) => {
         //fetch from database 
         exports.db.collection(constants_1.collectionName).findOne({ "documentID": req.params.documentid }).then((result) => {
             console.log("Read document", result);
@@ -106,7 +106,6 @@ app.get("/documents/:documentid", (req, res) => __awaiter(void 0, void 0, void 0
  * log the file in the ledger
  */
 app.post("/documents", upload.single('file'), (req, res) => {
-    console.log("in /documents", req.file, req.body);
     if (!req.file) {
         console.error("NO FILE ATTACHED TO REQUEST");
         res.status(400).json({ "Result": "error no file in request" });
@@ -154,7 +153,7 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
         return;
     }
     //check the id exists in the ledger
-    let checkLedgerEntryExists = yield (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.params.documentid);
+    let checkLedgerEntryExists = yield (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.params.documentid, req.body.userID);
     if (!checkLedgerEntryExists) {
         res.status(404).json({ "Result": "No id found in ledger" });
         return;
@@ -174,21 +173,21 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
         .then(() => {
         // Check if the document hash needs updating in the ledger
         if (document.documentHash !== checkLedgerEntryExists.documentID) {
-            return (0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash);
+            return (0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash, req.body.userID);
         }
     })
         .then(() => {
         // Check if the signable flag has changed
         if (req.body.signable) {
             if (req.body.signable !== dbEntry.signable) {
-                return (0, documentInterface_1.ledgerUpdateSignable)(exports.contract, req.params.documentid, req.body.signable);
+                return (0, documentInterface_1.ledgerUpdateSignable)(exports.contract, req.params.documentid, req.body.signable, req.body.userID);
             }
         }
     })
         .then(() => {
         // Check if the name has changed
         if (req.file.originalname !== checkLedgerEntryExists.documentName) {
-            return (0, documentInterface_1.ledgerRenameDocument)(exports.contract, req.params.documentid, req.file.originalname);
+            return (0, documentInterface_1.ledgerRenameDocument)(exports.contract, req.params.documentid, req.file.originalname, req.body.userID);
         }
     })
         .then(() => {
@@ -206,7 +205,7 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
  */
 app.delete("/documents/:documentid", (req, res) => {
     console.log("Deleting doc %s", req.params.documentid);
-    (0, documentInterface_1.ledgerDelete)(exports.contract, req.params.documentid).then(() => {
+    (0, documentInterface_1.ledgerDelete)(exports.contract, req.params.documentid, req.body.userID).then(() => {
         res.status(200).json({ "DeleteStatus": "Successful" });
     }).catch((err) => {
         console.log("error");
