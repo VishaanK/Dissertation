@@ -68,6 +68,10 @@ app.post("/documents/ledger", (req, res) => {
  *
  */
 app.post("/documents/read", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!req.body.documentID || !req.body.userID) {
+        res.status(400).json({ "ERROR": "No documentID or USER ID" });
+        return;
+    }
     //confirm the id exists 
     //check the entered id is in the database 
     let dbEntry = yield exports.db.collection(constants_1.collectionName).findOne({ documentID: req.body.documentID });
@@ -75,13 +79,19 @@ app.post("/documents/read", (req, res) => __awaiter(void 0, void 0, void 0, func
         res.status(404).json({ "Result": "No entry in the database" });
         return;
     }
+    else {
+        console.log("in db");
+    }
     //check the id exists in the ledger
     let checkLedgerEntryExists = yield (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.body.documentID, req.body.userID);
     if (!checkLedgerEntryExists) {
         res.status(404).json({ "Result": "No id found in ledger" });
         return;
     }
-    console.log("Fetching doc %s", req.body.documentID);
+    else {
+        console.log("in Ledger");
+    }
+    console.log("Fetching doc %s --------------------------------------------------------", req.body.documentID);
     (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.body.documentID, req.body.userID).then((ledgerResult) => {
         //fetch from database 
         exports.db.collection(constants_1.collectionName).findOne({ "documentID": req.body.documentID }).then((result) => {

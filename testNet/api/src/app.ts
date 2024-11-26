@@ -79,6 +79,11 @@ app.post("/documents/ledger", (req:Request, res:Response) => {
  * 
  */
 app.post("/documents/read",async (req:Request, res:Response) => {
+  
+  if(!req.body.documentID || !req.body.userID){
+    res.status(400).json({"ERROR":"No documentID or USER ID"});
+    return;
+  }
 
   //confirm the id exists 
   //check the entered id is in the database 
@@ -86,15 +91,19 @@ app.post("/documents/read",async (req:Request, res:Response) => {
   if(!dbEntry){
     res.status(404).json({"Result":"No entry in the database"});
     return;
+  }else{
+    console.log("in db")
   }
   //check the id exists in the ledger
   let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.body.documentID,req.body.userID);
   if(!checkLedgerEntryExists){
     res.status(404).json({"Result":"No id found in ledger"});
     return;
+  }else{
+    console.log("in Ledger")
   }
 
-  console.log("Fetching doc %s", req.body.documentID);
+  console.log("Fetching doc %s --------------------------------------------------------", req.body.documentID);
 
   ledgerReadDocument(contract,req.body.documentID,req.body.userID).then((ledgerResult) => {
 

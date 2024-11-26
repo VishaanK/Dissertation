@@ -8,7 +8,7 @@ echo making edit
 # Execute the curl command to send the POST request
 curl -X POST $URL \
   -H "Content-Type: multipart/form-data" \
-  -d '{"userID": "vk62"}' \
+  -F "userID=vk62" \
   -F "file=@$FILE_PATH"
 
 # Check if the curl command was successful
