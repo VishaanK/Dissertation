@@ -78,28 +78,28 @@ app.post("/documents/ledger", (req:Request, res:Response) => {
  * also fetches the file from the database 
  * 
  */
-app.post("/documents/read/:documentid",async (req:Request, res:Response) => {
+app.post("/documents/read",async (req:Request, res:Response) => {
 
   //confirm the id exists 
   //check the entered id is in the database 
-  let dbEntry = await db.collection(collectionName).findOne({documentID:req.params.documentid});
+  let dbEntry = await db.collection(collectionName).findOne({documentID:req.body.documentID});
   if(!dbEntry){
     res.status(404).json({"Result":"No entry in the database"});
     return;
   }
   //check the id exists in the ledger
-  let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.params.documentid,req.body.userID);
+  let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.body.documentID,req.body.userID);
   if(!checkLedgerEntryExists){
     res.status(404).json({"Result":"No id found in ledger"});
     return;
   }
 
-  console.log("Fetching doc %s", req.params.documentid);
+  console.log("Fetching doc %s", req.body.documentID);
 
-  ledgerReadDocument(contract,req.params.documentid,req.body.userID).then((ledgerResult) => {
+  ledgerReadDocument(contract,req.body.documentID,req.body.userID).then((ledgerResult) => {
 
     //fetch from database 
-    db.collection(collectionName).findOne({"documentID":req.params.documentid}).then((result) =>{
+    db.collection(collectionName).findOne({"documentID":req.body.documentID}).then((result) =>{
 
       console.log("Read document",result)
       // Include the raw file data as a Base64 string in the response
@@ -245,11 +245,15 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
  * Deleting a document 
  * :id is the id of the document  
  */
-app.delete("/documents/:documentid", (req:Request, res:Response) => {
-  
-  console.log("Deleting doc %s", req.params.documentid)
+app.delete("/documents", (req:Request, res:Response) => {
+  console.log("Request body:", req.body);  // Debug line
+  console.log("Deleting doc %s", req.body.documentID)
 
-  ledgerDelete(contract,req.params.documentid,req.body.userID).then(()=>{
+  if (!req.body || !req.body.documentID || !req.body.userID) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+  
+  ledgerDelete(contract,req.body.documentID,req.body.userID).then(()=>{
 
     res.status(200).json({"DeleteStatus":"Successful"});
 

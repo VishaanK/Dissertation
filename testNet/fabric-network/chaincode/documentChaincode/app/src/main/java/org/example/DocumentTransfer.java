@@ -15,6 +15,7 @@ import org.hyperledger.fabric.contract.annotation.License;
 import org.hyperledger.fabric.contract.annotation.Transaction;
 import org.hyperledger.fabric.shim.ChaincodeException;
 import org.hyperledger.fabric.shim.ChaincodeStub;
+import org.hyperledger.fabric.shim.ledger.KeyModification;
 import org.hyperledger.fabric.shim.ledger.KeyValue;
 import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
 
@@ -143,7 +144,7 @@ public final class DocumentTransfer implements ContractInterface {
      * @param userID
      * @return
      */
-    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
     public Document ReadDocument(final Context ctx, final String documentID,final String userID){
         ChaincodeStub stub = ctx.getStub();
         String documentJSON = stub.getStringState(documentID);
@@ -271,7 +272,7 @@ public final class DocumentTransfer implements ContractInterface {
      * Deletes document on the ledger.
      *
      * @param ctx the transaction context
-     * @param assetID the ID of the asset being deleted
+     * @param documentID the ID of the asset being deleted
      * @param userID
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
@@ -284,18 +285,24 @@ public final class DocumentTransfer implements ContractInterface {
             throw new ChaincodeException(errorMessage, DocumentTransferErrors.DOCUMENT_NOT_FOUND.toString());
         }
 
-        String documentJSON = stub.getStringState(documentID);
-        Document doc = genson.deserialize(documentJSON,Document.class);
-        //update last action and ID of reader
-        doc.setLastAction(DocumentAction.DELETED);
-        doc.setLastInteractedWithID(userID);
+        try {
+            String documentJSON = stub.getStringState(documentID);
+            Document doc = genson.deserialize(documentJSON,Document.class);
+            //update last action and ID of reader
+            doc.setLastAction(DocumentAction.DELETED);
+            doc.setLastInteractedWithID(userID);
+    
+            //write the changes 
+            String sortedJson = genson.serialize(doc);
+            stub.putStringState(documentID, sortedJson);
+    
+            //delete the item
+            stub.delState(documentID);
 
-        //write the changes 
-        String sortedJson = genson.serialize(doc);
-        stub.putStringState(documentID, sortedJson);
+        } catch (Exception e) {
+            throw new ChaincodeException("Deletion failed due to an unexpected error", e.getMessage());
+        }
 
-        //delete the item
-        stub.delState(documentID);
     }
 
         /**
@@ -305,7 +312,7 @@ public final class DocumentTransfer implements ContractInterface {
      * @param userID
      * @return array of assets found on the ledger
      */
-    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
     public String GetAllDocuments(final Context ctx,final String userID) {
         ChaincodeStub stub = ctx.getStub();
 
@@ -345,7 +352,7 @@ public final class DocumentTransfer implements ContractInterface {
      * @param userID
      * @return JSON array of documents found within the range
      */
-    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    @Transaction(intent = Transaction.TYPE.SUBMIT)
     public String GetAllDocumentsInRange(final Context ctx, final String startKey, final String endKey,final String userID) {
         ChaincodeStub stub = ctx.getStub();
 
@@ -379,6 +386,34 @@ public final class DocumentTransfer implements ContractInterface {
 
         // Serialize the list of documents to JSON and return
         return genson.serialize(queryResults);
+    }
+
+    /**
+     * Retrieve the history of a given Key 
+     * @param ctx context
+     * @param documentID id of the documents history to fetch 
+     * @return
+     */
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    public Document[] retrieveHistory(final Context ctx,final String documentID)  {
+        ChaincodeStub stub = ctx.getStub();
+
+        if (!CheckDocumentExists(ctx, documentID)) {
+            String errorMessage = String.format("Document %s does not exist", documentID);
+            System.out.println(errorMessage);
+            throw new ChaincodeException(errorMessage, DocumentTransferErrors.DOCUMENT_NOT_FOUND.toString());
+        }
+
+        QueryResultsIterator<KeyModification> history = stub.getHistoryForKey(documentID);
+        ArrayList<Document> historyList= new ArrayList<>();
+        for(KeyModification k : history){
+
+            Document doc = genson.deserialize(k.getStringValue(), Document.class);
+            historyList.add(doc);
+        }
+
+        //cast to a document Array 
+        return  historyList.toArray(new Document[0]);
     }
 
     
