@@ -135,9 +135,10 @@ export async function ledgerUpdateSignable(contract: Contract,docID : string,sig
  * Log a document is being deleted 
  * @param contract 
  * @param docID 
+ * @param userID
  */
-export async function ledgerDelete(contract: Contract,docID : string,userID:string): Promise<void> {
-    console.log('\n--> Evaluate Transaction: DeleteDocument,deletes document');
+export async function ledgerDelete(contract: Contract,docID : string, userID:string): Promise<void> {
+    console.log('\n--> Evaluate Transaction: DeleteDocument,deletes document',docID,userID);
 
     const resultBytes = await contract.submitTransaction('DeleteDocument', docID,userID);
 

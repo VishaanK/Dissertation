@@ -287,6 +287,7 @@ public final class DocumentTransfer implements ContractInterface {
 
         try {
             String documentJSON = stub.getStringState(documentID);
+            
             Document doc = genson.deserialize(documentJSON,Document.class);
             //update last action and ID of reader
             doc.setLastAction(DocumentAction.DELETED);

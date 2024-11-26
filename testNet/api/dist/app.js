@@ -212,7 +212,7 @@ app.delete("/documents", (req, res) => {
     (0, documentInterface_1.ledgerDelete)(exports.contract, req.body.documentID, req.body.userID).then(() => {
         res.status(200).json({ "DeleteStatus": "Successful" });
     }).catch((err) => {
-        console.log("error");
+        console.log("error", err);
         res.status(500).json({ "Error deleting document": err.message, "DocID": req.params.id });
     });
 });

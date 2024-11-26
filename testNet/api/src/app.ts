@@ -252,13 +252,13 @@ app.delete("/documents", (req:Request, res:Response) => {
   if (!req.body || !req.body.documentID || !req.body.userID) {
     return res.status(400).json({ error: "Missing required fields" });
   }
-  
+
   ledgerDelete(contract,req.body.documentID,req.body.userID).then(()=>{
 
     res.status(200).json({"DeleteStatus":"Successful"});
 
   }).catch((err:Error)=>{
-    console.log("error")
+    console.log("error",err)
     res.status(500).json({"Error deleting document":err.message,"DocID":req.params.id})
   })
   
