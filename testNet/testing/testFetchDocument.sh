@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Fetch JSON data from the endpoint
-response=$(curl -s -X POST "http://localhost:3000/documents/read" -H "Accept: application/json" -d '{"userID": "vk60","documentID":"doc3"}')
+response=$(curl -s -X POST "http://localhost:3000/documents/read" -H "Content-Type: application/json" -d '{"userID": "vk60","documentID":"doc2"}')
 
 # Extract the Base64 data and document name using jq
 encodedFile=$(echo "$response" | jq -r '.fileData')

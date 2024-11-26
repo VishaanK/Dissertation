@@ -5,7 +5,7 @@ URL="http://localhost:3000/documents"
 
 
 # Send DELETE request with a body (userID parameter)
-curl -X DELETE $URL -d '{"userID": "vk62", "documentID":"doc2"}' -H "Content-Type: application/json" -H "Accept: application/json"
+curl -X DELETE $URL -d '{"userID": "vk62", "documentID":"doc1"}' -H "Content-Type: application/json" -H "Accept: application/json"
 # Wait for 2 seconds
 sleep 2
 

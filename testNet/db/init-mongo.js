@@ -36,6 +36,7 @@ db.createCollection('documents', {
           bsonType: "binData",
           description: "Must be binary data representing the file content (Word/PDF)"
         }
+        
       }
     }
   }

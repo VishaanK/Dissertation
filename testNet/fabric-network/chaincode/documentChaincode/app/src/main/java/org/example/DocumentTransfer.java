@@ -276,7 +276,7 @@ public final class DocumentTransfer implements ContractInterface {
      * @param userID
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public void DeleteDocument(final Context ctx, final String documentID,final String userID) {
+    public boolean DeleteDocument(final Context ctx, final String documentID,final String userID) {
         ChaincodeStub stub = ctx.getStub();
 
         if (!CheckDocumentExists(ctx, documentID)) {
@@ -287,7 +287,7 @@ public final class DocumentTransfer implements ContractInterface {
 
         try {
             String documentJSON = stub.getStringState(documentID);
-            
+
             Document doc = genson.deserialize(documentJSON,Document.class);
             //update last action and ID of reader
             doc.setLastAction(DocumentAction.DELETED);
@@ -299,6 +299,7 @@ public final class DocumentTransfer implements ContractInterface {
     
             //delete the item
             stub.delState(documentID);
+            return true;
 
         } catch (Exception e) {
             throw new ChaincodeException("Deletion failed due to an unexpected error", e.getMessage());
@@ -417,6 +418,40 @@ public final class DocumentTransfer implements ContractInterface {
         return  historyList.toArray(new Document[0]);
     }
 
+    /**
+     * Check for duplicate hashes or names on ledger 
+     * @param ctx
+     * @param documentName
+     * @param documentHash
+     * @return boolean true if no duplicates and false if there are duplicates 
+     */
+    @Transaction(intent=Transaction.TYPE.EVALUATE)
+    public boolean checkDuplicate(final Context ctx,final String documentName, final String documentHash){
+        ChaincodeStub stub = ctx.getStub();
+
+        if(documentName == null|| documentHash == null) {
+            String errorMessage = String.format("INVALID ARGUMENTS");
+            System.out.println(errorMessage);
+            throw new ChaincodeException(errorMessage,"CANNOT CHECK DUPLICATES AS NAME OR HASH ARE NULL");
+        }
+        //get all items on ledger 
+        QueryResultsIterator<KeyValue> results = stub.getStateByRange("", "");
+
+        for (KeyValue result: results) {
+            Document document = genson.deserialize(result.getStringValue(), Document.class);
+            
+            // Check if either the document name or the document hash already exists
+            if ((documentName.equals(document.getDocumentName())) || 
+                (documentHash.equals(document.getDocumentHash()))) {
+                return false;  // Duplicate found
+            }
+
+   
+        }
+
+        return true;
+
+    }
     
 
 

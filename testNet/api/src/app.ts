@@ -91,19 +91,13 @@ app.post("/documents/read",async (req:Request, res:Response) => {
   if(!dbEntry){
     res.status(404).json({"Result":"No entry in the database"});
     return;
-  }else{
-    console.log("in db")
   }
   //check the id exists in the ledger
   let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.body.documentID,req.body.userID);
   if(!checkLedgerEntryExists){
     res.status(404).json({"Result":"No id found in ledger"});
     return;
-  }else{
-    console.log("in Ledger")
   }
-
-  console.log("Fetching doc %s --------------------------------------------------------", req.body.documentID);
 
   ledgerReadDocument(contract,req.body.documentID,req.body.userID).then((ledgerResult) => {
 
@@ -152,6 +146,8 @@ app.post("/documents/read",async (req:Request, res:Response) => {
       "documentHash":calculateHash(req.file!.buffer),
       "file":req.file!.buffer
     }
+
+    //check that nothing with the same name or hash already exists 
 
     console.log("saving file to db",document);
 
@@ -252,11 +248,9 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
 
 /**
  * Deleting a document 
- * :id is the id of the document  
+ * id and user id provided in body
  */
 app.delete("/documents", (req:Request, res:Response) => {
-  console.log("Request body:", req.body);  // Debug line
-  console.log("Deleting doc %s", req.body.documentID)
 
   if (!req.body || !req.body.documentID || !req.body.userID) {
     return res.status(400).json({ error: "Missing required fields" });

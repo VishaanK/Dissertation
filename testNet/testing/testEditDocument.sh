@@ -2,7 +2,7 @@
 ####This test renames the file and changes its contents i.e the hash 
 # Set the endpoint and file path
 URL="http://localhost:3000/documents/doc2"
-FILE_PATH="Vishaan_Khanna_CV-3.pdf"
+FILE_PATH="Vishaan_Khanna_CV-4.pdf"
 
 echo making edit 
 # Execute the curl command to send the POST request
@@ -22,7 +22,7 @@ sleep 3
 echo after edit
 
 # Fetch JSON data from the endpoint
-response=$(curl -s -X POST "http://localhost:3000/documents/read" -H "Accept: application/json" -d '{"userID": "vk62","documentID":"doc1"}')
+response=$(curl -s -X POST "http://localhost:3000/documents/read" -H "Content-Type: application/json" -d '{"userID": "vk60","documentID":"doc2"}')
 
 # Extract the Base64 data and document name using jq
 encodedFile=$(echo "$response" | jq -r '.fileData')

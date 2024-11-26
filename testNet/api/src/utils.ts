@@ -21,6 +21,15 @@ export interface DocumentLedger {
     documentName: string;
     documentType: string;
     signable: boolean;
+    lastInteractedWithID: DocumentAction;
+    lastAction: string;
+    
+}
+export enum DocumentAction {
+  CREATED,
+  READ,
+  EDITED,
+  DELETED
 }
 
 
