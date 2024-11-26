@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { newGrpcConnection, newIdentity, newSigner } from "./gateway";
 import { Client } from "@grpc/grpc-js";
 import { chaincodeName, channelName, collectionName, DATABASE_NAME, MONGO_URL } from "./constants";
-import { initLedger, ledgerCreateDocument, ledgerDelete, ledgerGetAllDocuments, ledgerHealthCheck, ledgerReadDocument, ledgerRenameDocument, ledgerUpdateDocumentHash, ledgerUpdateSignable } from "./documentInterface";
+import { initLedger, ledgerCheckDuplicate, ledgerCreateDocument, ledgerDelete, ledgerGetAllDocuments, ledgerHealthCheck, ledgerReadDocument, ledgerRenameDocument, ledgerRetrieveHistory, ledgerUpdateDocumentHash, ledgerUpdateSignable } from "./documentInterface";
 import { Db, MongoClient, UpdateResult, WithId } from "mongodb";
 import multer, { FileFilterCallback } from 'multer';
 import { createHash, Hash } from "crypto";
@@ -149,28 +149,38 @@ app.post("/documents/read",async (req:Request, res:Response) => {
 
     //check that nothing with the same name or hash already exists 
 
-    console.log("saving file to db",document);
-
-    db.collection(collectionName).insertOne(document).then((result) =>{
-
-      console.log("inserted obj id",result);
-
-      //update the ledger now that the file has successfully been stored 
-      ledgerCreateDocument(contract,document.documentID,document.documentName,document.creatorID,document.documentHash,document.documentType,document.signable).then(()=>{
-        res.sendStatus(200);
-
-      }).catch((err)=>{
-
-        console.error("error logging in ledger",err);
-        res.status(500).json({"Error":err});
+    ledgerCheckDuplicate(contract,document.documentName,document.documentHash).then((result)=>{
+      if(result == true){
         
-      })
+      console.log("saving file to db",document);
+    
+        db.collection(collectionName).insertOne(document).then((result) =>{
 
-    }).catch((err)=>{
-      console.error("error saving in database",err)
+          console.log("inserted obj id",result);
+    
+          //update the ledger now that the file has successfully been stored 
+          ledgerCreateDocument(contract,document.documentID,document.documentName,document.creatorID,document.documentHash,document.documentType,document.signable).then(()=>{
+            res.sendStatus(200);
+    
+          }).catch((err)=>{
+    
+            console.error("error logging in ledger",err);
+            res.status(500).json({"Error":err});
+            
+          })
+    
+        }).catch((err)=>{
+          console.error("error saving in database",err)
+          res.status(500).json({"Error":err});
+          
+        })
+      }else{
+        res.status(404).json({"Error":"THIS DOCUMENT NAME OR HASH ALREADY EXISTS"});
+      }
+    }).catch((err) => {
       res.status(500).json({"Error":err});
-      
     })
+   
 
  });
 
@@ -267,6 +277,21 @@ app.delete("/documents", (req:Request, res:Response) => {
   
 });
 
+/**
+ * get the transaction history of a particular key 
+ */
+app.get("/documents/history/:documentid" , (req:Request, res:Response) => {
+  if(!req.params.documentid){
+
+    res.status(400).json({"Error no documentid provided":"no id"})
+  }
+  ledgerRetrieveHistory(contract,req.params.documentid).then((result) =>{
+    res.status(200).json({"History":result});
+  }).catch((err:Error) =>{
+    console.log(err)
+    res.status(500).json({"Error":err.message});
+  })
+});
 
 //set the api server listening 
 app.listen(3000, () => {

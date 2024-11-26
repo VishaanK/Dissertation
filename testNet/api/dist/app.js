@@ -79,19 +79,12 @@ app.post("/documents/read", (req, res) => __awaiter(void 0, void 0, void 0, func
         res.status(404).json({ "Result": "No entry in the database" });
         return;
     }
-    else {
-        console.log("in db");
-    }
     //check the id exists in the ledger
     let checkLedgerEntryExists = yield (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.body.documentID, req.body.userID);
     if (!checkLedgerEntryExists) {
         res.status(404).json({ "Result": "No id found in ledger" });
         return;
     }
-    else {
-        console.log("in Ledger");
-    }
-    console.log("Fetching doc %s --------------------------------------------------------", req.body.documentID);
     (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.body.documentID, req.body.userID).then((ledgerResult) => {
         //fetch from database 
         exports.db.collection(constants_1.collectionName).findOne({ "documentID": req.body.documentID }).then((result) => {
@@ -131,18 +124,28 @@ app.post("/documents", upload.single('file'), (req, res) => {
         "documentHash": calculateHash(req.file.buffer),
         "file": req.file.buffer
     };
-    console.log("saving file to db", document);
-    exports.db.collection(constants_1.collectionName).insertOne(document).then((result) => {
-        console.log("inserted obj id", result);
-        //update the ledger now that the file has successfully been stored 
-        (0, documentInterface_1.ledgerCreateDocument)(exports.contract, document.documentID, document.documentName, document.creatorID, document.documentHash, document.documentType, document.signable).then(() => {
-            res.sendStatus(200);
-        }).catch((err) => {
-            console.error("error logging in ledger", err);
-            res.status(500).json({ "Error": err });
-        });
+    //check that nothing with the same name or hash already exists 
+    (0, documentInterface_1.ledgerCheckDuplicate)(exports.contract, document.documentName, document.documentHash).then((result) => {
+        if (result == true) {
+            console.log("saving file to db", document);
+            exports.db.collection(constants_1.collectionName).insertOne(document).then((result) => {
+                console.log("inserted obj id", result);
+                //update the ledger now that the file has successfully been stored 
+                (0, documentInterface_1.ledgerCreateDocument)(exports.contract, document.documentID, document.documentName, document.creatorID, document.documentHash, document.documentType, document.signable).then(() => {
+                    res.sendStatus(200);
+                }).catch((err) => {
+                    console.error("error logging in ledger", err);
+                    res.status(500).json({ "Error": err });
+                });
+            }).catch((err) => {
+                console.error("error saving in database", err);
+                res.status(500).json({ "Error": err });
+            });
+        }
+        else {
+            res.status(404).json({ "Error": "THIS DOCUMENT NAME OR HASH ALREADY EXISTS" });
+        }
     }).catch((err) => {
-        console.error("error saving in database", err);
         res.status(500).json({ "Error": err });
     });
 });
@@ -211,11 +214,9 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
 }));
 /**
  * Deleting a document
- * :id is the id of the document
+ * id and user id provided in body
  */
 app.delete("/documents", (req, res) => {
-    console.log("Request body:", req.body); // Debug line
-    console.log("Deleting doc %s", req.body.documentID);
     if (!req.body || !req.body.documentID || !req.body.userID) {
         return res.status(400).json({ error: "Missing required fields" });
     }
@@ -224,6 +225,20 @@ app.delete("/documents", (req, res) => {
     }).catch((err) => {
         console.log("error", err);
         res.status(500).json({ "Error deleting document": err.message, "DocID": req.params.id });
+    });
+});
+/**
+ * get the transaction history of a particular key
+ */
+app.get("/documents/history/:documentid", (req, res) => {
+    if (!req.params.documentid) {
+        res.status(400).json({ "Error no documentid provided": "no id" });
+    }
+    (0, documentInterface_1.ledgerRetrieveHistory)(exports.contract, req.params.documentid).then((result) => {
+        res.status(200).json({ "History": result });
+    }).catch((err) => {
+        console.log(err);
+        res.status(500).json({ "Error": err.message });
     });
 });
 //set the api server listening 

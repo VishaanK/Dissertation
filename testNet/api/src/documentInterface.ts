@@ -164,3 +164,39 @@ export async function logReadInRange(contract: Contract,docID : string,startKey 
     console.log('*** Result:', result);
     return result;
 }
+
+/**
+ * checks ledger for duplicates of the documents name and hash
+ * @param contract 
+ * @param documentName name 
+ * @param documentHash hash 
+ * @returns 
+ */
+export async function ledgerCheckDuplicate(contract: Contract,documentName : string,documentHash : string): Promise<boolean> {
+    console.log('\n--> Evaluate Transaction: checkDuplicate, checks for duplicates ');
+
+    const resultBytes = await contract.submitTransaction('checkDuplicate', documentName,documentHash);
+
+    const resultJson = utf8Decoder.decode(resultBytes);
+    const result: boolean = JSON.parse(resultJson);
+    console.log('*** Result:', result);
+    return result;
+}
+
+/**
+ * checks ledger for duplicates of the documents name and hash
+ * @param contract 
+ * @param documentName name 
+ * @param documentHash hash 
+ * @returns 
+ */
+export async function ledgerRetrieveHistory(contract: Contract,documentID : string): Promise<DocumentLedger[]> {
+    console.log('\n--> Evaluate Transaction: checkDuplicate, checks for duplicates ');
+
+    const resultBytes = await contract.evaluateTransaction('retrieveHistory',documentID);
+
+    const resultJson = utf8Decoder.decode(resultBytes);
+    const result: DocumentLedger[] = JSON.parse(resultJson);
+    console.log('*** Result:', result);
+    return result;
+}

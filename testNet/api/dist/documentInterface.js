@@ -19,6 +19,8 @@ exports.ledgerRenameDocument = ledgerRenameDocument;
 exports.ledgerUpdateSignable = ledgerUpdateSignable;
 exports.ledgerDelete = ledgerDelete;
 exports.logReadInRange = logReadInRange;
+exports.ledgerCheckDuplicate = ledgerCheckDuplicate;
+exports.ledgerRetrieveHistory = ledgerRetrieveHistory;
 const constants_1 = require("./constants");
 /**
  * Healthcheck function tried to fetch all documents on the ledger
@@ -154,6 +156,40 @@ function logReadInRange(contract, docID, startKey, endKey, userID) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: GetAllDocumentsInRange, updates the hash to a new value to factor in changes');
         const resultBytes = yield contract.submitTransaction('DeleteDocument', docID, startKey, endKey, userID);
+        const resultJson = constants_1.utf8Decoder.decode(resultBytes);
+        const result = JSON.parse(resultJson);
+        console.log('*** Result:', result);
+        return result;
+    });
+}
+/**
+ * checks ledger for duplicates of the documents name and hash
+ * @param contract
+ * @param documentName name
+ * @param documentHash hash
+ * @returns
+ */
+function ledgerCheckDuplicate(contract, documentName, documentHash) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log('\n--> Evaluate Transaction: checkDuplicate, checks for duplicates ');
+        const resultBytes = yield contract.submitTransaction('checkDuplicate', documentName, documentHash);
+        const resultJson = constants_1.utf8Decoder.decode(resultBytes);
+        const result = JSON.parse(resultJson);
+        console.log('*** Result:', result);
+        return result;
+    });
+}
+/**
+ * checks ledger for duplicates of the documents name and hash
+ * @param contract
+ * @param documentName name
+ * @param documentHash hash
+ * @returns
+ */
+function ledgerRetrieveHistory(contract, documentID) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log('\n--> Evaluate Transaction: checkDuplicate, checks for duplicates ');
+        const resultBytes = yield contract.evaluateTransaction('retrieveHistory', documentID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);
