@@ -166,8 +166,9 @@ app.post("/documents/read",async (req:Request, res:Response) => {
           ledgerCreateDocument(contract,document.documentID,document.documentName,document.creatorID,document.documentHash,document.documentType,document.signable).then(()=>{
             res.sendStatus(200);
             console.log("Calculating vector")
+            console.log(req.file!.buffer)
             controller.generateVectors.extract_and_embed_pdf(req.file!.buffer).then((result:number[]) =>{
-              console.log("THE FILES VECTOR IS " + result)
+              console.log("THE FILES VECTOR IS " + result) 
             })
             
           }).catch((err)=>{

@@ -145,6 +145,7 @@ app.post("/documents", upload.single('file'), __assignType((req, res) => {
                 (0, documentInterface_1.ledgerCreateDocument)(exports.contract, document.documentID, document.documentName, document.creatorID, document.documentHash, document.documentType, document.signable).then(() => {
                     res.sendStatus(200);
                     console.log("Calculating vector");
+                    console.log(req.file.buffer);
                     controller.generateVectors.extract_and_embed_pdf(req.file.buffer).then(__assignType((result) => {
                         console.log("THE FILES VECTOR IS " + result);
                     }, ['result', '', 'P\'F2!"/"']));

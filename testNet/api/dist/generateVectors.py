@@ -10,6 +10,10 @@ tokenizer = AutoTokenizer.from_pretrained("allenai/longformer-base-4096-extra.po
 model = AutoModel.from_pretrained("allenai/longformer-base-4096-extra.pos.embd.only")
 
 def extract_and_embed_pdf(pdf_binary):
+    
+    if isinstance(pdf_binary, dict):
+        pdf_binary = bytes(pdf_binary['data']) 
+        
     # Step 1: Extract text from the PDF binary
     file_like_object = io.BytesIO(pdf_binary)
     reader = PyPDF2.PdfReader(file_like_object)

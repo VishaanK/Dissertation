@@ -50,7 +50,7 @@ export interface createDocumentRequest extends Request {
 
 
 export interface pythonAPI {
-  extract_and_embed_pdf(pdfBinary: BinaryData): Promise<number[]>;
+  extract_and_embed_pdf(pdfBinary: Buffer): Promise<number[]>;
 }
 
 
