@@ -7,7 +7,8 @@ import { initLedger, ledgerCheckDuplicate, ledgerCreateDocument, ledgerDelete, l
 import { Db, MongoClient, UpdateResult, WithId } from "mongodb";
 import multer, { FileFilterCallback } from 'multer';
 import { createHash, Hash } from "crypto";
-import { DocumentDB, DocumentLedger } from "./utils";
+import { pythonAPI, DocumentDB, DocumentLedger, PythonController } from "./utils";
+import {PyBridge} from 'pybridge';
 
 const crypto = require('crypto');
 const express = require("express");
@@ -16,6 +17,9 @@ const express = require("express");
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+//python bridge 
+const bridge = new PyBridge({python: 'python3', cwd: __dirname});
+const controller = new PythonController(bridge);
 //hyperledger connection detials to make available is different files 
 export let gateway: Gateway;
 export let client:Client;
@@ -161,7 +165,11 @@ app.post("/documents/read",async (req:Request, res:Response) => {
           //update the ledger now that the file has successfully been stored 
           ledgerCreateDocument(contract,document.documentID,document.documentName,document.creatorID,document.documentHash,document.documentType,document.signable).then(()=>{
             res.sendStatus(200);
-    
+            console.log("Calculating vector")
+            controller.generateVectors.extract_and_embed_pdf(req.file!.buffer).then((result:number[]) =>{
+              console.log("THE FILES VECTOR IS " + result)
+            })
+            
           }).catch((err)=>{
     
             console.error("error logging in ledger",err);

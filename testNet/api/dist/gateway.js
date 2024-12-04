@@ -36,12 +36,15 @@ function newGrpcConnection() {
     const tlsCredentials = grpc.credentials.createSsl(tlsRootCert);
     return new grpc.Client(constants_1.peerEndpoint, tlsCredentials, { 'grpc.ssl_target_name_override': constants_1.peerHostAlias, });
 }
+newGrpcConnection.__type = ['newGrpcConnection', 'P!/!'];
 function newIdentity() {
     const credentials = fs.readFileSync(constants_1.certDirectoryPath);
     return { mspId: 'Org1MSP', credentials };
 }
+newIdentity.__type = ['Identity', 'newIdentity', 'P"w!/"'];
 function newSigner() {
     const privateKeyPem = fs.readFileSync(constants_1.keyDirectoryPath);
     const privateKey = crypto.createPrivateKey(privateKeyPem);
     return fabric_gateway_1.signers.newPrivateKeySigner(privateKey);
 }
+newSigner.__type = ['Signer', 'newSigner', 'P"w!/"'];

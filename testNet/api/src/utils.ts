@@ -1,5 +1,6 @@
 
 import { Request } from 'express';
+import { PyBridge } from 'pybridge';
 
 //database structure
 //TODO CHANGE TO MATCH THE STRUCTURE I HAVE GIVEN THE DB
@@ -25,6 +26,7 @@ export interface DocumentLedger {
     lastAction: string;
     
 }
+
 export enum DocumentAction {
   CREATED,
   READ,
@@ -47,3 +49,13 @@ export interface createDocumentRequest extends Request {
   }
 
 
+export interface pythonAPI {
+  extract_and_embed_pdf(pdfBinary: BinaryData): Promise<number[]>;
+}
+
+
+export class PythonController {
+  generateVectors = this.python.controller<pythonAPI>('generateVectors.py');
+  constructor(protected python: PyBridge) {
+  }
+}

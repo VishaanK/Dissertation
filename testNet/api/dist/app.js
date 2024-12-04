@@ -13,6 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.db = exports.contract = exports.network = exports.client = exports.gateway = void 0;
+const __ΩError = ['name', 'message', 'stack', 'Error', 'P&4!&4"&4#8Mw$y'];
+function __assignType(fn, args) {
+    fn.__type = args;
+    return fn;
+}
 const fabric_gateway_1 = require("@hyperledger/fabric-gateway");
 const gateway_1 = require("./gateway");
 const constants_1 = require("./constants");
@@ -20,54 +25,60 @@ const documentInterface_1 = require("./documentInterface");
 const mongodb_1 = require("mongodb");
 const multer_1 = __importDefault(require("multer"));
 const crypto_1 = require("crypto");
+const utils_1 = require("./utils");
+const pybridge_1 = require("pybridge");
 const crypto = require('crypto');
 const express = require("express");
 //configure multer to use in memory buffers 
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage: storage });
+//python bridge 
+const bridge = new pybridge_1.PyBridge({ python: 'python3', cwd: __dirname });
+const controller = new utils_1.PythonController(bridge);
 let hashingAlgo = (0, crypto_1.createHash)('sha256');
 let highestAssetId = 0;
 function generatedNewID() {
     highestAssetId = highestAssetId + 1;
     return "doc" + highestAssetId.toString();
 }
+generatedNewID.__type = ['generatedNewID', 'P&/!'];
 var app = express();
 //enable logging each request that turns up 
-app.use((req, res, next) => {
+app.use(__assignType((req, res, next) => {
     console.log('Time: ', Date.now());
     next();
-});
+}, ['req', 'res', 'next', '', 'P!2!!2"!2#"/$']));
 app.use(express.json());
 /**
  * Healthcheck endpoint
  */
-app.get("/healthcheck", (req, res) => {
-    (0, documentInterface_1.ledgerHealthCheck)(exports.contract).then(value => {
+app.get("/healthcheck", __assignType((req, res) => {
+    (0, documentInterface_1.ledgerHealthCheck)(exports.contract).then(__assignType(value => {
         console.log("Result :", value);
         res.status(200).json({ "Result": value });
-    }).catch((error) => {
+    }, ['value', '', 'P"2!"/"'])).catch(__assignType((error) => {
         console.log("error %s", error);
         res.status(500).json({ "Error": error });
-    });
-});
+    }, [() => __ΩError, 'error', '', 'Pn!2""/#']));
+}, ['req', 'res', '', 'P!2!!2""/#']));
 /**
  * Fetch all document states from ledger
  */
-app.post("/documents/ledger", (req, res) => {
-    (0, documentInterface_1.ledgerGetAllDocuments)(exports.contract, req.body.userID).then(value => {
+app.post("/documents/ledger", __assignType((req, res) => {
+    (0, documentInterface_1.ledgerGetAllDocuments)(exports.contract, req.body.userID).then(__assignType(value => {
         console.log("Result :", value);
         res.status(200).json({ "Result": value });
-    }).catch((err) => {
+    }, ['value', '', 'P"2!"/"'])).catch(__assignType((err) => {
         console.log("error %s", err);
         res.status(500).json({ "Error": err });
-    });
-});
+    }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
+}, ['req', 'res', '', 'P!2!!2""/#']));
 /**
  * Fetch a specific documents info from ledger
  * also fetches the file from the database
  *
  */
-app.post("/documents/read", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post("/documents/read", __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.body.documentID || !req.body.userID) {
         res.status(400).json({ "ERROR": "No documentID or USER ID" });
         return;
@@ -85,22 +96,22 @@ app.post("/documents/read", (req, res) => __awaiter(void 0, void 0, void 0, func
         res.status(404).json({ "Result": "No id found in ledger" });
         return;
     }
-    (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.body.documentID, req.body.userID).then((ledgerResult) => {
+    (0, documentInterface_1.ledgerReadDocument)(exports.contract, req.body.documentID, req.body.userID).then(__assignType((ledgerResult) => {
         //fetch from database 
-        exports.db.collection(constants_1.collectionName).findOne({ "documentID": req.body.documentID }).then((result) => {
+        exports.db.collection(constants_1.collectionName).findOne({ "documentID": req.body.documentID }).then(__assignType((result) => {
             console.log("Read document", result);
             // Include the raw file data as a Base64 string in the response
             const encodedFile = dbEntry.file.toString('base64'); // Encode binary to Base64
             res.status(200).json({ "LedgerData": ledgerResult, "fileData": encodedFile });
-        }).catch((err) => {
+        }, ['result', '', 'P"2!"/"'])).catch(__assignType((err) => {
             console.log("error fetching file from database", err);
             res.status(404).json({ "Error": err });
-        });
-    }).catch((err) => {
+        }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
+    }, ['ledgerResult', '', 'P"2!"/"'])).catch(__assignType((err) => {
         console.log("error reading file", err);
         res.status(404).json({ "Error": err });
-    });
-}));
+    }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
+}), ['req', 'res', '', 'P!2!!2""/#']));
 /**
  * Creating a document
  * Document to store and register is in the payload
@@ -108,7 +119,7 @@ app.post("/documents/read", (req, res) => __awaiter(void 0, void 0, void 0, func
  * send the file to the db
  * log the file in the ledger
  */
-app.post("/documents", upload.single('file'), (req, res) => {
+app.post("/documents", upload.single('file'), __assignType((req, res) => {
     if (!req.file) {
         console.error("NO FILE ATTACHED TO REQUEST");
         res.status(400).json({ "Result": "error no file in request" });
@@ -125,34 +136,38 @@ app.post("/documents", upload.single('file'), (req, res) => {
         "file": req.file.buffer
     };
     //check that nothing with the same name or hash already exists 
-    (0, documentInterface_1.ledgerCheckDuplicate)(exports.contract, document.documentName, document.documentHash).then((result) => {
+    (0, documentInterface_1.ledgerCheckDuplicate)(exports.contract, document.documentName, document.documentHash).then(__assignType((result) => {
         if (result == true) {
             console.log("saving file to db", document);
-            exports.db.collection(constants_1.collectionName).insertOne(document).then((result) => {
+            exports.db.collection(constants_1.collectionName).insertOne(document).then(__assignType((result) => {
                 console.log("inserted obj id", result);
                 //update the ledger now that the file has successfully been stored 
                 (0, documentInterface_1.ledgerCreateDocument)(exports.contract, document.documentID, document.documentName, document.creatorID, document.documentHash, document.documentType, document.signable).then(() => {
                     res.sendStatus(200);
-                }).catch((err) => {
+                    console.log("Calculating vector");
+                    controller.generateVectors.extract_and_embed_pdf(req.file.buffer).then(__assignType((result) => {
+                        console.log("THE FILES VECTOR IS " + result);
+                    }, ['result', '', 'P\'F2!"/"']));
+                }).catch(__assignType((err) => {
                     console.error("error logging in ledger", err);
                     res.status(500).json({ "Error": err });
-                });
-            }).catch((err) => {
+                }, ['err', '', 'P"2!"/"']));
+            }, ['result', '', 'P"2!"/"'])).catch(__assignType((err) => {
                 console.error("error saving in database", err);
                 res.status(500).json({ "Error": err });
-            });
+            }, ['err', '', 'P"2!"/"']));
         }
         else {
             res.status(404).json({ "Error": "THIS DOCUMENT NAME OR HASH ALREADY EXISTS" });
         }
-    }).catch((err) => {
+    }, ['result', '', 'P"2!"/"'])).catch(__assignType((err) => {
         res.status(500).json({ "Error": err });
-    });
-});
+    }, ['err', '', 'P"2!"/"']));
+}, ['req', 'res', '', 'P!2!!2""/#']));
 /**Edit a document or its properties
  * need to reupload the document to recalculate the hash
  */
-app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post("/documents/:documentid", upload.single('file'), __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("in /documents", req.file, req.body);
     if (!req.file) {
         console.error("NO FILE ATTACHED TO REQUEST");
@@ -207,40 +222,40 @@ app.post("/documents/:documentid", upload.single('file'), (req, res) => __awaite
         // Send the 200 response after all updates are successful
         res.status(200).json({ "Result": "Updates made" });
     })
-        .catch((err) => {
+        .catch(__assignType((err) => {
         // Handle any errors from any of the promises
         res.status(500).json({ "Error": err.message || "An error occurred during the update process" });
-    });
-}));
+    }, ['err', '', 'P"2!"/"']));
+}), ['req', 'res', '', 'P!2!!2""/#']));
 /**
  * Deleting a document
  * id and user id provided in body
  */
-app.delete("/documents", (req, res) => {
+app.delete("/documents", __assignType((req, res) => {
     if (!req.body || !req.body.documentID || !req.body.userID) {
         return res.status(400).json({ error: "Missing required fields" });
     }
     (0, documentInterface_1.ledgerDelete)(exports.contract, req.body.documentID, req.body.userID).then(() => {
         res.status(200).json({ "DeleteStatus": "Successful" });
-    }).catch((err) => {
+    }).catch(__assignType((err) => {
         console.log("error", err);
         res.status(500).json({ "Error deleting document": err.message, "DocID": req.params.id });
-    });
-});
+    }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
+}, ['req', 'res', '', 'P!2!!2""/#']));
 /**
  * get the transaction history of a particular key
  */
-app.get("/documents/history/:documentid", (req, res) => {
+app.get("/documents/history/:documentid", __assignType((req, res) => {
     if (!req.params.documentid) {
         res.status(400).json({ "Error no documentid provided": "no id" });
     }
-    (0, documentInterface_1.ledgerRetrieveHistory)(exports.contract, req.params.documentid).then((result) => {
+    (0, documentInterface_1.ledgerRetrieveHistory)(exports.contract, req.params.documentid).then(__assignType((result) => {
         res.status(200).json({ "History": result });
-    }).catch((err) => {
+    }, ['result', '', 'P"2!"/"'])).catch(__assignType((err) => {
         console.log(err);
         res.status(500).json({ "Error": err.message });
-    });
-});
+    }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
+}, ['req', 'res', '', 'P!2!!2""/#']));
 //set the api server listening 
 app.listen(3000, () => {
     setupAPI();
@@ -287,11 +302,11 @@ function setupAPI() {
     try {
         // Connect to MongoDB
         mongodb_1.MongoClient.connect(constants_1.MONGO_URL)
-            .then((client) => {
+            .then(__assignType((client) => {
             console.log('Connected to MongoDB');
             //only need the db as its extracted from the client 
             exports.db = client.db(constants_1.DATABASE_NAME);
-        }).then(() => {
+        }, ['client', '', 'P"2!"/"'])).then(() => {
             //get the highest id 
             exports.db.collection(constants_1.collectionName).aggregate([
                 {
@@ -320,7 +335,7 @@ function setupAPI() {
                     // Step 3: Limit the result to just one document (the one with the highest number)
                     $limit: 1,
                 },
-            ]).toArray().then((result) => {
+            ]).toArray().then(__assignType((result) => {
                 if (result.length > 0) {
                     highestAssetId = result[0].numericPart;
                 }
@@ -328,9 +343,9 @@ function setupAPI() {
                     highestAssetId = 0;
                 }
                 console.log("HighestId found", highestAssetId);
-            }).catch((error) => {
+            }, ['result', '', 'P"2!"/"'])).catch(__assignType((error) => {
                 console.error("error getting highest ID", error);
-            });
+            }, ['error', '', 'P"2!"/"']));
         });
     }
     catch (error) {
@@ -339,6 +354,7 @@ function setupAPI() {
         process.exitCode = 1;
     }
 }
+setupAPI.__type = ['setupAPI', 'P"/!'];
 /**
 * hashes a file in sync
 * @param filePath to file to hash
@@ -356,3 +372,4 @@ function calculateHash(file) {
         return "";
     }
 }
+calculateHash.__type = ['file', 'calculateHash', 'P!2!&/"'];

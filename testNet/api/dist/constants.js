@@ -32,5 +32,6 @@ exports.collectionName = "documents";
 function envOrDefault(key, defaultValue) {
     return process.env[key] || defaultValue;
 }
+envOrDefault.__type = ['key', 'defaultValue', 'envOrDefault', 'P&2!&2"&/#'];
 //decoder
 exports.utf8Decoder = new TextDecoder();

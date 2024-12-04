@@ -21,6 +21,8 @@ exports.ledgerDelete = ledgerDelete;
 exports.logReadInRange = logReadInRange;
 exports.ledgerCheckDuplicate = ledgerCheckDuplicate;
 exports.ledgerRetrieveHistory = ledgerRetrieveHistory;
+/*@ts-ignore*/
+const { __ΩDocumentLedger } = require("./utils");
 const constants_1 = require("./constants");
 /**
  * Healthcheck function tried to fetch all documents on the ledger
@@ -34,6 +36,7 @@ function ledgerHealthCheck(contract) {
         return result;
     });
 }
+ledgerHealthCheck.__type = ['Contract', 'contract', () => __ΩDocumentLedger, 'ledgerHealthCheck', 'P"w!2"n#F`/$'];
 /**
  * Healthcheck function tried to fetch all documents on the ledger
  */
@@ -44,6 +47,7 @@ function initLedger(contract) {
         console.log('*** Transaction committed successfully');
     });
 }
+initLedger.__type = ['Contract', 'contract', 'initLedger', 'P"w!2"$`/#'];
 /**
  * Evaluate a getAllDocuments transaction to query ledger state.
  *
@@ -57,6 +61,7 @@ function ledgerGetAllDocuments(contract, userID) {
         return result;
     });
 }
+ledgerGetAllDocuments.__type = ['Contract', 'contract', 'userID', () => __ΩDocumentLedger, 'ledgerGetAllDocuments', 'P"w!2"&2#n$F`/%'];
 /**
  * create the document on the ledger
  */
@@ -67,6 +72,7 @@ function ledgerCreateDocument(contract, documentID, documentName, creatorID, doc
         console.log('*** Transaction committed successfully');
     });
 }
+ledgerCreateDocument.__type = ['Contract', 'contract', 'documentID', 'documentName', 'creatorID', 'documentHash', 'documentType', 'signable', 'ledgerCreateDocument', 'P"w!2"&2#&2$&2%&2&&2\')2($`/)'];
 /**
  * log that a document is beign read
  * @param contract contract object
@@ -82,6 +88,7 @@ function ledgerReadDocument(contract, docID, userID) {
         return result;
     });
 }
+ledgerReadDocument.__type = ['Contract', 'contract', 'docID', 'userID', () => __ΩDocumentLedger, 'ledgerReadDocument', 'P"w!2"&2#&2$n%`/&'];
 /**
  * Update the document hash in the ledger
  * @param contract contract object
@@ -98,6 +105,7 @@ function ledgerUpdateDocumentHash(contract, docID, newHash, userID) {
         return result;
     });
 }
+ledgerUpdateDocumentHash.__type = ['Contract', 'contract', 'docID', 'newHash', 'userID', () => __ΩDocumentLedger, 'ledgerUpdateDocumentHash', 'P"w!2"&2#&2$&2%n&`/\''];
 /**
  * log that a document is being renamed
  * @param contract conotract object
@@ -114,6 +122,7 @@ function ledgerRenameDocument(contract, docID, newName, userID) {
         return result;
     });
 }
+ledgerRenameDocument.__type = ['Contract', 'contract', 'docID', 'newName', 'userID', () => __ΩDocumentLedger, 'ledgerRenameDocument', 'P"w!2"&2#&2$&2%n&`/\''];
 /**
  * Update the signable statud of the document
  * @param contract
@@ -130,6 +139,7 @@ function ledgerUpdateSignable(contract, docID, signable, userID) {
         return result;
     });
 }
+ledgerUpdateSignable.__type = ['Contract', 'contract', 'docID', 'signable', 'userID', () => __ΩDocumentLedger, 'ledgerUpdateSignable', 'P"w!2"&2#)2$&2%n&`/\''];
 /**
  * Log a document is being deleted
  * @param contract
@@ -145,6 +155,7 @@ function ledgerDelete(contract, docID, userID) {
         console.log('*** Result:', result);
     });
 }
+ledgerDelete.__type = ['Contract', 'contract', 'docID', 'userID', 'ledgerDelete', 'P"w!2"&2#&2$$`/%'];
 /**
  * Read the documents in a given range of keys
  * @param contract
@@ -162,6 +173,7 @@ function logReadInRange(contract, docID, startKey, endKey, userID) {
         return result;
     });
 }
+logReadInRange.__type = ['Contract', 'contract', 'docID', 'startKey', 'endKey', 'userID', () => __ΩDocumentLedger, 'logReadInRange', 'P"w!2"&2#&2$&2%&2&n\'F`/('];
 /**
  * checks ledger for duplicates of the documents name and hash
  * @param contract
@@ -179,6 +191,7 @@ function ledgerCheckDuplicate(contract, documentName, documentHash) {
         return result;
     });
 }
+ledgerCheckDuplicate.__type = ['Contract', 'contract', 'documentName', 'documentHash', 'ledgerCheckDuplicate', 'P"w!2"&2#&2$)`/%'];
 /**
  * checks ledger for duplicates of the documents name and hash
  * @param contract
@@ -196,3 +209,4 @@ function ledgerRetrieveHistory(contract, documentID) {
         return result;
     });
 }
+ledgerRetrieveHistory.__type = ['Contract', 'contract', 'documentID', () => __ΩDocumentLedger, 'ledgerRetrieveHistory', 'P"w!2"&2#n$F`/%'];
