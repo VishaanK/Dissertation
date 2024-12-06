@@ -65,14 +65,14 @@ ledgerGetAllDocuments.__type = ['Contract', 'contract', 'userID', () => __ΩDocu
 /**
  * create the document on the ledger
  */
-function ledgerCreateDocument(contract, documentID, documentName, creatorID, documentHash, documentType, signable) {
+function ledgerCreateDocument(contract, documentID, documentName, creatorID, documentHash, documentType, signable, vector) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('\n--> Submit Transaction: CreateAsset, creates new asset with name : %s,creator : %s ,hash %s , type %s, signable %s', documentName, creatorID, documentHash, documentType, signable);
-        yield contract.submitTransaction('CreateDocument', documentID, documentName, creatorID, documentHash, documentType, signable.toString());
+        console.log('\n--> Submit Transaction: CreateAsset, creates new asset with name : %s,creator : %s ,hash %s , type %s, signable %s and the vector(not printed for brevity)', documentName, creatorID, documentHash, documentType, signable);
+        yield contract.submitTransaction('CreateDocument', documentID, documentName, creatorID, documentHash, documentType, signable.toString(), vector.toString());
         console.log('*** Transaction committed successfully');
     });
 }
-ledgerCreateDocument.__type = ['Contract', 'contract', 'documentID', 'documentName', 'creatorID', 'documentHash', 'documentType', 'signable', 'ledgerCreateDocument', 'P"w!2"&2#&2$&2%&2&&2\')2($`/)'];
+ledgerCreateDocument.__type = ['Contract', 'contract', 'documentID', 'documentName', 'creatorID', 'documentHash', 'documentType', 'signable', 'vector', 'ledgerCreateDocument', 'P"w!2"&2#&2$&2%&2&&2\')2(\'F2)$`/*'];
 /**
  * log that a document is beign read
  * @param contract contract object
@@ -95,17 +95,17 @@ ledgerReadDocument.__type = ['Contract', 'contract', 'docID', 'userID', () => __
  * @param docID Id of doc to change
  * @param newHash New hash of the document
  */
-function ledgerUpdateDocumentHash(contract, docID, newHash, userID) {
+function ledgerUpdateDocumentHash(contract, docID, newHash, userID, newVector) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: UpdateDocumentHash, updates the hash to a new value to factor in changes');
-        const resultBytes = yield contract.submitTransaction('UpdateDocumentHash', docID, newHash, userID);
+        const resultBytes = yield contract.submitTransaction('UpdateDocumentHash', docID, newHash, userID, newVector.toString());
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);
         return result;
     });
 }
-ledgerUpdateDocumentHash.__type = ['Contract', 'contract', 'docID', 'newHash', 'userID', () => __ΩDocumentLedger, 'ledgerUpdateDocumentHash', 'P"w!2"&2#&2$&2%n&`/\''];
+ledgerUpdateDocumentHash.__type = ['Contract', 'contract', 'docID', 'newHash', 'userID', 'newVector', () => __ΩDocumentLedger, 'ledgerUpdateDocumentHash', 'P"w!2"&2#&2$&2%\'F2&n\'`/('];
 /**
  * log that a document is being renamed
  * @param contract conotract object

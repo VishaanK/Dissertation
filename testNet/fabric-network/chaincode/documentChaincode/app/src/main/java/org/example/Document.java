@@ -1,5 +1,6 @@
 package org.example;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.hyperledger.fabric.contract.annotation.DataType;
@@ -35,6 +36,9 @@ public final class Document {
 
     @Property()
     private DocumentAction lastAction;
+
+    @Property()
+    private double[] vector;
 
     public String getDocumentID(){
         return documentID;
@@ -95,7 +99,7 @@ public final class Document {
     */
     public Document(@JsonProperty("documentID") final String documentID, @JsonProperty("creatorID") final String creatorID, 
                     @JsonProperty("documentName") final String documentName,@JsonProperty("documentHash") final String documentHash,
-                    @JsonProperty("documentType") final String documentType,@JsonProperty("signable") final boolean signable){
+                    @JsonProperty("documentType") final String documentType,@JsonProperty("signable") final boolean signable,@JsonProperty("vector") final double[] vector){
         
         this.documentID = documentID;
         this.creatorID = creatorID;
@@ -105,8 +109,8 @@ public final class Document {
         this.signable = signable;
         this.lastAction=DocumentAction.CREATED;
         this.lastInteractedWithID = creatorID;
+        this.vector = vector;
 
-        
     }
 
     @Override
@@ -122,8 +126,8 @@ public final class Document {
         Document other = (Document) obj;
 
         return Objects.deepEquals(
-            new String[]{getDocumentID(), getCreatorID(), getDocumentName(), getDocumentHash(), getDocumentType(),String.valueOf(getSignable()),this.lastAction.toString(),this.lastInteractedWithID},
-            new String[]{other.getDocumentID(),other.getCreatorID(), other.getDocumentName(), other.getDocumentHash(), other.getDocumentType(),String.valueOf(other.getSignable()),other.lastAction.toString(),other.lastInteractedWithID}
+            new String[]{getDocumentID(), getCreatorID(), getDocumentName(), getDocumentHash(), getDocumentType(),String.valueOf(getSignable()),this.lastAction.toString(),this.lastInteractedWithID,Arrays.toString(this.getVector())},
+            new String[]{other.getDocumentID(),other.getCreatorID(), other.getDocumentName(), other.getDocumentHash(), other.getDocumentType(),String.valueOf(other.getSignable()),other.lastAction.toString(),other.lastInteractedWithID,Arrays.toString(other.getVector())}
     );
         
         
@@ -132,14 +136,23 @@ public final class Document {
     @Override
     public int hashCode() {
         
-        return Objects.hash(getDocumentID(),getCreatorID(), getDocumentName(), getDocumentHash(), getDocumentType(),String.valueOf(getSignable()),getLastAction(),getLastInteractedWithID());
+        return Objects.hash(getDocumentID(),getCreatorID(), getDocumentName(), getDocumentHash(), getDocumentType(),String.valueOf(getSignable()),getLastAction(),getLastInteractedWithID(),this.getVector());
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) +"documentID=" + getDocumentID() + "creatorID=" + getCreatorID() + ", documentName=" + getDocumentName() 
                 + ", documentHash=" + getDocumentHash() + ", documentType=" + getDocumentType() + "signable=" + String.valueOf(getSignable()) + 
-                "Last Action" + getLastAction() + "LastInteractedID" + getLastInteractedWithID()  + "]";
+                "Last Action" + getLastAction() + "LastInteractedID" + getLastInteractedWithID()  + "Vector" + Arrays.toString(this.getVector()) + "]";
+    }
+
+    public double[] getVector() {
+        return vector;
+    }
+
+    public void setVector(double [] newVector){
+        this.vector = newVector;
+        
     }
 
 

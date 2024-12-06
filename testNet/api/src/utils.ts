@@ -1,5 +1,4 @@
 
-import { Request } from 'express';
 import { PyBridge } from 'pybridge';
 
 //database structure
@@ -24,6 +23,7 @@ export interface DocumentLedger {
     signable: boolean;
     lastInteractedWithID: DocumentAction;
     lastAction: string;
+    vector: number[];
     
 }
 
@@ -33,20 +33,6 @@ export enum DocumentAction {
   EDITED,
   DELETED
 }
-
-
-// data type for sending requests to the server 
-// has a file but no ID as that is created when the data is inserted
-export interface createDocumentRequest extends Request {
-    file: Express.Multer.File; // file data from multer
-    body: {
-      creatorID: string;
-      documentHash: string;
-      documentName: string;
-      documentType: string;
-      signable: boolean;
-    };
-  }
 
 
 export interface pythonAPI {

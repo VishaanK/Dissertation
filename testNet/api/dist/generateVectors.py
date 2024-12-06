@@ -31,6 +31,7 @@ def extract_and_embed_pdf(pdf_binary):
         outputs = model(**tokens)
         
     # Perform mean pooling: average the token embeddings
+    #make sure that this is the pre softmax layer 
     token_embeddings = outputs.last_hidden_state  # Shape: [batch_size=1, sequence_length, hidden_size]
     mean_pooled_embedding = torch.mean(token_embeddings, dim=1).squeeze()  # Shape: [hidden_size]
     

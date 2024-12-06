@@ -46,8 +46,8 @@ export async function ledgerGetAllDocuments(contract: Contract,userID:string): P
 /**
  * create the document on the ledger
  */
-export async function ledgerCreateDocument(contract: Contract,documentID:string,documentName:string, creatorID:string, documentHash:string, documentType:string, signable:boolean): Promise<void> {
-    console.log('\n--> Submit Transaction: CreateAsset, creates new asset with name : %s,creator : %s ,hash %s , type %s, signable %s', documentName, creatorID, documentHash, documentType, signable);
+export async function ledgerCreateDocument(contract: Contract,documentID:string,documentName:string, creatorID:string, documentHash:string, documentType:string, signable:boolean,vector :number[]): Promise<void> {
+    console.log('\n--> Submit Transaction: CreateAsset, creates new asset with name : %s,creator : %s ,hash %s , type %s, signable %s and the vector(not printed for brevity)', documentName, creatorID, documentHash, documentType, signable);
 
     await contract.submitTransaction(
         'CreateDocument',
@@ -57,6 +57,7 @@ export async function ledgerCreateDocument(contract: Contract,documentID:string,
         documentHash,
         documentType,
         signable.toString(),
+        vector.toString()
     );
 
     console.log('*** Transaction committed successfully');
@@ -85,10 +86,10 @@ export async function ledgerReadDocument(contract: Contract,docID : string,userI
  * @param docID Id of doc to change 
  * @param newHash New hash of the document 
  */
-export async function ledgerUpdateDocumentHash(contract: Contract,docID : string,newHash : string,userID:string): Promise<DocumentLedger> {
+export async function ledgerUpdateDocumentHash(contract: Contract,docID : string,newHash : string,userID:string,newVector:number[]): Promise<DocumentLedger> {
     console.log('\n--> Evaluate Transaction: UpdateDocumentHash, updates the hash to a new value to factor in changes');
 
-    const resultBytes = await contract.submitTransaction('UpdateDocumentHash', docID,newHash,userID);
+    const resultBytes = await contract.submitTransaction('UpdateDocumentHash', docID,newHash,userID,newVector.toString());
 
     const resultJson = utf8Decoder.decode(resultBytes);
     const result: DocumentLedger = JSON.parse(resultJson);

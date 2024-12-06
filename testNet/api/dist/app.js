@@ -141,16 +141,16 @@ app.post("/documents", upload.single('file'), __assignType((req, res) => {
             console.log("saving file to db", document);
             exports.db.collection(constants_1.collectionName).insertOne(document).then(__assignType((result) => {
                 console.log("inserted obj id", result);
-                //update the ledger now that the file has successfully been stored 
-                (0, documentInterface_1.ledgerCreateDocument)(exports.contract, document.documentID, document.documentName, document.creatorID, document.documentHash, document.documentType, document.signable).then(() => {
-                    res.sendStatus(200);
-                    console.log("Calculating vector");
-                    console.log(req.file.buffer);
-                    controller.generateVectors.extract_and_embed_pdf(req.file.buffer).then(__assignType((result) => {
-                        console.log("THE FILES VECTOR IS " + result);
-                    }, ['result', '', 'P\'F2!"/"']));
-                }).catch(__assignType((err) => {
-                    console.error("error logging in ledger", err);
+                controller.generateVectors.extract_and_embed_pdf(req.file.buffer).then(__assignType((result) => {
+                    //update the ledger now that the file has successfully been stored 
+                    (0, documentInterface_1.ledgerCreateDocument)(exports.contract, document.documentID, document.documentName, document.creatorID, document.documentHash, document.documentType, document.signable, result).then(() => {
+                        res.sendStatus(200);
+                    }).catch(__assignType((err) => {
+                        console.error("error logging in ledger", err);
+                        res.status(500).json({ "Error": err });
+                    }, ['err', '', 'P"2!"/"']));
+                }, ['result', '', 'P\'F2!"/"'])).catch(__assignType((err) => {
+                    console.error("error generating embedding", err);
                     res.status(500).json({ "Error": err });
                 }, ['err', '', 'P"2!"/"']));
             }, ['result', '', 'P"2!"/"'])).catch(__assignType((err) => {
@@ -202,7 +202,9 @@ app.post("/documents/:documentid", upload.single('file'), __assignType((req, res
         .then(() => {
         // Check if the document hash needs updating in the ledger
         if (document.documentHash !== checkLedgerEntryExists.documentID) {
-            return (0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash, req.body.userID);
+            controller.generateVectors.extract_and_embed_pdf(req.file.buffer).then(__assignType((result) => {
+                return (0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash, req.body.userID, result);
+            }, ['result', '', 'P\'F2!"/"']));
         }
     })
         .then(() => {

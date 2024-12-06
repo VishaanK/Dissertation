@@ -3,11 +3,11 @@ import { NextFunction, Request, Response } from "express";
 import { newGrpcConnection, newIdentity, newSigner } from "./gateway";
 import { Client } from "@grpc/grpc-js";
 import { chaincodeName, channelName, collectionName, DATABASE_NAME, MONGO_URL } from "./constants";
-import { initLedger, ledgerCheckDuplicate, ledgerCreateDocument, ledgerDelete, ledgerGetAllDocuments, ledgerHealthCheck, ledgerReadDocument, ledgerRenameDocument, ledgerRetrieveHistory, ledgerUpdateDocumentHash, ledgerUpdateSignable } from "./documentInterface";
-import { Db, MongoClient, UpdateResult, WithId } from "mongodb";
-import multer, { FileFilterCallback } from 'multer';
-import { createHash, Hash } from "crypto";
-import { pythonAPI, DocumentDB, DocumentLedger, PythonController } from "./utils";
+import { ledgerCheckDuplicate, ledgerCreateDocument, ledgerDelete, ledgerGetAllDocuments, ledgerHealthCheck, ledgerReadDocument, ledgerRenameDocument, ledgerRetrieveHistory, ledgerUpdateDocumentHash, ledgerUpdateSignable } from "./documentInterface";
+import { Db, MongoClient} from "mongodb";
+import multer from 'multer';
+import {createHash, Hash } from "crypto";
+import {DocumentDB, DocumentLedger, PythonController } from "./utils";
 import {PyBridge} from 'pybridge';
 
 const crypto = require('crypto');
@@ -62,7 +62,6 @@ app.get("/healthcheck", (req:Request, res:Response) => {
   
 });
 
-
 /**
  * Fetch all document states from ledger 
  */
@@ -96,6 +95,7 @@ app.post("/documents/read",async (req:Request, res:Response) => {
     res.status(404).json({"Result":"No entry in the database"});
     return;
   }
+
   //check the id exists in the ledger
   let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.body.documentID,req.body.userID);
   if(!checkLedgerEntryExists){
@@ -160,23 +160,29 @@ app.post("/documents/read",async (req:Request, res:Response) => {
     
         db.collection(collectionName).insertOne(document).then((result) =>{
 
+
           console.log("inserted obj id",result);
-    
-          //update the ledger now that the file has successfully been stored 
-          ledgerCreateDocument(contract,document.documentID,document.documentName,document.creatorID,document.documentHash,document.documentType,document.signable).then(()=>{
-            res.sendStatus(200);
-            console.log("Calculating vector")
-            console.log(req.file!.buffer)
-            controller.generateVectors.extract_and_embed_pdf(req.file!.buffer).then((result:number[]) =>{
-              console.log("THE FILES VECTOR IS " + result) 
-            })
+          controller.generateVectors.extract_and_embed_pdf(req.file!.buffer).then((result:number[]) =>{
+
+            //update the ledger now that the file has successfully been stored 
+            ledgerCreateDocument(contract,document.documentID,document.documentName,document.creatorID,document.documentHash,document.documentType,document.signable,result).then(()=>{
+              res.sendStatus(200);
+
             
+            }).catch((err)=>{
+      
+              console.error("error logging in ledger",err);
+              res.status(500).json({"Error":err});
+              
+            })
+
           }).catch((err)=>{
     
-            console.error("error logging in ledger",err);
+            console.error("error generating embedding",err);
             res.status(500).json({"Error":err});
             
           })
+          
     
         }).catch((err)=>{
           console.error("error saving in database",err)
@@ -235,7 +241,11 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
   .then(() => {
     // Check if the document hash needs updating in the ledger
     if (document.documentHash !== checkLedgerEntryExists.documentID) {
-      return ledgerUpdateDocumentHash(contract, req.params.documentid, document.documentHash,req.body.userID);
+      controller.generateVectors.extract_and_embed_pdf(req.file!.buffer).then((result:number[]) =>{
+        return ledgerUpdateDocumentHash(contract, req.params.documentid, document.documentHash,req.body.userID,result);
+      
+      })
+
     }
   })
   .then(() => {
