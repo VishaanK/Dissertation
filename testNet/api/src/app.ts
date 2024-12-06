@@ -9,6 +9,7 @@ import multer from 'multer';
 import {createHash, Hash } from "crypto";
 import {DocumentDB, DocumentLedger, PythonController } from "./utils";
 import {PyBridge} from 'pybridge';
+import { documentStateNode } from "./auditFunctionality";
 
 const crypto = require('crypto');
 const express = require("express");
@@ -27,6 +28,7 @@ export let network:Network;
 export let contract:Contract;
 export let db:Db;
 
+let auditMap : Map<string,documentStateNode[]> = new Map();
 let hashingAlgo:Hash = createHash('sha256');
 
 let highestAssetId:number=0;
@@ -310,6 +312,14 @@ app.get("/documents/history/:documentid" , (req:Request, res:Response) => {
     console.log(err)
     res.status(500).json({"Error":err.message});
   })
+});
+
+/**
+ * sets up the audit history object 
+ */
+app.get("/documents/audit/setup" , (req:Request, res:Response) => {
+  //get all the document ids from the database 
+  
 });
 
 //set the api server listening 

@@ -28,10 +28,10 @@ export interface DocumentLedger {
 }
 
 export enum DocumentAction {
-  CREATED,
-  READ,
-  EDITED,
-  DELETED
+  CREATED = "CREATED",
+  READ = "READ",
+  EDITED = "EDITED",
+  DELETED = "DELETED"
 }
 
 
@@ -45,3 +45,4 @@ export class PythonController {
   constructor(protected python: PyBridge) {
   }
 }
+
