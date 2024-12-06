@@ -163,7 +163,8 @@ app.post("/documents/read",async (req:Request, res:Response) => {
 
           console.log("inserted obj id",result);
           controller.generateVectors.extract_and_embed_pdf(req.file!.buffer).then((result:number[]) =>{
-
+            
+            console.log("THIS IS THE VECTOR " + result)
             //update the ledger now that the file has successfully been stored 
             ledgerCreateDocument(contract,document.documentID,document.documentName,document.creatorID,document.documentHash,document.documentType,document.signable,result).then(()=>{
               res.sendStatus(200);

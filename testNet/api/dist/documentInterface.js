@@ -67,8 +67,8 @@ ledgerGetAllDocuments.__type = ['Contract', 'contract', 'userID', () => __ΩDocu
  */
 function ledgerCreateDocument(contract, documentID, documentName, creatorID, documentHash, documentType, signable, vector) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('\n--> Submit Transaction: CreateAsset, creates new asset with name : %s,creator : %s ,hash %s , type %s, signable %s and the vector(not printed for brevity)', documentName, creatorID, documentHash, documentType, signable);
-        yield contract.submitTransaction('CreateDocument', documentID, documentName, creatorID, documentHash, documentType, signable.toString(), vector.toString());
+        console.log('\n--> Submit Transaction: CreateAsset, creates new asset with name : %s,creator : %s ,hash %s , type %s, signable %s and the vector %s)', documentName, creatorID, documentHash, documentType, signable, vector.toString());
+        yield contract.submitTransaction('CreateDocument', documentID, documentName, creatorID, documentHash, documentType, signable.toString(), "[" + vector.toString() + "]");
         console.log('*** Transaction committed successfully');
     });
 }

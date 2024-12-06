@@ -47,7 +47,7 @@ export async function ledgerGetAllDocuments(contract: Contract,userID:string): P
  * create the document on the ledger
  */
 export async function ledgerCreateDocument(contract: Contract,documentID:string,documentName:string, creatorID:string, documentHash:string, documentType:string, signable:boolean,vector :number[]): Promise<void> {
-    console.log('\n--> Submit Transaction: CreateAsset, creates new asset with name : %s,creator : %s ,hash %s , type %s, signable %s and the vector(not printed for brevity)', documentName, creatorID, documentHash, documentType, signable);
+    console.log('\n--> Submit Transaction: CreateAsset, creates new asset with name : %s,creator : %s ,hash %s , type %s, signable %s and the vector %s)', documentName, creatorID, documentHash, documentType, signable,vector.toString());
 
     await contract.submitTransaction(
         'CreateDocument',
@@ -57,7 +57,7 @@ export async function ledgerCreateDocument(contract: Contract,documentID:string,
         documentHash,
         documentType,
         signable.toString(),
-        vector.toString()
+        "[" + vector.toString() +"]"
     );
 
     console.log('*** Transaction committed successfully');

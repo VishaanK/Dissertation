@@ -70,9 +70,15 @@ public final class DocumentTransfer implements ContractInterface {
      */
     @Transaction(intent=Transaction.TYPE.SUBMIT)
     public Document CreateDocument(final Context ctx,final String documentID, final String documentName , final String creatorID, final String documentHash,
-                                final String documentType , final boolean signable,final double[] vector){
+                                final String documentType , final boolean signable,final String[] vector){
 
         ChaincodeStub stub = ctx.getStub();
+
+        //unpack the double 
+        double[] unpackedVector = new double[vector.length];
+        for(int i = 0;i<vector.length;i++){
+            unpackedVector[i] = Double.parseDouble(vector[i]);
+        }
 
         //check if a document of that id exists 
         String documentJSON = stub.getStringState(documentID);
@@ -83,7 +89,7 @@ public final class DocumentTransfer implements ContractInterface {
                 throw new ChaincodeException("Document already exists for ID: " + documentID, DocumentTransferErrors.DOCUMENT_ALREADY_EXISTS.toString());
             }
 
-        Document newDoc = new Document(documentID,creatorID, documentName, documentHash, documentType, signable,vector);
+        Document newDoc = new Document(documentID,creatorID, documentName, documentHash, documentType, signable,unpackedVector);
 
         // Use Genson to convert the Asset into string, sort it alphabetically and serialize it into a json string
         String sortedJson = genson.serialize(newDoc);
@@ -178,7 +184,7 @@ public final class DocumentTransfer implements ContractInterface {
      * @return
      */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public Document UpdateDocumentHash(Context ctx, final String documentID, final String hash,final String userID,final double[] newVector){
+    public Document UpdateDocumentHash(Context ctx, final String documentID, final String hash,final String userID,final String[] vector){
         ChaincodeStub stub = ctx.getStub();
 
         String documentJSON = stub.getStringState(documentID);
@@ -188,14 +194,20 @@ public final class DocumentTransfer implements ContractInterface {
                 throw new ChaincodeException("Document not found for ID: " + documentID , DocumentTransferErrors.DOCUMENT_NOT_FOUND.toString());
         }
 
+        //unpack the double 
+        double[] unpackedVector = new double[vector.length];
+        for(int i = 0;i<vector.length;i++){
+            unpackedVector[i] = Double.parseDouble(vector[i]);
+        }
         // Convert the JSON string to a JSONObject
         Document doc = genson.deserialize(documentJSON,Document.class);
+        //update the hash
         doc.setHash(hash);
 
         //update last action and ID of reader
         doc.setLastAction(DocumentAction.EDITED);
         doc.setLastInteractedWithID(userID);
-        doc.setVector(newVector);
+        doc.setVector(unpackedVector);
         
         String sortedJson = genson.serialize(doc);
 
