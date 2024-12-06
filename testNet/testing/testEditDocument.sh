@@ -2,7 +2,7 @@
 ####This test renames the file and changes its contents i.e the hash 
 # Set the endpoint and file path
 URL="http://localhost:3000/documents/doc1"
-FILE_PATH="Vishaan_Khanna_CV-4.pdf"
+FILE_PATH="Vishaan_Khanna_CV-5.pdf"
 
 echo making edit 
 # Execute the curl command to send the POST request
@@ -18,7 +18,7 @@ else
   echo "Error: Failed to send the request."
 fi
 
-sleep 3
+sleep 15
 echo after edit
 
 # Fetch JSON data from the endpoint

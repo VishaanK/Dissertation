@@ -89,7 +89,7 @@ export async function ledgerReadDocument(contract: Contract,docID : string,userI
 export async function ledgerUpdateDocumentHash(contract: Contract,docID : string,newHash : string,userID:string,newVector:number[]): Promise<DocumentLedger> {
     console.log('\n--> Evaluate Transaction: UpdateDocumentHash, updates the hash to a new value to factor in changes');
 
-    const resultBytes = await contract.submitTransaction('UpdateDocumentHash', docID,newHash,userID,newVector.toString());
+    const resultBytes = await contract.submitTransaction('UpdateDocumentHash', docID,newHash,userID,"[" + newVector.toString() +"]");
 
     const resultJson = utf8Decoder.decode(resultBytes);
     const result: DocumentLedger = JSON.parse(resultJson);

@@ -98,7 +98,7 @@ ledgerReadDocument.__type = ['Contract', 'contract', 'docID', 'userID', () => __
 function ledgerUpdateDocumentHash(contract, docID, newHash, userID, newVector) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('\n--> Evaluate Transaction: UpdateDocumentHash, updates the hash to a new value to factor in changes');
-        const resultBytes = yield contract.submitTransaction('UpdateDocumentHash', docID, newHash, userID, newVector.toString());
+        const resultBytes = yield contract.submitTransaction('UpdateDocumentHash', docID, newHash, userID, "[" + newVector.toString() + "]");
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
         console.log('*** Result:', result);

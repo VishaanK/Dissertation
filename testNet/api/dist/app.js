@@ -142,7 +142,6 @@ app.post("/documents", upload.single('file'), __assignType((req, res) => {
             exports.db.collection(constants_1.collectionName).insertOne(document).then(__assignType((result) => {
                 console.log("inserted obj id", result);
                 controller.generateVectors.extract_and_embed_pdf(req.file.buffer).then(__assignType((result) => {
-                    console.log("THIS IS THE VECTOR " + result);
                     //update the ledger now that the file has successfully been stored 
                     (0, documentInterface_1.ledgerCreateDocument)(exports.contract, document.documentID, document.documentName, document.creatorID, document.documentHash, document.documentType, document.signable, result).then(() => {
                         res.sendStatus(200);
