@@ -35,6 +35,7 @@ const upload = (0, multer_1.default)({ storage: storage });
 //python bridge 
 const bridge = new pybridge_1.PyBridge({ python: 'python3', cwd: __dirname });
 const controller = new utils_1.PythonController(bridge);
+let auditMap = new Map();
 let hashingAlgo = (0, crypto_1.createHash)('sha256');
 let highestAssetId = 0;
 function generatedNewID() {
@@ -258,6 +259,12 @@ app.get("/documents/history/:documentid", __assignType((req, res) => {
         console.log(err);
         res.status(500).json({ "Error": err.message });
     }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
+}, ['req', 'res', '', 'P!2!!2""/#']));
+/**
+ * sets up the audit history object
+ */
+app.get("/documents/audit/setup", __assignType((req, res) => {
+    //get all the document ids from the database 
 }, ['req', 'res', '', 'P!2!!2""/#']));
 //set the api server listening 
 app.listen(3000, () => {

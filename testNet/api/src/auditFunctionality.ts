@@ -70,7 +70,8 @@ export class documentStateNode{
 
  
 //convert the data from the hashmap into a json object to pass to a front end 
-export function makeAuditJSON(Map:Map<string,documentStateNode[]>):JSON{
-    obj =
-}
+//export function makeAuditJSON(Map:Map<string,documentStateNode[]>):JSON{
+//    obj : JSON = new JSON
+//
+//}
 

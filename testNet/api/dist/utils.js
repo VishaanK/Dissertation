@@ -6,14 +6,14 @@ const __ΩDocumentDB = ['file', 'creatorID', 'documentHash', 'documentID', 'docu
 exports.__ΩDocumentDB = __ΩDocumentDB;
 const __ΩDocumentLedger = ['creatorID', 'documentHash', 'documentID', 'documentName', 'documentType', 'signable', () => __ΩDocumentAction, 'lastInteractedWithID', 'lastAction', 'vector', 'DocumentLedger', 'P&4!&4"&4#&4$&4%)4&n\'4(&4)\'F4*Mw+y'];
 exports.__ΩDocumentLedger = __ΩDocumentLedger;
-const __ΩDocumentAction = ['CREATED', 'READ', 'EDITED', 'DELETED', 'DocumentAction', 'PC!C"C#C$Bw%'];
+const __ΩDocumentAction = ['CREATED', () => "CREATED", 'READ', () => "READ", 'EDITED', () => "EDITED", 'DELETED', () => "DELETED", 'DocumentAction', 'PC!>"C#>$C%>&C\'>(Bw)'];
 exports.__ΩDocumentAction = __ΩDocumentAction;
 var DocumentAction;
 (function (DocumentAction) {
-    DocumentAction[DocumentAction["CREATED"] = 0] = "CREATED";
-    DocumentAction[DocumentAction["READ"] = 1] = "READ";
-    DocumentAction[DocumentAction["EDITED"] = 2] = "EDITED";
-    DocumentAction[DocumentAction["DELETED"] = 3] = "DELETED";
+    DocumentAction["CREATED"] = "CREATED";
+    DocumentAction["READ"] = "READ";
+    DocumentAction["EDITED"] = "EDITED";
+    DocumentAction["DELETED"] = "DELETED";
 })(DocumentAction || (exports.DocumentAction = DocumentAction = {}));
 const __ΩpythonAPI = ['pdfBinary', 'extract_and_embed_pdf', 'pythonAPI', 'PP!2!\'F`1"Mw#y'];
 exports.__ΩpythonAPI = __ΩpythonAPI;
