@@ -7,7 +7,7 @@ import { ledgerCheckDuplicate, ledgerCreateDocument, ledgerDelete, ledgerGetAllD
 import { Db, MongoClient} from "mongodb";
 import multer from 'multer';
 import {createHash, Hash } from "crypto";
-import {DocumentDB, DocumentLedger, PythonController } from "./utils";
+import {DocumentAction, DocumentDB, DocumentLedger, PythonController } from "./utils";
 import {PyBridge} from 'pybridge';
 import { documentStateNode } from "./auditFunctionality";
 
@@ -28,7 +28,7 @@ export let network:Network;
 export let contract:Contract;
 export let db:Db;
 
-let auditMap : Map<string,documentStateNode[]> = new Map();
+let auditMap : Map<string,documentStateNode> = new Map();
 let hashingAlgo:Hash = createHash('sha256');
 
 let highestAssetId:number=0;
@@ -317,9 +317,59 @@ app.get("/documents/history/:documentid" , (req:Request, res:Response) => {
 /**
  * sets up the audit history object 
  */
-app.get("/documents/audit/setup" , (req:Request, res:Response) => {
+app.get("/documents/audit/setup" , async (req:Request, res:Response) => {
   //get all the document ids from the database 
-  
+
+  const documents : DocumentLedger[] =  await ledgerGetAllDocuments(contract,"audit")
+
+  let histories : Map<string,DocumentLedger[]> = new Map;
+  for(let i =0;i < documents.length;i++){
+      histories.set(documents[i].documentID,await ledgerRetrieveHistory(contract,documents[i].documentID))
+  }
+
+  //read the histories into the datastructures 
+  //for each history iterate from the end to the start and read them into the audit blocks 
+  for (let [key, value] of histories) {
+    
+    console.log(`Key: ${key}, Value: ${value}`);
+
+    //iterate from the end of the value to the start 
+    //add the create operations to the correspondng entries in the audit map 
+
+    for(let j = value.length - 1 ;j >= 0 ; j --){
+      //create a node
+      let node : documentStateNode = new documentStateNode(value[j])
+
+      //add to the audit hashmap if it is a created event
+      if(value[j].lastAction == DocumentAction.CREATED){
+        auditMap.set(value[j].documentID,node)
+
+      }else{
+        //add to the appropriate chain of events
+        //go along the events till you read a node where previous is null 
+        //get the start node
+        //iterate to the end 
+        let docBlock = auditMap.get(value[j].documentID)
+
+        if(!docBlock){
+          console.log("THE DOCUMENT DOESNT EXIST AUDIT BUILDER FAILED")
+          return 
+        }
+        let end : Boolean = false;
+        
+        while(end == false){
+          if(docBlock.next == null){
+            docBlock.next = node;
+            node.previous = docBlock;
+            end = true;
+          }else{
+            docBlock = docBlock?.next;
+          }
+        }
+      }
+
+    }
+  }
 });
 
 //set the api server listening 

@@ -198,6 +198,5 @@ export async function ledgerRetrieveHistory(contract: Contract,documentID : stri
 
     const resultJson = utf8Decoder.decode(resultBytes);
     const result: DocumentLedger[] = JSON.parse(resultJson);
-    console.log('*** Result:', result);
     return result;
 }

@@ -32,8 +32,8 @@ export function cosineDistance(vecA: number[], vecB: number[]): number {
   
 export class documentStateNode{
     public state : DocumentLedger;
-    public previous : DocumentLedger | null = null;
-    public next : DocumentLedger | null = null;
+    public previous : documentStateNode | null = null;
+    public next : documentStateNode | null = null;
     semanticChangeScore : Number = 0;
 
 
@@ -45,13 +45,13 @@ export class documentStateNode{
         ){
             this.semanticChangeScore = -1;
         }else{
-            //edits may not effect the file in which case : 
-            if( this.state.documentHash == this.previous!.documentHash){
+            //edits may not effect the file in which case :               
+            if( this.state.documentHash == this.previous?.state.documentHash){
                 //no change to the document 
                 this.semanticChangeScore = -1;
             }else{
                 //calculate the distance from the previous one and let that be the value for now 
-                this.semanticChangeScore = cosineDistance(this.state.vector,this.previous!.vector);
+                this.semanticChangeScore = cosineDistance(this.state.vector,this.previous!.state.vector);
             }
       
         }
