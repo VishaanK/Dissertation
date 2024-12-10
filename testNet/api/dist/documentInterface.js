@@ -205,7 +205,6 @@ function ledgerRetrieveHistory(contract, documentID) {
         const resultBytes = yield contract.evaluateTransaction('retrieveHistory', documentID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
-        console.log('*** Result:', result);
         return result;
     });
 }

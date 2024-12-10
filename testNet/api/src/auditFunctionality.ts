@@ -39,22 +39,6 @@ export class documentStateNode{
 
     constructor(state:DocumentLedger){
         this.state = state;
-        if( (this.state.lastAction ==  DocumentAction.CREATED )|| 
-            this.state.lastAction == DocumentAction.READ ||
-            this.state.lastAction == DocumentAction.DELETED
-        ){
-            this.semanticChangeScore = -1;
-        }else{
-            //edits may not effect the file in which case :               
-            if( this.state.documentHash == this.previous?.state.documentHash){
-                //no change to the document 
-                this.semanticChangeScore = -1;
-            }else{
-                //calculate the distance from the previous one and let that be the value for now 
-                this.semanticChangeScore = cosineDistance(this.state.vector,this.previous!.state.vector);
-            }
-      
-        }
     }
 
     public hashMatch(hash : string) :boolean{
@@ -63,6 +47,31 @@ export class documentStateNode{
         }else{
             return false;
         }
+    }
+
+    //set the next node 
+    public setNext(nextNode : documentStateNode){
+        this.next = nextNode;
+    }
+
+    /**
+     * set the nodes previous node
+     * calculates the vector distance between this node and its previous 
+     * score is -1 if the hashes are the same i.e no semantic change at all 
+     * @param previousNode the previous node
+     */
+    public setPrevious(previousNode: documentStateNode){
+
+        //edits may not effect the file in which case :               
+        if( this.state.documentHash == previousNode.state.documentHash){
+            //no change to the document 
+            this.semanticChangeScore = -1;
+        }else{
+            //calculate the distance from the previous one and let that be the value for now 
+            this.semanticChangeScore = cosineDistance(previousNode.state.vector,this.state.vector);
+        }
+      
+        
     }
 
 }

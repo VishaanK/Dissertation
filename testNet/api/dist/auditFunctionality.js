@@ -4,7 +4,6 @@ exports.documentStateNode = void 0;
 exports.cosineDistance = cosineDistance;
 /*@ts-ignore*/
 const { __ΩDocumentLedger } = require("./utils");
-const utils_1 = require("./utils");
 function cosineDistance(vecA, vecB) {
     if (vecA.length !== vecB.length) {
         throw new Error("Vectors must have the same length");
@@ -33,22 +32,6 @@ class documentStateNode {
         this.next = null;
         this.semanticChangeScore = 0;
         this.state = state;
-        if ((this.state.lastAction == utils_1.DocumentAction.CREATED) ||
-            this.state.lastAction == utils_1.DocumentAction.READ ||
-            this.state.lastAction == utils_1.DocumentAction.DELETED) {
-            this.semanticChangeScore = -1;
-        }
-        else {
-            //edits may not effect the file in which case : 
-            if (this.state.documentHash == this.previous.documentHash) {
-                //no change to the document 
-                this.semanticChangeScore = -1;
-            }
-            else {
-                //calculate the distance from the previous one and let that be the value for now 
-                this.semanticChangeScore = cosineDistance(this.state.vector, this.previous.vector);
-            }
-        }
     }
     hashMatch(hash) {
         if (this.state.documentHash === hash) {
@@ -58,6 +41,27 @@ class documentStateNode {
             return false;
         }
     }
+    //set the next node 
+    setNext(nextNode) {
+        this.next = nextNode;
+    }
+    /**
+     * set the nodes previous node
+     * calculates the vector distance between this node and its previous
+     * score is -1 if the hashes are the same i.e no semantic change at all
+     * @param previousNode the previous node
+     */
+    setPrevious(previousNode) {
+        //edits may not effect the file in which case :               
+        if (this.state.documentHash == previousNode.state.documentHash) {
+            //no change to the document 
+            this.semanticChangeScore = -1;
+        }
+        else {
+            //calculate the distance from the previous one and let that be the value for now 
+            this.semanticChangeScore = cosineDistance(previousNode.state.vector, this.state.vector);
+        }
+    }
 }
 exports.documentStateNode = documentStateNode;
-documentStateNode.__type = [() => __ΩDocumentLedger, 'state', () => __ΩDocumentLedger, 'previous', function () { return null; }, () => __ΩDocumentLedger, 'next', function () { return null; }, 'semanticChangeScore', function () { return 0; }, () => __ΩDocumentLedger, 'constructor', 'hash', 'hashMatch', 'documentStateNode', 'n!3"Pn#,J3$>%Pn&,J3\'>(\'3)>*Pn+2""0,P&2-)0.5w/'];
+documentStateNode.__type = [() => __ΩDocumentLedger, 'state', () => documentStateNode, 'previous', function () { return null; }, () => documentStateNode, 'next', function () { return null; }, 'semanticChangeScore', function () { return 0; }, () => __ΩDocumentLedger, 'constructor', 'hash', 'hashMatch', () => documentStateNode, 'nextNode', 'setNext', () => documentStateNode, 'previousNode', 'setPrevious', 'documentStateNode', 'n!3"PP7#,J3$>%PP7&,J3\'>(\'3)>*Pn+2""0,P&2-)0.PP7/20"01PP7223"045w5'];

@@ -346,7 +346,7 @@ app.get("/documents/audit/setup" , async (req:Request, res:Response) => {
 
       }else{
         //add to the appropriate chain of events
-        //go along the events till you read a node where previous is null 
+        //go along the events till you read a node where next is null 
         //get the start node
         //iterate to the end 
         let docBlock = auditMap.get(value[j].documentID)
@@ -355,12 +355,13 @@ app.get("/documents/audit/setup" , async (req:Request, res:Response) => {
           console.log("THE DOCUMENT DOESNT EXIST AUDIT BUILDER FAILED")
           return 
         }
+
         let end : Boolean = false;
         
         while(end == false){
           if(docBlock.next == null){
-            docBlock.next = node;
-            node.previous = docBlock;
+            docBlock.setNext(node);
+            node.setPrevious(docBlock);
             end = true;
           }else{
             docBlock = docBlock?.next;

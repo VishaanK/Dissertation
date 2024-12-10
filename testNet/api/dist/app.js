@@ -27,6 +27,7 @@ const multer_1 = __importDefault(require("multer"));
 const crypto_1 = require("crypto");
 const utils_1 = require("./utils");
 const pybridge_1 = require("pybridge");
+const auditFunctionality_1 = require("./auditFunctionality");
 const crypto = require('crypto');
 const express = require("express");
 //configure multer to use in memory buffers 
@@ -263,9 +264,51 @@ app.get("/documents/history/:documentid", __assignType((req, res) => {
 /**
  * sets up the audit history object
  */
-app.get("/documents/audit/setup", __assignType((req, res) => {
+app.get("/documents/audit/setup", __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //get all the document ids from the database 
-}, ['req', 'res', '', 'P!2!!2""/#']));
+    const documents = yield (0, documentInterface_1.ledgerGetAllDocuments)(exports.contract, "audit");
+    let histories = new Map;
+    for (let i = 0; i < documents.length; i++) {
+        histories.set(documents[i].documentID, yield (0, documentInterface_1.ledgerRetrieveHistory)(exports.contract, documents[i].documentID));
+    }
+    //read the histories into the datastructures 
+    //for each history iterate from the end to the start and read them into the audit blocks 
+    for (let [key, value] of histories) {
+        console.log(`Key: ${key}, Value: ${value}`);
+        //iterate from the end of the value to the start 
+        //add the create operations to the correspondng entries in the audit map 
+        for (let j = value.length - 1; j >= 0; j--) {
+            //create a node
+            let node = new auditFunctionality_1.documentStateNode(value[j]);
+            //add to the audit hashmap if it is a created event
+            if (value[j].lastAction == utils_1.DocumentAction.CREATED) {
+                auditMap.set(value[j].documentID, node);
+            }
+            else {
+                //add to the appropriate chain of events
+                //go along the events till you read a node where next is null 
+                //get the start node
+                //iterate to the end 
+                let docBlock = auditMap.get(value[j].documentID);
+                if (!docBlock) {
+                    console.log("THE DOCUMENT DOESNT EXIST AUDIT BUILDER FAILED");
+                    return;
+                }
+                let end = false;
+                while (end == false) {
+                    if (docBlock.next == null) {
+                        docBlock.setNext(node);
+                        node.setPrevious(docBlock);
+                        end = true;
+                    }
+                    else {
+                        docBlock = docBlock === null || docBlock === void 0 ? void 0 : docBlock.next;
+                    }
+                }
+            }
+        }
+    }
+}), ['req', 'res', '', 'P!2!!2""/#']));
 //set the api server listening 
 app.listen(3000, () => {
     setupAPI();
