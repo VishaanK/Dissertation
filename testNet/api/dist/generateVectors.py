@@ -4,7 +4,6 @@ import PyPDF2
 import io
 import sys
 import json
-
 # Load the Longformer tokenizer and model
 tokenizer = AutoTokenizer.from_pretrained("allenai/longformer-base-4096-extra.pos.embd.only")
 model = AutoModel.from_pretrained("allenai/longformer-base-4096-extra.pos.embd.only")
@@ -35,8 +34,11 @@ def extract_and_embed_pdf(pdf_binary):
     token_embeddings = outputs.last_hidden_state  # Shape: [batch_size=1, sequence_length, hidden_size]
     mean_pooled_embedding = torch.mean(token_embeddings, dim=1).squeeze()  # Shape: [hidden_size]
     
+    #normalize 
+    doc_vectors_normalized = torch.nn.functional.normalize(mean_pooled_embedding,p=2.0,dim=0)
+
     # Convert the tensor to a list (JSON-compatible format)
-    embedding_list = mean_pooled_embedding.tolist()
+    embedding_list = doc_vectors_normalized.tolist()
     
     return embedding_list
 

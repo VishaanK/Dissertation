@@ -12,7 +12,7 @@ RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Install Python dependencies inside the virtual environment
-RUN pip install --no-cache-dir torch transformers pypdf2
+RUN pip install --no-cache-dir torch transformers pypdf2 
 
 WORKDIR /app
 

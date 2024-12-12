@@ -274,7 +274,7 @@ app.get("/documents/audit/setup", __assignType((req, res) => __awaiter(void 0, v
     //read the histories into the datastructures 
     //for each history iterate from the end to the start and read them into the audit blocks 
     for (let [key, value] of histories) {
-        console.log(`Key: ${key}, Value: ${value}`);
+        console.log(`Key: ${key}`);
         //iterate from the end of the value to the start 
         //add the create operations to the correspondng entries in the audit map 
         for (let j = value.length - 1; j >= 0; j--) {
@@ -282,6 +282,7 @@ app.get("/documents/audit/setup", __assignType((req, res) => __awaiter(void 0, v
             let node = new auditFunctionality_1.documentStateNode(value[j]);
             //add to the audit hashmap if it is a created event
             if (value[j].lastAction == utils_1.DocumentAction.CREATED) {
+                console.log("Creation event for ", value[j].documentID);
                 auditMap.set(value[j].documentID, node);
             }
             else {
@@ -307,6 +308,38 @@ app.get("/documents/audit/setup", __assignType((req, res) => __awaiter(void 0, v
                 }
             }
         }
+    }
+    res.status(200).json({ "RESULT": "SUCCESS" });
+}), ['req', 'res', '', 'P!2!!2""/#']));
+/**
+ * fetches the audit history with the semantic change scores
+ */
+app.get("/documents/audit", __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Declare result as an object with the desired structure
+        const result = {};
+        // Iterate over the audit map
+        for (let [key, value] of auditMap) {
+            // Create a new list for the current document
+            const items = [];
+            let current = value;
+            // Traverse the linked list
+            while (current != null) {
+                items.push({
+                    "STATE": current.state,
+                    "CHANGE_SCORE": current.semanticChangeScore
+                });
+                current = current.next;
+            }
+            // Assign the list to the result object
+            result[key] = items;
+        }
+        // Send the result as a JSON response
+        res.json(result);
+    }
+    catch (error) {
+        console.error("Error fetching audit history:", error);
+        res.status(500).send("Internal Server Error");
     }
 }), ['req', 'res', '', 'P!2!!2""/#']));
 //set the api server listening 

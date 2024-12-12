@@ -331,7 +331,7 @@ app.get("/documents/audit/setup" , async (req:Request, res:Response) => {
   //for each history iterate from the end to the start and read them into the audit blocks 
   for (let [key, value] of histories) {
     
-    console.log(`Key: ${key}, Value: ${value}`);
+    console.log(`Key: ${key}`);
 
     //iterate from the end of the value to the start 
     //add the create operations to the correspondng entries in the audit map 
@@ -342,6 +342,7 @@ app.get("/documents/audit/setup" , async (req:Request, res:Response) => {
 
       //add to the audit hashmap if it is a created event
       if(value[j].lastAction == DocumentAction.CREATED){
+        console.log("Creation event for " , value[j].documentID)
         auditMap.set(value[j].documentID,node)
 
       }else{
@@ -350,7 +351,6 @@ app.get("/documents/audit/setup" , async (req:Request, res:Response) => {
         //get the start node
         //iterate to the end 
         let docBlock = auditMap.get(value[j].documentID)
-
         if(!docBlock){
           console.log("THE DOCUMENT DOESNT EXIST AUDIT BUILDER FAILED")
           return 
@@ -360,6 +360,7 @@ app.get("/documents/audit/setup" , async (req:Request, res:Response) => {
         
         while(end == false){
           if(docBlock.next == null){
+   
             docBlock.setNext(node);
             node.setPrevious(docBlock);
             end = true;
@@ -370,6 +371,45 @@ app.get("/documents/audit/setup" , async (req:Request, res:Response) => {
       }
 
     }
+  }
+  res.status(200).json({"RESULT":"SUCCESS"})
+});
+
+
+
+/**
+ * fetches the audit history with the semantic change scores 
+ */
+app.get("/documents/audit", async (req: Request, res: Response) => {
+  try {
+    // Declare result as an object with the desired structure
+    const result: { [key: string]: { "STATE": DocumentLedger, "CHANGE_SCORE": Number }[] } = {};
+
+    // Iterate over the audit map
+    for (let [key, value] of auditMap) {
+      // Create a new list for the current document
+      const items: { "STATE": DocumentLedger, "CHANGE_SCORE": Number }[] = [];
+
+      let current: documentStateNode | null = value;
+
+      // Traverse the linked list
+      while (current != null) {
+        items.push({
+          "STATE": current.state,
+          "CHANGE_SCORE": current.semanticChangeScore
+        });
+        current = current.next;
+      }
+
+      // Assign the list to the result object
+      result[key] = items;
+    }
+
+    // Send the result as a JSON response
+    res.json(result);
+  } catch (error) {
+    console.error("Error fetching audit history:", error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
