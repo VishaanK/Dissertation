@@ -11,6 +11,11 @@ from sklearn.decomposition import PCA
 
 # Step 1: Load the PDF and extract text
 def extract_text_from_pdf(pdf_path):
+    """
+    extract the pdf text from the pdf at the file path provided 
+    Parameters:
+        pdf_path : the file path 
+    """
     with open(pdf_path, 'rb') as file:
         reader = PyPDF2.PdfReader(file)
         text = ''.join([page.extract_text() or "" for page in reader.pages])
@@ -21,6 +26,11 @@ tokenizer = AutoTokenizer.from_pretrained("allenai/longformer-base-4096-extra.po
 model = AutoModel.from_pretrained("allenai/longformer-base-4096-extra.pos.embd.only")
 
 def get_embeddings(text):
+    """
+    extract the embedding from the text provided
+    Parameters:
+        text : the text to process
+    """
     # Tokenize without truncation
     tokens = tokenizer(text, return_tensors='pt', padding='longest', truncation=False)
     
@@ -44,69 +54,6 @@ def get_embeddings(text):
     
     return embedding_list
 
-
-
-#place the embedding on a graph 
-
-def plotEmbeddings(embeddings): 
-    reducer = umap.UMAP()
-    print("THE SHAPE OF THE STACKED IS " , embeddings_array.shape)
-    embedding = reducer.fit_transform(embeddings)
-    print("THE SHAPE OF THE STACKED IS " , embedding.shape)
-    # Plotting the resulting 2D point
-    plt.figure(figsize=(8, 6))
-    plt.scatter(embedding[:, 0], embedding[:, 1], c='blue', label="Document Embedding")
-    plt.title("UMAP Projection of Document Embedding")
-    plt.xlabel("UMAP Dimension 1")
-    plt.ylabel("UMAP Dimension 2")
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-    
-def plotWithAmplifiedPCA(embeddings, labels, scale_factor=1):
-    """
-    Plot embeddings using PCA with amplified scale for better visualization.
-
-    Parameters:
-        embeddings (list or numpy.ndarray): List of embedding vectors or 2D numpy array of shape [n_samples, embedding_dim].
-        labels (list): List of labels corresponding to each embedding.
-        scale_factor (float): Factor to scale the PCA-transformed coordinates.
-    """
-    from sklearn.decomposition import PCA
-    import matplotlib.pyplot as plt
-    import numpy as np
-
-    # Perform PCA to reduce to 2 dimensions
-    pca = PCA(n_components=2)
-    reduced_embeddings = pca.fit_transform(embeddings)  # Shape: [n_samples, 2]
-
-    # Amplify the differences by applying a scaling factor
-    amplified_embeddings = reduced_embeddings * scale_factor
-
-    # Assign a unique color to each label
-    unique_labels = list(set(labels))
-    colors = plt.cm.get_cmap('tab10', len(unique_labels))  # Using distinct colors from colormap
-    color_map = {label: colors(i) for i, label in enumerate(unique_labels)}
-
-    # Plot the amplified PCA results
-    plt.figure(figsize=(10, 8))
-
-    for i, label in enumerate(labels):
-        plt.scatter(amplified_embeddings[i, 0], amplified_embeddings[i, 1],
-                    color=color_map[label], s=100, label=label if label not in plt.gca().get_legend_handles_labels()[1] else None)
-
-        # Annotate points with slight offsets to reduce overlap
-        plt.annotate(label,
-                     (amplified_embeddings[i, 0], amplified_embeddings[i, 1] ),
-                     fontsize=10, alpha=0.75)
-
-    # Add plot details
-    plt.title(f"PCA Projection of Embeddings (Amplified by {scale_factor}x)", fontsize=16)
-    plt.xlabel("Amplified PCA Dimension 1", fontsize=14)
-    plt.ylabel("Amplified PCA Dimension 2", fontsize=14)
-    plt.grid(True)
-    plt.legend(loc='best', fontsize=10)
-    plt.show()
 
 
 import torch
@@ -190,6 +137,10 @@ def plotWithAmplifiedTSNE(embeddings, labels, scale_factor=1, perplexity=1, n_it
 folders = ['./TestData/ContractAndOpposite','./TestData/ParagraphTests','./TestData/Story','./TestData/SingleDocVersions']
 
 for folder in folders:
+
+    embeddings = []
+    labels = []
+
     # Iterate over the files in the folder
     for filename in os.listdir(folder):
         # Get the full path of the file
@@ -199,23 +150,14 @@ for folder in folders:
         if os.path.isfile(file_path):
             print(f"Processing file: {filename}")
             # Add your processing code here
+            labels.append[filename]
+            embeddings.append(get_embeddings(extract_text_from_pdf(file_path)))
 
-pdf_texts = [] 
-embeddings = []
 
-for n in documents:
-   pdf_texts.append(extract_text_from_pdf(n))
 
-for pdf in pdf_texts:
-    embeddings.append(get_embeddings(pdf))
+    #here i now have an array of the vector embeddings which have been normalised
+    embeddings_array = np.stack(embeddings)
 
-#here i now have an array of the vector embeddings which have been normalised
-embeddings_array = np.stack(embeddings)
+    plotWithAmplifiedTSNE(embeddings_array,labels)
 
-#plotEmbeddings(embeddings_array)
-
-#plotWithAmplifiedPCA(embeddings_array,documentLabels)
-
-plotWithAmplifiedTSNE(embeddings_array,documentLabels)
-
-calculate_euclidean_distances(embeddings_array)
+    calculate_euclidean_distances(embeddings_array)
