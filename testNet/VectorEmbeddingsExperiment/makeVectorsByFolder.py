@@ -1,3 +1,4 @@
+import os
 import torch
 from transformers import AutoTokenizer, AutoModel
 import PyPDF2
@@ -186,17 +187,18 @@ def plotWithAmplifiedTSNE(embeddings, labels, scale_factor=1, perplexity=1, n_it
 
 
 # Load and process the PDF
-documents = ['./TestData/ContractAndOpposite/Contract_John_to_Sophie.pdf',
-             './TestData/ContractAndOpposite/Contract_Sophie_to_John.pdf',
-             './TestData/ContractAndOpposite/Rephrase_John_to_Sophie.pdf',
-             './TestData/ContractAndOpposite/Rephrase_Sophie_to_John.pdf']
+folders = ['./TestData/ContractAndOpposite','./TestData/ParagraphTests','./TestData/Story','./TestData/SingleDocVersions']
 
-#documents = ['./TestData/ContractAndOpposite/Rephrase_John_to_Sophie.pdf',
-#             './TestData/ContractAndOpposite/Rephrase_Sophie_to_John.pdf']
-
-documentLabels = ["John_to_Sophie","Sophie_to_John","Rephrase_John_to_Sophie","Rephrase_Sophie_to_John"]
-#documentLabels = ["Rephrase_John_to_Sophie","Rephrase_Sophie_to_John"]
-
+for folder in folders:
+    # Iterate over the files in the folder
+    for filename in os.listdir(folder):
+        # Get the full path of the file
+        file_path = os.path.join(folder, filename)
+        
+        # Check if it is a file (not a directory)
+        if os.path.isfile(file_path):
+            print(f"Processing file: {filename}")
+            # Add your processing code here
 
 pdf_texts = [] 
 embeddings = []
