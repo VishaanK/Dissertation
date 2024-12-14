@@ -177,9 +177,9 @@ def plotWithAmplifiedTSNE(embeddings, labels, scale_factor=1, perplexity=1, n_it
                      fontsize=10, alpha=0.75)
 
     # Add plot details
-    plt.title(f"t-SNE Projection of Embeddings (Amplified by {scale_factor}x)", fontsize=16)
-    plt.xlabel("Amplified t-SNE Dimension 1", fontsize=14)
-    plt.ylabel("Amplified t-SNE Dimension 2", fontsize=14)
+    plt.title(f"t-SNE Projection of Embeddings ", fontsize=16)
+    plt.xlabel("t-SNE Dimension 1", fontsize=14)
+    plt.ylabel("t-SNE Dimension 2", fontsize=14)
     plt.grid(True)
     plt.legend(loc='best', fontsize=10)
     plt.show()
@@ -214,6 +214,6 @@ embeddings_array = np.stack(embeddings)
 
 #plotWithAmplifiedPCA(embeddings_array,documentLabels)
 
-plotWithAmplifiedTSNE(embeddings_array,documentLabels)
+plotWithAmplifiedTSNE(embeddings_array,documentLabels,perplexity= len(embeddings_array))
 
 calculate_euclidean_distances(embeddings_array)

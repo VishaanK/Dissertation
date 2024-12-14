@@ -8,8 +8,6 @@ import umap
 import matplotlib.pyplot as plt
 import umap.plot
 from sklearn.decomposition import PCA
-from scipy.cluster.hierarchy import dendrogram, linkage
-from sklearn.preprocessing import StandardScaler
 
 # Step 1: Load the PDF and extract text
 def extract_text_from_pdf(pdf_path):
@@ -62,7 +60,7 @@ import torch
 import numpy as np
 from scipy.spatial.distance import euclidean
 
-def calculate_euclidean_distances(embeddings,label):
+def calculate_euclidean_distances(embeddings):
     """
     Calculate and print the Euclidean distances between pairs of document embeddings.
 
@@ -86,7 +84,7 @@ def calculate_euclidean_distances(embeddings,label):
             if i != j:
                 print(f"Distance between Document {i+1} and Document {j+1}: {distances[i, j]:.4f}")
 
-def plotWithAmplifiedTSNE(embeddings, labels, scale_factor=1, perplexity=1, n_iter=1000):
+def plotWithAmplifiedTSNE(embeddings, labels, scale_factor=1, perplexity=4, n_iter=1000):
     """
     Plot embeddings using t-SNE with amplified scale for better visualization.
 
@@ -134,95 +132,9 @@ def plotWithAmplifiedTSNE(embeddings, labels, scale_factor=1, perplexity=1, n_it
     plt.legend(loc='best', fontsize=10)
     plt.show()
 
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.manifold import TSNE
-
-def generate_radar_charts_with_tsne(embeddings,labels, n_components=2, perplexity=2):
-    """
-    Generates a single visual with radar charts for each datapoint using t-SNE dimension reduction.
-
-    Parameters:
-    - embeddings: numpy array of shape [num_points, num_dimensions]
-    - n_components: Number of dimensions to reduce to (default is 2)
-    - perplexity: t-SNE parameter to control the balance between local and global data representation (default is 30)
-
-    Returns:
-    - None
-    """
-    # Perform t-SNE to reduce dimensions
-    tsne = TSNE(n_components=n_components, perplexity=perplexity, random_state=42)
-    reduced_embeddings = tsne.fit_transform(embeddings)
-
-    # Number of features (dimensions) after reduction
-    num_features = reduced_embeddings.shape[1]
-    angles = np.linspace(0, 2 * np.pi, num_features, endpoint=False).tolist()
-    angles += angles[:1]  # Close the loop for radar chart
-
-    # Determine number of charts and their layout
-    num_points = reduced_embeddings.shape[0]
-    num_columns = min(3, num_points)  # Limit columns to 3 for a manageable visual
-    num_rows = int(np.ceil(num_points / num_columns))
-
-    plt.figure(figsize=(4 * num_columns, 4 * num_rows))
-
-    # Create radar charts for each reduced embedding
-    colors = plt.cm.tab10(np.linspace(0, 1, num_points))  # Distinct colors for each chart
-    for idx, embedding in enumerate(reduced_embeddings):
-        row = np.append(embedding, embedding[0])  # Close the radar chart loop
-        plt.subplot(num_rows, num_columns, idx + 1)
-        plt.plot(angles, row, linewidth=2, linestyle='solid', color=colors[idx])
-        plt.fill(angles, row, alpha=0.25, color=colors[idx])
-
-        plt.title(f'Point {labels[idx]}')
-        plt.yticks([])  # Remove y-axis ticks
-
-    plt.tight_layout()
-    plt.show()
-
-# Example usage
-# embeddings = np.random.rand(5, 50)  # Example dataset with 5 points and 50 dimensions
-# generate_radar_charts_with_tsne(embeddings, n_components=2, perplexity=30)
-
-# Example usage
-# embeddings = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]])
-# generate_radar_charts_comparison(embeddings)
-
-
-def generate_hierarchical_clustering(embeddings, labels):
-    """
-    Generates hierarchical clustering dendrogram for given embeddings and labels.
-
-    Parameters:
-    - embeddings: numpy array of shape [num_points, num_dimensions]
-    - labels: list of labels corresponding to each embedding point
-
-    Returns:
-    - None
-    """
-    # Standardize the embeddings (optional)
-    scaler = StandardScaler()
-    embeddings_scaled = scaler.fit_transform(embeddings)
-
-    # Perform hierarchical clustering
-    linked = linkage(embeddings_scaled, method='ward')
-
-    # Plotting Dendrogram
-    plt.figure(figsize=(10, 5))
-    dendrogram(linked, labels=labels,leaf_font_size=4)
-    plt.title('Hierarchical Clustering Dendrogram')
-    plt.xlabel('Points')
-    plt.ylabel('Distance')
-    plt.show()
-
-# Example usage
-# embeddings = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-# labels = ['Point 1', 'Point 2', 'Point 3']
-# generate_hierarchical_clustering(embeddings, labels)
-
 
 # Load and process the PDF
-folders = ['./TestData/ContractAndOpposite','./TestData/ParagraphTests','./TestData/Story','./TestData/SingleDocVersions']
+folders = ['./TestData/SingleDocVersions']
 
 for folder in folders:
 
@@ -245,11 +157,7 @@ for folder in folders:
 
     #here i now have an array of the vector embeddings which have been normalised
     embeddings_array = np.stack(embeddings)
-    #num = len(embeddings_array) - 1
-    #when i change the perplexity I start to get very different looking results
-    #plotWithAmplifiedTSNE(embeddings_array,labels,perplexity=num)
-
-    #calculate_euclidean_distances(embeddings_array,labels)
-    #generate_hierarchical_clustering(embeddings_array,labels)
-    generate_radar_charts_with_tsne(embeddings_array,labels)
     
+    plotWithAmplifiedTSNE(embeddings_array,labels)
+
+    calculate_euclidean_distances(embeddings_array)
