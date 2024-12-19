@@ -104,7 +104,7 @@ def plotWithAmplifiedPCA(embeddings, labels, scale_factor=1):
     plt.xlabel("Amplified PCA Dimension 1", fontsize=14)
     plt.ylabel("Amplified PCA Dimension 2", fontsize=14)
     plt.grid(True)
-    plt.legend(loc='best', fontsize=10)
+    plt.legend(loc='best', fontsize=10)s
     plt.show()
 
 
@@ -183,6 +183,61 @@ def plotWithAmplifiedTSNE(embeddings, labels, scale_factor=1, perplexity=1, n_it
     plt.grid(True)
     plt.legend(loc='best', fontsize=10)
     plt.show()
+import numpy as np
+import umap
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder
+from matplotlib.colors import ListedColormap
+
+def plot_umap(vectors, labels, n_neighbors=2, min_dist=0.1, n_components=2):
+    """
+    Reduces the dimensionality of the input vectors using UMAP and plots the result.
+
+    Parameters:
+    - vectors: numpy array of shape [number of vectors, number of dimensions]
+    - labels: array of labels corresponding to each vector
+    - n_neighbors: int, number of neighbors for UMAP (default: 2)
+    - min_dist: float, minimum distance between points in UMAP projection (default: 0.0)
+    - n_components: int, target dimensionality of the projection (default: 2)
+    """
+    # Validate input
+    if len(vectors) != len(labels):
+        raise ValueError("The number of vectors and labels must be the same.")
+
+    # Encode labels to integers if they are not numeric
+    label_encoder = LabelEncoder()
+    numeric_labels = label_encoder.fit_transform(labels)
+
+    # Apply UMAP
+    reducer = umap.UMAP(n_neighbors=n_neighbors, min_dist=min_dist, n_components=n_components, random_state=42)
+    embedding = reducer.fit_transform(vectors)
+
+    # Plot the result
+    plt.figure(figsize=(10, 8))
+
+    # Create a scatter plot, color by labels
+    scatter = plt.scatter(
+        embedding[:, 0], 
+        embedding[:, 1], 
+        c=numeric_labels, 
+        cmap="Spectral", 
+        s=50, 
+        alpha=0.8
+    )
+
+    # Create a legend with the actual label names
+    handles, _ = scatter.legend_elements()
+    legend_labels = label_encoder.inverse_transform(range(len(label_encoder.classes_)))
+    plt.legend(handles, legend_labels, title="Labels", loc="best", fontsize="medium")
+
+    # Add titles and labels
+    plt.title("UMAP Projection", fontsize=16)
+    plt.xlabel("UMAP-1", fontsize=12)
+    plt.ylabel("UMAP-2", fontsize=12)
+    plt.grid(True, alpha=0.5)
+    
+    # Show plot
+    plt.show()
 
 
 # Load and process the PDF
@@ -194,7 +249,8 @@ documents = ['./TestData/ContractAndOpposite/Contract_John_to_Sophie.pdf',
 #documents = ['./TestData/ContractAndOpposite/Rephrase_John_to_Sophie.pdf',
 #             './TestData/ContractAndOpposite/Rephrase_Sophie_to_John.pdf']
 
-documentLabels = ["John_to_Sophie","Sophie_to_John","Rephrase_John_to_Sophie","Rephrase_Sophie_to_John"]
+documentLabels = ["John_to_Sophie","Sophie_to_John","Rephrase_John_to_Sophie",
+                  "Rephrase_Sophie_to_John"]
 #documentLabels = ["Rephrase_John_to_Sophie","Rephrase_Sophie_to_John"]
 
 
@@ -214,6 +270,8 @@ embeddings_array = np.stack(embeddings)
 
 #plotWithAmplifiedPCA(embeddings_array,documentLabels)
 
-plotWithAmplifiedTSNE(embeddings_array,documentLabels,perplexity= len(embeddings_array))
+#plotWithAmplifiedTSNE(embeddings_array,documentLabels,perplexity= len(embeddings_array))
 
-calculate_euclidean_distances(embeddings_array)
+#calculate_euclidean_distances(embeddings_array)
+
+plot_umap(embeddings_array,documentLabels)

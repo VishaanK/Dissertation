@@ -51,7 +51,7 @@ def get_embeddings(text):
     
     #normalize 
     doc_vectors_normalized = torch.nn.functional.normalize(mean_pooled_embedding,p=2.0,dim=0)
-    # Convert the tensor to a list (JSON-compatible format)
+   # Convert the tensor to a list (JSON-compatible format)
     embedding_list = doc_vectors_normalized.tolist()
     
     return embedding_list
@@ -61,6 +61,60 @@ def get_embeddings(text):
 import torch
 import numpy as np
 from scipy.spatial.distance import euclidean
+def calculate_cosine_similarity_dot(embeddings, label):
+    """
+    Calculate and print the Cosine Similarity between pairs of document embeddings.
+
+    Parameters:
+        embeddings (list or numpy.ndarray): A list of normalized embeddings or a 2D numpy array of shape [n_samples, embedding_dim].
+    """
+    embeddings_array = np.array(embeddings)
+
+    # Compute pairwise Cosine Similarity using dot product
+    num_embeddings = len(embeddings_array)
+    similarities = np.zeros((num_embeddings, num_embeddings))
+
+    for i in range(num_embeddings):
+        for j in range(num_embeddings):
+            dot_product = np.dot(embeddings_array[i], embeddings_array[j])
+            similarities[i, j] = dot_product
+
+    # Print similarities
+    print("Cosine Similarity between Document Embeddings:")
+    for i in range(num_embeddings):
+        for j in range(num_embeddings):
+            if i != j:
+                print(f"Similarity between Document {label[i]} and Document {label[j]}: {similarities[i, j]:.4f}")
+
+import numpy as np
+
+def calculate_cosine_similarity(embeddings, labels):
+    """
+    Calculate and print the Cosine Similarity between pairs of document embeddings.
+
+    Parameters:
+        embeddings (list or numpy.ndarray): A list of normalized embeddings or a 2D numpy array of shape [n_samples, embedding_dim].
+        labels (list): A list of labels corresponding to each embedding.
+    """
+    embeddings_array = np.array(embeddings)
+
+    # Compute pairwise Cosine Similarity
+    num_embeddings = len(embeddings_array)
+    similarities = np.zeros((num_embeddings, num_embeddings))
+
+    for i in range(num_embeddings):
+        for j in range(num_embeddings):
+            dot_product = np.dot(embeddings_array[i], embeddings_array[j])
+            norm_i = np.linalg.norm(embeddings_array[i])
+            norm_j = np.linalg.norm(embeddings_array[j])
+            similarities[i, j] = dot_product / (norm_i * norm_j)
+
+    # Print similarities
+    print("Cosine Similarity between Document Embeddings:")
+    for i in range(num_embeddings):
+        for j in range(num_embeddings):
+            if i != j:
+                print(f"Similarity between Document {labels[i]} and Document {labels[j]}: {similarities[i, j]:.4f}")
 
 def calculate_euclidean_distances(embeddings,label):
     """
@@ -84,7 +138,7 @@ def calculate_euclidean_distances(embeddings,label):
     for i in range(num_embeddings):
         for j in range(num_embeddings):
             if i != j:
-                print(f"Distance between Document {i+1} and Document {j+1}: {distances[i, j]:.4f}")
+                print(f"Distance between Document {label[i]} and Document {label[j]}: {distances[i, j]:.4f}")
 
 def plotWithAmplifiedTSNE(embeddings, labels, scale_factor=1, perplexity=1, n_iter=1000):
     """
@@ -127,98 +181,40 @@ def plotWithAmplifiedTSNE(embeddings, labels, scale_factor=1, perplexity=1, n_it
                      fontsize=10, alpha=0.75)
 
     # Add plot details
-    plt.title(f"t-SNE Projection of Embeddings (Amplified by {scale_factor}x)", fontsize=16)
+    plt.title(f"t-SNE Projection of Embeddings)", fontsize=16)
     plt.xlabel("Amplified t-SNE Dimension 1", fontsize=14)
     plt.ylabel("Amplified t-SNE Dimension 2", fontsize=14)
     plt.grid(True)
     plt.legend(loc='best', fontsize=10)
     plt.show()
-
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.manifold import TSNE
+from scipy.stats import wasserstein_distance
 
-def generate_radar_charts_with_tsne(embeddings,labels, n_components=2, perplexity=2):
+def calculate_wasserstein_distances(embeddings, labels):
     """
-    Generates a single visual with radar charts for each datapoint using t-SNE dimension reduction.
+    Calculate and print the Wasserstein distances (Earth Mover's Distance) between pairs of vectors.
 
     Parameters:
-    - embeddings: numpy array of shape [num_points, num_dimensions]
-    - n_components: Number of dimensions to reduce to (default is 2)
-    - perplexity: t-SNE parameter to control the balance between local and global data representation (default is 30)
-
-    Returns:
-    - None
+        embeddings (list or numpy.ndarray): A list or 2D numpy array of vectors.
+        labels (list): A list of labels corresponding to the embeddings.
     """
-    # Perform t-SNE to reduce dimensions
-    tsne = TSNE(n_components=n_components, perplexity=perplexity, random_state=42)
-    reduced_embeddings = tsne.fit_transform(embeddings)
+    embeddings_array = np.array(embeddings)
+    num_embeddings = len(embeddings_array)
+    distances = np.zeros((num_embeddings, num_embeddings))
 
-    # Number of features (dimensions) after reduction
-    num_features = reduced_embeddings.shape[1]
-    angles = np.linspace(0, 2 * np.pi, num_features, endpoint=False).tolist()
-    angles += angles[:1]  # Close the loop for radar chart
+    # Compute pairwise Wasserstein distances
+    for i in range(num_embeddings):
+        for j in range(num_embeddings):
+            distances[i, j] = wasserstein_distance(embeddings_array[i], embeddings_array[j])
 
-    # Determine number of charts and their layout
-    num_points = reduced_embeddings.shape[0]
-    num_columns = min(3, num_points)  # Limit columns to 3 for a manageable visual
-    num_rows = int(np.ceil(num_points / num_columns))
+    # Print distances
+    print("Wasserstein Distances between Document Embeddings:")
+    for i in range(num_embeddings):
+        for j in range(num_embeddings):
+            if i != j:
+                print(f"Distance between {labels[i]} and {labels[j]}: {distances[i, j]:.4f}")
 
-    plt.figure(figsize=(4 * num_columns, 4 * num_rows))
-
-    # Create radar charts for each reduced embedding
-    colors = plt.cm.tab10(np.linspace(0, 1, num_points))  # Distinct colors for each chart
-    for idx, embedding in enumerate(reduced_embeddings):
-        row = np.append(embedding, embedding[0])  # Close the radar chart loop
-        plt.subplot(num_rows, num_columns, idx + 1)
-        plt.plot(angles, row, linewidth=2, linestyle='solid', color=colors[idx])
-        plt.fill(angles, row, alpha=0.25, color=colors[idx])
-
-        plt.title(f'Point {labels[idx]}')
-        plt.yticks([])  # Remove y-axis ticks
-
-    plt.tight_layout()
-    plt.show()
-
-# Example usage
-# embeddings = np.random.rand(5, 50)  # Example dataset with 5 points and 50 dimensions
-# generate_radar_charts_with_tsne(embeddings, n_components=2, perplexity=30)
-
-# Example usage
-# embeddings = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]])
-# generate_radar_charts_comparison(embeddings)
-
-
-def generate_hierarchical_clustering(embeddings, labels):
-    """
-    Generates hierarchical clustering dendrogram for given embeddings and labels.
-
-    Parameters:
-    - embeddings: numpy array of shape [num_points, num_dimensions]
-    - labels: list of labels corresponding to each embedding point
-
-    Returns:
-    - None
-    """
-    # Standardize the embeddings (optional)
-    scaler = StandardScaler()
-    embeddings_scaled = scaler.fit_transform(embeddings)
-
-    # Perform hierarchical clustering
-    linked = linkage(embeddings_scaled, method='ward')
-
-    # Plotting Dendrogram
-    plt.figure(figsize=(10, 5))
-    dendrogram(linked, labels=labels,leaf_font_size=4)
-    plt.title('Hierarchical Clustering Dendrogram')
-    plt.xlabel('Points')
-    plt.ylabel('Distance')
-    plt.show()
-
-# Example usage
-# embeddings = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-# labels = ['Point 1', 'Point 2', 'Point 3']
-# generate_hierarchical_clustering(embeddings, labels)
+    return distances
 
 
 # Load and process the PDF
@@ -245,11 +241,11 @@ for folder in folders:
 
     #here i now have an array of the vector embeddings which have been normalised
     embeddings_array = np.stack(embeddings)
-    #num = len(embeddings_array) - 1
+    num = len(embeddings_array) - 1
     #when i change the perplexity I start to get very different looking results
     #plotWithAmplifiedTSNE(embeddings_array,labels,perplexity=num)
+    calculate_euclidean_distances(embeddings_array,labels)
 
-    #calculate_euclidean_distances(embeddings_array,labels)
-    #generate_hierarchical_clustering(embeddings_array,labels)
-    generate_radar_charts_with_tsne(embeddings_array,labels)
+    #calculate_cosine_similarity(embeddings_array,labels)
     
+    #calculate_wasserstein_distances(embeddings_array,labels)
