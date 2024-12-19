@@ -1,31 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.documentStateNode = void 0;
-exports.cosineDistance = cosineDistance;
 /*@ts-ignore*/
 const { __ΩDocumentLedger } = require("./utils");
-function cosineDistance(vecA, vecB) {
-    if (vecA.length !== vecB.length) {
-        throw new Error("Vectors must have the same length");
+function euclideanDistance(vector1, vector2) {
+    if (vector1.length !== vector2.length) {
+        throw new Error('Vectors must be of the same length');
     }
-    // Calculate dot product (A . B)
-    let dotProduct = 0;
-    let magnitudeA = 0;
-    let magnitudeB = 0;
-    for (let i = 0; i < vecA.length; i++) {
-        dotProduct += vecA[i] * vecB[i];
-        magnitudeA += vecA[i] * vecA[i];
-        magnitudeB += vecB[i] * vecB[i];
+    let sumOfSquares = 0;
+    for (let i = 0; i < vector1.length; i++) {
+        const diff = vector1[i] - vector2[i];
+        sumOfSquares += diff * diff;
     }
-    // Calculate magnitudes
-    magnitudeA = Math.sqrt(magnitudeA);
-    magnitudeB = Math.sqrt(magnitudeB);
-    // Compute cosine similarity
-    const cosineSimilarity = dotProduct / (magnitudeA * magnitudeB);
-    // Calculate cosine distance
-    return 1 - cosineSimilarity;
+    return Math.sqrt(sumOfSquares);
 }
-cosineDistance.__type = ['vecA', 'vecB', 'cosineDistance', 'P\'F2!\'F2"\'/#'];
+euclideanDistance.__type = ['vector1', 'vector2', 'euclideanDistance', 'P\'F2!\'F2"\'/#'];
 class documentStateNode {
     constructor(state) {
         this.previous = null;
@@ -55,11 +44,11 @@ class documentStateNode {
         //edits may not effect the file in which case :               
         if (this.state.documentHash == previousNode.state.documentHash) {
             //no change to the document 
-            this.semanticChangeScore = -1;
+            this.semanticChangeScore = 0;
         }
         else {
             //calculate the distance from the previous one and let that be the value for now 
-            this.semanticChangeScore = cosineDistance(previousNode.state.vector, this.state.vector);
+            this.semanticChangeScore = euclideanDistance(previousNode.state.vector, this.state.vector);
         }
     }
 }

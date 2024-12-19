@@ -104,7 +104,7 @@ def plotWithAmplifiedPCA(embeddings, labels, scale_factor=1):
     plt.xlabel("Amplified PCA Dimension 1", fontsize=14)
     plt.ylabel("Amplified PCA Dimension 2", fontsize=14)
     plt.grid(True)
-    plt.legend(loc='best', fontsize=10)s
+    plt.legend(loc='best', fontsize=10)
     plt.show()
 
 
