@@ -4,15 +4,16 @@ const Navbar: React.FC = () => {
   return (
 
     <header className="header">
-      <h1>hello</h1>
+      
       <div className="header-left">
         <button className="home-button">Home</button>
+        <h2> Document tracking system</h2>
       </div>
       <div className="header-right">
-        <button className="nav-button">Page 1</button>
-        <button className="nav-button">Page 2</button>
-        <button className="nav-button">Page 3</button>
-        <button className="nav-button">Page 4</button>
+        <button className="nav-button">View all documents</button>
+        <button className="nav-button">View edit history of a document</button>
+        <button className="nav-button">Log a new document</button>
+        <button className="nav-button">Edit a document</button>
       </div>
     </header>
 

@@ -1,18 +1,20 @@
 
-
+body{
+  background-color: #cecbcb;
+}
 header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   padding: 10px;
-  background-color: #333;
+  background-color: #cecbcb;
   color: rgb(0, 0, 0);
 }
 
 button {
   padding: 10px;
   margin: 5px;
-  background-color: #61dafb;
+  background-color: #89a6ad;
   color: white;
   border: none;
   border-radius: 5px;
@@ -21,4 +23,29 @@ button {
 
 button:hover {
   background-color: #282c34;
+}
+
+
+.header-left {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start; /* Aligns left */
+  align-items: center;
+}
+
+.header-right {
+  display:flex;
+  gap: 10px; /* Adds spacing between buttons */
+  justify-content: flex-end; /* Aligns right */
+  align-items: center;
+}
+
+
+.centre {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;  /* Takes full height of the viewport */
+  padding: 10px;
 }
