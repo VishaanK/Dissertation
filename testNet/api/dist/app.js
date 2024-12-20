@@ -68,7 +68,6 @@ app.get("/healthcheck", __assignType((req, res) => {
  */
 app.post("/documents/ledger", __assignType((req, res) => {
     (0, documentInterface_1.ledgerGetAllDocuments)(exports.contract, req.body.userID).then(__assignType(value => {
-        console.log("Result :", value);
         res.status(200).json({ "Result": value });
     }, ['value', '', 'P"2!"/"'])).catch(__assignType((err) => {
         console.log("error %s", err);

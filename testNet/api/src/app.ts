@@ -10,7 +10,7 @@ import {createHash, Hash } from "crypto";
 import {DocumentAction, DocumentDB, DocumentLedger, PythonController } from "./utils";
 import {PyBridge} from 'pybridge';
 import { documentStateNode } from "./auditFunctionality";
-
+const cors = require('cors');
 const crypto = require('crypto');
 const express = require("express");
 
@@ -41,6 +41,9 @@ function generatedNewID() : string{
 
 
 var app = express();
+
+app.use(cors());
+
 //enable logging each request that turns up 
 app.use((req:Request, res:Response, next:NextFunction) => {
   console.log('Time: ', Date.now());
