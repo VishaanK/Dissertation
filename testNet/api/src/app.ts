@@ -69,7 +69,6 @@ app.get("/healthcheck", (req:Request, res:Response) => {
  */
 app.post("/documents/ledger", (req:Request, res:Response) => {
   ledgerGetAllDocuments(contract,req.body.userID).then(value => {
-    console.log("Result :" , value);
     res.status(200).json({"Result":value}); 
   }).catch((err : Error) => {
     console.log("error %s",err);
