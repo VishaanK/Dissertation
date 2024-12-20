@@ -11,13 +11,12 @@ if(root){
   ReactDOM.createRoot(root).render(
     <BrowserRouter>
     <Routes>
-      <Route path="/" element={<Layout />}>
-        {/* renders into the outlet in <Root> at "/" */}
-        <Route index element={<App />} />
-        <Route path="AllDocuments" element={<Alldocuments />}/>
-          
+      <Route path ='/' element={<Layout/>}>
+      <Route index element={<App />} />
+      <Route path ='allDocuments' element = {<Alldocuments/>}/>
       </Route>
     </Routes>
+     
     </BrowserRouter>
   );
 }else{
