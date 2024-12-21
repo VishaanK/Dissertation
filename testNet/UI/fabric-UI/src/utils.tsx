@@ -16,8 +16,8 @@ export interface DocumentLedger {
     documentName: string;
     documentType: string;
     signable: boolean;
-    lastInteractedWithID: DocumentAction;
-    lastAction: string;
+    lastInteractedWithID: String;
+    lastAction: DocumentAction;
     vector: number[];
     
 }

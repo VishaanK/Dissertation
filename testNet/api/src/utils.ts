@@ -21,11 +21,11 @@ export interface DocumentLedger {
     documentName: string;
     documentType: string;
     signable: boolean;
-    lastInteractedWithID: DocumentAction;
-    lastAction: string;
+    lastInteractedWithID: String;
+    lastAction: DocumentAction;
     vector: number[];
     
-}
+}//changes the data type of lastInteractedWithID check that didnt break anything
 
 export enum DocumentAction {
   CREATED = "CREATED",

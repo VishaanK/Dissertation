@@ -4,7 +4,7 @@ exports.PythonController = exports.__ΩpythonAPI = exports.DocumentAction = expo
 const pybridge_1 = require("pybridge");
 const __ΩDocumentDB = ['file', 'creatorID', 'documentHash', 'documentID', 'documentName', 'documentType', 'signable', 'DocumentDB', 'P!4!&4"&4#&4$&4%&4&)4\'Mw(y'];
 exports.__ΩDocumentDB = __ΩDocumentDB;
-const __ΩDocumentLedger = ['creatorID', 'documentHash', 'documentID', 'documentName', 'documentType', 'signable', () => __ΩDocumentAction, 'lastInteractedWithID', 'lastAction', 'vector', 'DocumentLedger', 'P&4!&4"&4#&4$&4%)4&n\'4(&4)\'F4*Mw+y'];
+const __ΩDocumentLedger = ['creatorID', 'documentHash', 'documentID', 'documentName', 'documentType', 'signable', 'lastInteractedWithID', () => __ΩDocumentAction, 'lastAction', 'vector', 'DocumentLedger', 'P&4!&4"&4#&4$&4%)4&&4\'n(4)\'F4*Mw+y'];
 exports.__ΩDocumentLedger = __ΩDocumentLedger;
 const __ΩDocumentAction = ['CREATED', () => "CREATED", 'READ', () => "READ", 'EDITED', () => "EDITED", 'DELETED', () => "DELETED", 'DocumentAction', 'PC!>"C#>$C%>&C\'>(Bw)'];
 exports.__ΩDocumentAction = __ΩDocumentAction;

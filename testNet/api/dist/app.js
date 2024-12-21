@@ -28,6 +28,7 @@ const crypto_1 = require("crypto");
 const utils_1 = require("./utils");
 const pybridge_1 = require("pybridge");
 const auditFunctionality_1 = require("./auditFunctionality");
+const cors = require('cors');
 const crypto = require('crypto');
 const express = require("express");
 //configure multer to use in memory buffers 
@@ -45,6 +46,7 @@ function generatedNewID() {
 }
 generatedNewID.__type = ['generatedNewID', 'P&/!'];
 var app = express();
+app.use(cors());
 //enable logging each request that turns up 
 app.use(__assignType((req, res, next) => {
     console.log('Time: ', Date.now());

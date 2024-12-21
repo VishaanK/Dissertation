@@ -12,9 +12,9 @@ const Navbar: React.FC = () => {
       </div>
       <div className="header-right">
         <Link to={"/allDocuments"}><button className="nav-button" >View all documents</button></Link> 
-        <button className="nav-button">View edit history of a document</button>
-        <button className="nav-button">Log a new document</button>
-        <button className="nav-button">Edit a document</button>
+        <Link to= {"/documentHistory"}> <button className="nav-button">View edit history of a document</button></Link>
+        <Link to = {"/addDocument"}>  <button className="nav-button">Log a new document</button></Link>
+        <Link to = {'/editDocument'} ><button className="nav-button">Edit a document</button> </Link>
       </div>
     </header>
 
