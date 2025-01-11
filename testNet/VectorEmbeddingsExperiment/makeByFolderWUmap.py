@@ -24,8 +24,8 @@ def extract_text_from_pdf(pdf_path):
     return text
 
 # Step 2: Load the Longformer tokenizer and model
-tokenizer = AutoTokenizer.from_pretrained("allenai/longformer-base-4096-extra.pos.embd.only")
-model = AutoModel.from_pretrained("allenai/longformer-base-4096-extra.pos.embd.only")
+tokenizer = AutoTokenizer.from_pretrained("nlpaueb/legal-bert-base-uncased")
+model = AutoModel.from_pretrained("nlpaueb/legal-bert-base-uncased")
 
 def get_embeddings(text):
     """

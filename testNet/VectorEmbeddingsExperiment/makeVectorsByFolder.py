@@ -24,9 +24,9 @@ def extract_text_from_pdf(pdf_path):
     return text
 
 # Step 2: Load the Longformer tokenizer and model
-tokenizer = AutoTokenizer.from_pretrained("allenai/longformer-base-4096-extra.pos.embd.only")
-model = AutoModel.from_pretrained("allenai/longformer-base-4096-extra.pos.embd.only")
-
+tokenizer = AutoTokenizer.from_pretrained("nlpaueb/legal-bert-base-uncased")
+model = AutoModel.from_pretrained("nlpaueb/legal-bert-base-uncased")
+print("model : nlpaueb/legal-bert-base-uncased")
 def get_embeddings(text):
     """
     extract the embedding from the text provided
@@ -57,64 +57,6 @@ def get_embeddings(text):
     return embedding_list
 
 
-
-import torch
-import numpy as np
-from scipy.spatial.distance import euclidean
-def calculate_cosine_similarity_dot(embeddings, label):
-    """
-    Calculate and print the Cosine Similarity between pairs of document embeddings.
-
-    Parameters:
-        embeddings (list or numpy.ndarray): A list of normalized embeddings or a 2D numpy array of shape [n_samples, embedding_dim].
-    """
-    embeddings_array = np.array(embeddings)
-
-    # Compute pairwise Cosine Similarity using dot product
-    num_embeddings = len(embeddings_array)
-    similarities = np.zeros((num_embeddings, num_embeddings))
-
-    for i in range(num_embeddings):
-        for j in range(num_embeddings):
-            dot_product = np.dot(embeddings_array[i], embeddings_array[j])
-            similarities[i, j] = dot_product
-
-    # Print similarities
-    print("Cosine Similarity between Document Embeddings:")
-    for i in range(num_embeddings):
-        for j in range(num_embeddings):
-            if i != j:
-                print(f"Similarity between Document {label[i]} and Document {label[j]}: {similarities[i, j]:.4f}")
-
-import numpy as np
-
-def calculate_cosine_similarity(embeddings, labels):
-    """
-    Calculate and print the Cosine Similarity between pairs of document embeddings.
-
-    Parameters:
-        embeddings (list or numpy.ndarray): A list of normalized embeddings or a 2D numpy array of shape [n_samples, embedding_dim].
-        labels (list): A list of labels corresponding to each embedding.
-    """
-    embeddings_array = np.array(embeddings)
-
-    # Compute pairwise Cosine Similarity
-    num_embeddings = len(embeddings_array)
-    similarities = np.zeros((num_embeddings, num_embeddings))
-
-    for i in range(num_embeddings):
-        for j in range(num_embeddings):
-            dot_product = np.dot(embeddings_array[i], embeddings_array[j])
-            norm_i = np.linalg.norm(embeddings_array[i])
-            norm_j = np.linalg.norm(embeddings_array[j])
-            similarities[i, j] = dot_product / (norm_i * norm_j)
-
-    # Print similarities
-    print("Cosine Similarity between Document Embeddings:")
-    for i in range(num_embeddings):
-        for j in range(num_embeddings):
-            if i != j:
-                print(f"Similarity between Document {labels[i]} and Document {labels[j]}: {similarities[i, j]:.4f}")
 
 def calculate_euclidean_distances(embeddings,label):
     """
@@ -176,9 +118,9 @@ def plotWithAmplifiedTSNE(embeddings, labels, scale_factor=1, perplexity=1, n_it
                     color=color_map[label], s=100, label=label if label not in plt.gca().get_legend_handles_labels()[1] else None)
 
         # Annotate points with slight offsets to reduce overlap
-        plt.annotate(label,
-                     (amplified_embeddings[i, 0], amplified_embeddings[i, 1]),
-                     fontsize=10, alpha=0.75)
+        #plt.annotate(label,
+        #             (amplified_embeddings[i, 0], amplified_embeddings[i, 1]),
+        #             fontsize=10, alpha=0.75)
 
     # Add plot details
     plt.title(f"t-SNE Projection of Embeddings)", fontsize=16)
@@ -189,33 +131,6 @@ def plotWithAmplifiedTSNE(embeddings, labels, scale_factor=1, perplexity=1, n_it
     plt.show()
 import numpy as np
 from scipy.stats import wasserstein_distance
-
-def calculate_wasserstein_distances(embeddings, labels):
-    """
-    Calculate and print the Wasserstein distances (Earth Mover's Distance) between pairs of vectors.
-
-    Parameters:
-        embeddings (list or numpy.ndarray): A list or 2D numpy array of vectors.
-        labels (list): A list of labels corresponding to the embeddings.
-    """
-    embeddings_array = np.array(embeddings)
-    num_embeddings = len(embeddings_array)
-    distances = np.zeros((num_embeddings, num_embeddings))
-
-    # Compute pairwise Wasserstein distances
-    for i in range(num_embeddings):
-        for j in range(num_embeddings):
-            distances[i, j] = wasserstein_distance(embeddings_array[i], embeddings_array[j])
-
-    # Print distances
-    print("Wasserstein Distances between Document Embeddings:")
-    for i in range(num_embeddings):
-        for j in range(num_embeddings):
-            if i != j:
-                print(f"Distance between {labels[i]} and {labels[j]}: {distances[i, j]:.4f}")
-
-    return distances
-
 
 # Load and process the PDF
 folders = ['./TestData/ContractAndOpposite','./TestData/ParagraphTests','./TestData/Story','./TestData/SingleDocVersions']
@@ -243,7 +158,7 @@ for folder in folders:
     embeddings_array = np.stack(embeddings)
     num = len(embeddings_array) - 1
     #when i change the perplexity I start to get very different looking results
-    #plotWithAmplifiedTSNE(embeddings_array,labels,perplexity=num)
+    plotWithAmplifiedTSNE(embeddings_array,labels,perplexity=num)
     calculate_euclidean_distances(embeddings_array,labels)
 
     #calculate_cosine_similarity(embeddings_array,labels)
