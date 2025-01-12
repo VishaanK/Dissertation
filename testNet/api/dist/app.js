@@ -172,7 +172,6 @@ app.post("/documents", upload.single('file'), __assignType((req, res) => {
  * need to reupload the document to recalculate the hash
  */
 app.post("/documents/:documentid", upload.single('file'), __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("in /documents", req.file, req.body);
     if (!req.file) {
         console.error("NO FILE ATTACHED TO REQUEST");
         res.status(400).json({ "Result": "error no file in request" });
@@ -246,6 +245,24 @@ app.delete("/documents", __assignType((req, res) => {
     }).catch(__assignType((err) => {
         console.log("error", err);
         res.status(500).json({ "Error deleting document": err.message, "DocID": req.params.id });
+    }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
+}, ['req', 'res', '', 'P!2!!2""/#']));
+//verifies the document by checking the hash 
+app.post("/documents/verify", upload.single('file'), __assignType((req, res) => {
+    if (!req.body || !req.body.documentID || !req.file) {
+        return res.status(400).json({ error: "Missing required fields" });
+    }
+    const documentHash = calculateHash(req.file.buffer);
+    (0, documentInterface_1.ledgerVerifyDocument)(exports.contract, req.body.documentID, documentHash).then(__assignType((result) => {
+        if (result == true) {
+            res.status(200).json({ "LedgerVerify": "Successful" });
+        }
+        else {
+            res.status(200).json({ "LedgerVerify": "Unsuccessful" });
+        }
+    }, ['result', '', 'P"2!"/"'])).catch(__assignType((err) => {
+        console.log("error", err);
+        res.status(500).json({ "Error verifying document": err.message, "DocID": req.params.id });
     }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
 }, ['req', 'res', '', 'P!2!!2""/#']));
 /**

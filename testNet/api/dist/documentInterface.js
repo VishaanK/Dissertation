@@ -21,6 +21,7 @@ exports.ledgerDelete = ledgerDelete;
 exports.logReadInRange = logReadInRange;
 exports.ledgerCheckDuplicate = ledgerCheckDuplicate;
 exports.ledgerRetrieveHistory = ledgerRetrieveHistory;
+exports.ledgerVerifyDocument = ledgerVerifyDocument;
 /*@ts-ignore*/
 const { __ΩDocumentLedger } = require("./utils");
 const constants_1 = require("./constants");
@@ -193,10 +194,9 @@ function ledgerCheckDuplicate(contract, documentName, documentHash) {
 }
 ledgerCheckDuplicate.__type = ['Contract', 'contract', 'documentName', 'documentHash', 'ledgerCheckDuplicate', 'P"w!2"&2#&2$)`/%'];
 /**
- * checks ledger for duplicates of the documents name and hash
+ * retrieve the history of an asset from the ledger
  * @param contract
- * @param documentName name
- * @param documentHash hash
+ * @param documentID Doc ID
  * @returns
  */
 function ledgerRetrieveHistory(contract, documentID) {
@@ -209,3 +209,20 @@ function ledgerRetrieveHistory(contract, documentID) {
     });
 }
 ledgerRetrieveHistory.__type = ['Contract', 'contract', 'documentID', () => __ΩDocumentLedger, 'ledgerRetrieveHistory', 'P"w!2"&2#n$F`/%'];
+/**
+ * verifies a document matches its on chain version
+ * @param contract
+ * @param documentID Doc ID
+ * @param documentHash hash of the document
+ * @returns
+ */
+function ledgerVerifyDocument(contract, documentID, documentHash) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log('\n--> Evaluate Transaction: checkDuplicate, checks for duplicates ');
+        const resultBytes = yield contract.evaluateTransaction('CheckDocumentValidity', documentID, documentHash);
+        const resultJson = constants_1.utf8Decoder.decode(resultBytes);
+        const result = JSON.parse(resultJson);
+        return result;
+    });
+}
+ledgerVerifyDocument.__type = ['Contract', 'contract', 'documentID', 'documentHash', 'ledgerVerifyDocument', 'P"w!2"&2#&2$)`/%'];

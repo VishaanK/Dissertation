@@ -7,7 +7,7 @@ FILE_PATH="Vishaan_Khanna_CV-3.pdf"
 # Execute the curl command to send the POST request
 curl -X POST $URL \
   -H "Content-Type: multipart/form-data" \
-  -F "documentID=Doc1" \
+  -F "documentID=doc1" \
   -F "file=@$FILE_PATH"
 
 # Check if the curl command was successful
