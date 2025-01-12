@@ -240,6 +240,45 @@ app.post("/documents/verify" ,upload.single('file'),  (req:Request, res:Response
 
  });
 
+ 
+
+/**
+ * fetches the audit history with the semantic change scores 
+ */
+app.get("/documents/audit", async (req: Request, res: Response) => {
+  console.log("/documents/audit")
+  try {
+    // Declare result as an object with the desired structure
+    const result: { [key: string]: { "STATE": DocumentLedger, "CHANGE_SCORE": Number }[] } = {};
+
+    // Iterate over the audit map
+    for (let [key, value] of auditMap) {
+      // Create a new list for the current document
+      const items: { "STATE": DocumentLedger, "CHANGE_SCORE": Number }[] = [];
+
+      let current: documentStateNode | null = value;
+
+      // Traverse the linked list
+      while (current != null) {
+        items.push({
+          "STATE": current.state,
+          "CHANGE_SCORE": current.semanticChangeScore
+        });
+        current = current.next;
+      }
+
+      // Assign the list to the result object
+      result[key] = items;
+    }
+
+    // Send the result as a JSON response
+    res.json(result);
+  } catch (error) {
+    console.error("Error fetching audit history:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 /**Edit a document or its properties 
  * need to reupload the document to recalculate the hash 
  */
@@ -424,43 +463,6 @@ app.get("/documents/audit/setup" , async (req:Request, res:Response) => {
 });
 
 
-
-/**
- * fetches the audit history with the semantic change scores 
- */
-app.get("/documents/audit", async (req: Request, res: Response) => {
-  console.log("/documents/audit")
-  try {
-    // Declare result as an object with the desired structure
-    const result: { [key: string]: { "STATE": DocumentLedger, "CHANGE_SCORE": Number }[] } = {};
-
-    // Iterate over the audit map
-    for (let [key, value] of auditMap) {
-      // Create a new list for the current document
-      const items: { "STATE": DocumentLedger, "CHANGE_SCORE": Number }[] = [];
-
-      let current: documentStateNode | null = value;
-
-      // Traverse the linked list
-      while (current != null) {
-        items.push({
-          "STATE": current.state,
-          "CHANGE_SCORE": current.semanticChangeScore
-        });
-        current = current.next;
-      }
-
-      // Assign the list to the result object
-      result[key] = items;
-    }
-
-    // Send the result as a JSON response
-    res.json(result);
-  } catch (error) {
-    console.error("Error fetching audit history:", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
 
 //set the api server listening 
 app.listen(3000, () => {
