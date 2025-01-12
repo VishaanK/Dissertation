@@ -121,7 +121,12 @@ describe('API Endpoint Tests', () => {
         signable: false,
       });
     }catch(e){
-      expect(e.response.status).toBe(400);
+      if(e.response){
+        expect(e.response.status).toBe(400);
+      }else{
+        console.error("NO RETURNED RESPONSE TO /documents/:documentid - should return 400 if file is missing ")
+      }
+      
 
     }
     

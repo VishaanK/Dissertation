@@ -57,6 +57,7 @@ app.use(express.json());
  * Healthcheck endpoint
  */
 app.get("/healthcheck", __assignType((req, res) => {
+    console.log("/healthcheck");
     (0, documentInterface_1.ledgerHealthCheck)(exports.contract).then(__assignType(value => {
         console.log("Result :", value);
         res.status(200).json({ "Result": value });
@@ -69,6 +70,7 @@ app.get("/healthcheck", __assignType((req, res) => {
  * Fetch all document states from ledger
  */
 app.post("/documents/ledger", __assignType((req, res) => {
+    console.log("/documents/ledger");
     (0, documentInterface_1.ledgerGetAllDocuments)(exports.contract, req.body.userID).then(__assignType(value => {
         res.status(200).json({ "Result": value });
     }, ['value', '', 'P"2!"/"'])).catch(__assignType((err) => {
@@ -82,6 +84,7 @@ app.post("/documents/ledger", __assignType((req, res) => {
  *
  */
 app.post("/documents/read", __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("/documents/read");
     if (!req.body.documentID || !req.body.userID) {
         res.status(400).json({ "ERROR": "No documentID or USER ID" });
         return;
@@ -123,6 +126,7 @@ app.post("/documents/read", __assignType((req, res) => __awaiter(void 0, void 0,
  * log the file in the ledger
  */
 app.post("/documents", upload.single('file'), __assignType((req, res) => {
+    console.log("/documents");
     if (!req.file) {
         console.error("NO FILE ATTACHED TO REQUEST - /documents");
         res.status(400).json({ "Result": "error no file in request" });
@@ -172,6 +176,7 @@ app.post("/documents", upload.single('file'), __assignType((req, res) => {
  * need to reupload the document to recalculate the hash
  */
 app.post("/documents/:documentid", upload.single('file'), __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("/documents/:documentid");
     if (!req.file) {
         console.error("NO FILE ATTACHED TO REQUEST - /documents/:documentid");
         res.status(400).json({ "Result": "error no file in request" });
@@ -242,6 +247,7 @@ app.post("/documents/:documentid", upload.single('file'), __assignType((req, res
  * id and user id provided in body
  */
 app.delete("/documents", __assignType((req, res) => {
+    console.log("/documents");
     if (!req.body || !req.body.documentID || !req.body.userID) {
         return res.status(400).json({ error: "Missing required fields" });
     }
@@ -254,6 +260,7 @@ app.delete("/documents", __assignType((req, res) => {
 }, ['req', 'res', '', 'P!2!!2""/#']));
 //verifies the document by checking the hash 
 app.post("/documents/verify", upload.single('file'), __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("/documents/verify");
     if (!req.file) {
         console.error("NO FILE ATTACHED TO REQUEST - /documents/verify");
         res.status(400).json({ "Result": "error no file in request" });
@@ -282,6 +289,7 @@ app.post("/documents/verify", upload.single('file'), __assignType((req, res) => 
  * get the transaction history of a particular key
  */
 app.get("/documents/history/:documentid", __assignType((req, res) => {
+    console.log("/documents/history/:documentid");
     if (!req.params.documentid) {
         res.status(400).json({ "Error no documentid provided": "no id" });
     }
@@ -296,6 +304,7 @@ app.get("/documents/history/:documentid", __assignType((req, res) => {
  * sets up the audit history object
  */
 app.get("/documents/audit/setup", __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("/documents/audit/setup");
     //get all the document ids from the database 
     const documents = yield (0, documentInterface_1.ledgerGetAllDocuments)(exports.contract, "audit");
     let histories = new Map;
@@ -346,6 +355,7 @@ app.get("/documents/audit/setup", __assignType((req, res) => __awaiter(void 0, v
  * fetches the audit history with the semantic change scores
  */
 app.get("/documents/audit", __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("/documents/audit");
     try {
         // Declare result as an object with the desired structure
         const result = {};
