@@ -177,6 +177,11 @@ app.post("/documents/:documentid", upload.single('file'), __assignType((req, res
         res.status(400).json({ "Result": "error no file in request" });
         return;
     }
+    if (!req) {
+        console.error("NO FILE ATTACHED TO REQUEST");
+        res.status(400).json({ "Result": "error no file in request" });
+        return;
+    }
     //check the entered id is in the database 
     let dbEntry = yield exports.db.collection(constants_1.collectionName).findOne({ documentID: req.params.documentid });
     if (!dbEntry) {

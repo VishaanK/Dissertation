@@ -215,6 +215,12 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
     return;
   }
 
+  if(!req){
+    console.error("NO FILE ATTACHED TO REQUEST")
+    res.status(400).json({"Result":"error no file in request"});
+    return;
+  }
+
   //check the entered id is in the database 
   let dbEntry = await db.collection(collectionName).findOne({documentID:req.params.documentid});
   if(!dbEntry){

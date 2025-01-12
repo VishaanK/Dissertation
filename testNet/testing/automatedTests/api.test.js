@@ -47,7 +47,7 @@ describe('API Endpoint Tests', () => {
     const formData = new FormData();
     const filePath = path.resolve('../Vishaan_Khanna_CV-3.pdf'); // Ensure you have a file in your test directory
     const fileBuffer= fs.readFileSync(filePath);
-    formData.append('file', fileBuffer);
+    formData.append('file', fileBuffer,"Vishaan_Khanna_CV-3.pdf");
     formData.append('creatorID', 'testUser');
     formData.append('documentType', 'testType');
     formData.append('signable', "true");
@@ -62,14 +62,13 @@ describe('API Endpoint Tests', () => {
     const formData = new FormData();
     formData.append('creatorID', 'testUser');
     formData.append('documentType', 'pdf');
-    formData.append('signable', true);
+    formData.append('signable', "true");
 
     try{
       const res = await apiClient.post('/documents', formData, {
         headers: formData.getHeaders(),
       });
     }catch(e){
-      console.error('Error:', e);
       if (e.response) {
         console.log('Response Error:', e.response);
         expect(e.response.status).toBe(400); // This will check the status code in the response
@@ -101,10 +100,10 @@ describe('API Endpoint Tests', () => {
   test('/documents/:documentid - should return 200 on success', async () => {
     const formData = new FormData();
     const filePath = path.resolve('../Vishaan_Khanna_CV-5.pdf'); // Ensure you have a file in your test directory
-    const fileBuffer = fs.readFileSync(filePath);
-    formData.append('file', fileBuffer,'Vishaan_Khanna_CV-5.pdf');
+    const fileBuffer = await fs.readFileSync(filePath);
+    formData.append('file', fileBuffer,"Vishaan_Khanna_CV-5.pdf");
     formData.append('documentType', 'pdf');
-    formData.append('signable', false);
+    formData.append('signable', "false");
 
     const res = await apiClient.post('/documents/doc1', formData, {
       headers: formData.getHeaders(),
@@ -134,9 +133,9 @@ describe('API Endpoint Tests', () => {
     const formData = new FormData();
 
     const filePath = path.resolve('../Vishaan_Khanna_CV-5.pdf'); // Ensure you have a file in your test directory
-    const fileBuffer = fs.readFileSync(filePath);
+    const fileBuffer = await fs.readFileSync(filePath);
 
-    formData.append('file', fileBuffer,'Vishaan_Khanna_CV-5.pdf');
+    formData.append('file', fileBuffer,"Vishaan_Khanna_CV-5.pdf");
 
     formData.append('documentID', 'doc1');
 
