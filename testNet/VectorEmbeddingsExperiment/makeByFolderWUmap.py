@@ -140,10 +140,6 @@ for folder in folders:
     #here i now have an array of the vector embeddings which have been normalised
     embeddings_array = np.stack(embeddings)
     num = len(embeddings_array) - 1
-    #when i change the perplexity I start to get very different looking results
-    #plotWithAmplifiedTSNE(embeddings_array,labels,perplexity=num)
 
-    #calculate_euclidean_distances(embeddings_array,labels)
-    #generate_hierarchical_clustering(embeddings_array,labels)
     plot_umap(embeddings_array,labels,n_neighbors=num)
     

@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { newGrpcConnection, newIdentity, newSigner } from "./gateway";
 import { Client } from "@grpc/grpc-js";
 import { chaincodeName, channelName, collectionName, DATABASE_NAME, MONGO_URL } from "./constants";
-import { ledgerCheckDuplicate, ledgerCreateDocument, ledgerDelete, ledgerGetAllDocuments, ledgerHealthCheck, ledgerReadDocument, ledgerRenameDocument, ledgerRetrieveHistory, ledgerUpdateDocumentHash, ledgerUpdateSignable } from "./documentInterface";
+import { ledgerCheckDuplicate, ledgerCreateDocument, ledgerDelete, ledgerGetAllDocuments, ledgerHealthCheck, ledgerReadDocument, ledgerRenameDocument, ledgerRetrieveHistory, ledgerUpdateDocumentHash, ledgerUpdateSignable, ledgerVerifyDocument } from "./documentInterface";
 import { Db, MongoClient} from "mongodb";
 import multer from 'multer';
 import {createHash, Hash } from "crypto";
@@ -208,7 +208,6 @@ app.post("/documents/read",async (req:Request, res:Response) => {
  */
 app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res:Response) => {
 
-  console.log("in /documents", req.file, req.body)
 
   if(!req.file){
     console.error("NO FILE ATTACHED TO REQUEST")
@@ -298,6 +297,28 @@ app.delete("/documents", (req:Request, res:Response) => {
     res.status(500).json({"Error deleting document":err.message,"DocID":req.params.id})
   })
   
+});
+
+//verifies the document by checking the hash 
+app.post("/documents/verify" ,upload.single('file'), (req:Request, res:Response) => { 
+  if (!req.body || !req.body.documentID ||!req.file) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const documentHash : string = calculateHash(req.file!.buffer);
+
+
+  ledgerVerifyDocument(contract,req.body.documentID,documentHash).then((result)=>{
+    if(result == true){
+      res.status(200).json({"LedgerVerify":"Successful"});
+    }else{
+      res.status(200).json({"LedgerVerify":"Unsuccessful"});
+    }
+
+  }).catch((err:Error)=>{
+    console.log("error",err)
+    res.status(500).json({"Error verifying document":err.message,"DocID":req.params.id})
+  })
 });
 
 /**

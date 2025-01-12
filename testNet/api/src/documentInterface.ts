@@ -185,10 +185,9 @@ export async function ledgerCheckDuplicate(contract: Contract,documentName : str
 }
 
 /**
- * checks ledger for duplicates of the documents name and hash
+ * retrieve the history of an asset from the ledger 
  * @param contract 
- * @param documentName name 
- * @param documentHash hash 
+ * @param documentID Doc ID  
  * @returns 
  */
 export async function ledgerRetrieveHistory(contract: Contract,documentID : string): Promise<DocumentLedger[]> {
@@ -200,3 +199,23 @@ export async function ledgerRetrieveHistory(contract: Contract,documentID : stri
     const result: DocumentLedger[] = JSON.parse(resultJson);
     return result;
 }
+
+
+/**
+ * verifies a document matches its on chain version
+ * @param contract 
+ * @param documentID Doc ID  
+ * @param documentHash hash of the document
+ * @returns 
+ */
+export async function ledgerVerifyDocument(contract: Contract,documentID : string,documentHash : string):  Promise<boolean> {
+    console.log('\n--> Evaluate Transaction: checkDuplicate, checks for duplicates ');
+
+    const resultBytes = await contract.evaluateTransaction('CheckDocumentValidity',documentID,documentHash);
+
+    const resultJson = utf8Decoder.decode(resultBytes);
+    const result: boolean = JSON.parse(resultJson);
+    return result;
+}
+
+
