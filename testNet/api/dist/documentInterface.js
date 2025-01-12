@@ -201,7 +201,7 @@ ledgerCheckDuplicate.__type = ['Contract', 'contract', 'documentName', 'document
  */
 function ledgerRetrieveHistory(contract, documentID) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('\n--> Evaluate Transaction: checkDuplicate, checks for duplicates ');
+        console.log('\n--> Evaluate Transaction: ledgerRetrieveHistory, get the history of an id ');
         const resultBytes = yield contract.evaluateTransaction('retrieveHistory', documentID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
@@ -218,7 +218,7 @@ ledgerRetrieveHistory.__type = ['Contract', 'contract', 'documentID', () => __Ω
  */
 function ledgerVerifyDocument(contract, documentID, documentHash) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('\n--> Evaluate Transaction: checkDuplicate, checks for duplicates ');
+        console.log('\n--> Evaluate Transaction: ledgerVerifyDocument, verify a document ');
         const resultBytes = yield contract.evaluateTransaction('CheckDocumentValidity', documentID, documentHash);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);

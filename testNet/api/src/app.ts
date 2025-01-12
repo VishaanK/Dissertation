@@ -133,6 +133,40 @@ app.post("/documents/read",async (req:Request, res:Response) => {
   
 });
 
+
+
+//verifies the document by checking the hash 
+app.post("/documents/verify" ,upload.single('file'),  (req:Request, res:Response) => { 
+  console.log("/documents/verify")
+  if(!req.file){
+    console.error("NO FILE ATTACHED TO REQUEST - /documents/verify")
+    res.status(400).json({"Result":"error no file in request"});
+    return;
+  }
+
+  if(!req.body.documentID){
+    console.error("NO USER ID - /documents/verify ")
+    res.status(400).json({"Result":"NO USER ID"});
+    return;
+  }
+
+  const documentHash : string = calculateHash(req.file!.buffer);
+
+
+  ledgerVerifyDocument(contract,req.body.documentID,documentHash).then((result)=>{
+    console.log("the result of the integrity check is ", result);
+    if(result == true){
+      res.status(200).json({"LedgerVerify":"Successful"});
+    }else{
+      res.status(200).json({"LedgerVerify":"Unsuccessful"});
+    }
+
+  }).catch((err:Error)=>{
+    console.log("error",err)
+    res.status(500).json({"Error verifying document":err.message,"DocID":req.body.id})
+  })
+});
+
 /**
  * Creating a document
  * Document to store and register is in the payload 
@@ -285,7 +319,7 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
   });
 
   
-})
+});
 
 /**
  * Deleting a document 
@@ -309,38 +343,6 @@ app.delete("/documents", (req:Request, res:Response) => {
 });
 
 
-
-//verifies the document by checking the hash 
-app.post("/documents/verify" ,upload.single('file'),  (req:Request, res:Response) => { 
-  console.log("/documents/verify")
-  if(!req.file){
-    console.error("NO FILE ATTACHED TO REQUEST - /documents/verify")
-    res.status(400).json({"Result":"error no file in request"});
-    return;
-  }
-
-  if(!req.body.documentID){
-    console.error("NO USER ID - /documents/verify ")
-    res.status(400).json({"Result":"NO USER ID"});
-    return;
-  }
-
-  const documentHash : string = calculateHash(req.file!.buffer);
-
-
-  ledgerVerifyDocument(contract,req.body.documentID,documentHash).then((result)=>{
-    console.log("the result of the integrity check is ", result);
-    if(result == true){
-      res.status(200).json({"LedgerVerify":"Successful"});
-    }else{
-      res.status(200).json({"LedgerVerify":"Unsuccessful"});
-    }
-
-  }).catch((err:Error)=>{
-    console.log("error",err)
-    res.status(500).json({"Error verifying document":err.message,"DocID":req.body.id})
-  })
-});
 
 /**
  * get the transaction history of a particular key 

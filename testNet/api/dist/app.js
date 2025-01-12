@@ -118,6 +118,33 @@ app.post("/documents/read", __assignType((req, res) => __awaiter(void 0, void 0,
         res.status(404).json({ "Error": err });
     }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
 }), ['req', 'res', '', 'P!2!!2""/#']));
+//verifies the document by checking the hash 
+app.post("/documents/verify", upload.single('file'), __assignType((req, res) => {
+    console.log("/documents/verify");
+    if (!req.file) {
+        console.error("NO FILE ATTACHED TO REQUEST - /documents/verify");
+        res.status(400).json({ "Result": "error no file in request" });
+        return;
+    }
+    if (!req.body.documentID) {
+        console.error("NO USER ID - /documents/verify ");
+        res.status(400).json({ "Result": "NO USER ID" });
+        return;
+    }
+    const documentHash = calculateHash(req.file.buffer);
+    (0, documentInterface_1.ledgerVerifyDocument)(exports.contract, req.body.documentID, documentHash).then(__assignType((result) => {
+        console.log("the result of the integrity check is ", result);
+        if (result == true) {
+            res.status(200).json({ "LedgerVerify": "Successful" });
+        }
+        else {
+            res.status(200).json({ "LedgerVerify": "Unsuccessful" });
+        }
+    }, ['result', '', 'P"2!"/"'])).catch(__assignType((err) => {
+        console.log("error", err);
+        res.status(500).json({ "Error verifying document": err.message, "DocID": req.body.id });
+    }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
+}, ['req', 'res', '', 'P!2!!2""/#']));
 /**
  * Creating a document
  * Document to store and register is in the payload
@@ -258,33 +285,6 @@ app.delete("/documents", __assignType((req, res) => {
         res.status(500).json({ "Error deleting document": err.message, "DocID": req.params.id });
     }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
 }, ['req', 'res', '', 'P!2!!2""/#']));
-//verifies the document by checking the hash 
-app.post("/documents/verify", upload.single('file'), __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("/documents/verify");
-    if (!req.file) {
-        console.error("NO FILE ATTACHED TO REQUEST - /documents/verify");
-        res.status(400).json({ "Result": "error no file in request" });
-        return;
-    }
-    if (!req.body.documentID) {
-        console.error("NO USER ID - /documents/verify ");
-        res.status(400).json({ "Result": "NO USER ID" });
-        return;
-    }
-    const documentHash = calculateHash(req.file.buffer);
-    (0, documentInterface_1.ledgerVerifyDocument)(exports.contract, req.body.documentID, documentHash).then(__assignType((result) => {
-        console.log("the result of the integrity check is ", result);
-        if (result == true) {
-            res.status(200).json({ "LedgerVerify": "Successful" });
-        }
-        else {
-            res.status(200).json({ "LedgerVerify": "Unsuccessful" });
-        }
-    }, ['result', '', 'P"2!"/"'])).catch(__assignType((err) => {
-        console.log("error", err);
-        res.status(500).json({ "Error verifying document": err.message, "DocID": req.params.id });
-    }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
-}), ['req', 'res', '', 'P!2!!2""/#']));
 /**
  * get the transaction history of a particular key
  */
