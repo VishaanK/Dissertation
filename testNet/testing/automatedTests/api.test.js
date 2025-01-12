@@ -10,7 +10,7 @@ describe('API Endpoint Tests', () => {
 
   // Add a delay of 0.25 seconds between tests
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-  const testDelay = 250; // 0.25 seconds
+  const testDelay = 1000; // 0.25 seconds
   jest.setTimeout(300000); // Set timeout for all tests to 5 mins
 
 
@@ -100,10 +100,12 @@ describe('API Endpoint Tests', () => {
   test('/documents/:documentid - should return 200 on success', async () => {
     const formData = new FormData();
     const filePath = path.resolve('../Vishaan_Khanna_CV-5.pdf'); // Ensure you have a file in your test directory
-    const fileBuffer = await fs.readFileSync(filePath);
+    const fileBuffer = fs.readFileSync(filePath);
+
     formData.append('file', fileBuffer,"Vishaan_Khanna_CV-5.pdf");
     formData.append('documentType', 'pdf');
-    formData.append('signable', "false");
+    formData.append('userID', "testUser");
+
 
     const res = await apiClient.post('/documents/doc1', formData, {
       headers: formData.getHeaders(),
@@ -127,16 +129,14 @@ describe('API Endpoint Tests', () => {
   });
 
 
-
   // Verify a document
   test('/documents/verify - should return 200 on success', async () => {
     const formData = new FormData();
 
     const filePath = path.resolve('../Vishaan_Khanna_CV-5.pdf'); // Ensure you have a file in your test directory
-    const fileBuffer = await fs.readFileSync(filePath);
+    const fileBuffer = fs.readFileSync(filePath);
 
     formData.append('file', fileBuffer,"Vishaan_Khanna_CV-5.pdf");
-
     formData.append('documentID', 'doc1');
 
     const res = await apiClient.post('/documents/verify', formData, {

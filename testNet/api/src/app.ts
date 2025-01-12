@@ -140,7 +140,7 @@ app.post("/documents/read",async (req:Request, res:Response) => {
  app.post("/documents", upload.single('file') , (req:Request, res:Response) => {
 
     if(!req.file){
-      console.error("NO FILE ATTACHED TO REQUEST")
+      console.error("NO FILE ATTACHED TO REQUEST - /documents")
       res.status(400).json({"Result":"error no file in request"});
       return;
     }
@@ -210,14 +210,14 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
 
 
   if(!req.file){
-    console.error("NO FILE ATTACHED TO REQUEST")
+    console.error("NO FILE ATTACHED TO REQUEST - /documents/:documentid")
     res.status(400).json({"Result":"error no file in request"});
     return;
   }
 
-  if(!req){
-    console.error("NO FILE ATTACHED TO REQUEST")
-    res.status(400).json({"Result":"error no file in request"});
+  if(!req.body.userID){
+    console.error("NO USER ID - /documents/:documentid")
+    res.status(400).json({"Result":"NO USER ID"});
     return;
   }
 
@@ -306,15 +306,25 @@ app.delete("/documents", (req:Request, res:Response) => {
 });
 
 //verifies the document by checking the hash 
-app.post("/documents/verify" ,upload.single('file'), (req:Request, res:Response) => { 
-  if (!req.body || !req.body.documentID ||!req.file) {
-    return res.status(400).json({ error: "Missing required fields" });
+app.post("/documents/verify" ,upload.single('file'), async (req:Request, res:Response) => { 
+  
+  if(!req.file){
+    console.error("NO FILE ATTACHED TO REQUEST - /documents/verify")
+    res.status(400).json({"Result":"error no file in request"});
+    return;
+  }
+
+  if(!req.body.documentID){
+    console.error("NO USER ID - /documents/verify ")
+    res.status(400).json({"Result":"NO USER ID"});
+    return;
   }
 
   const documentHash : string = calculateHash(req.file!.buffer);
 
 
   ledgerVerifyDocument(contract,req.body.documentID,documentHash).then((result)=>{
+    console.log("the result of the integrity check is ", result);
     if(result == true){
       res.status(200).json({"LedgerVerify":"Successful"});
     }else{
