@@ -191,7 +191,7 @@ export async function ledgerCheckDuplicate(contract: Contract,documentName : str
  * @returns 
  */
 export async function ledgerRetrieveHistory(contract: Contract,documentID : string): Promise<DocumentLedger[]> {
-    console.log('\n--> Evaluate Transaction: checkDuplicate, checks for duplicates ');
+    console.log('\n--> Evaluate Transaction: ledgerRetrieveHistory, get the history of an id ');
 
     const resultBytes = await contract.evaluateTransaction('retrieveHistory',documentID);
 
@@ -209,7 +209,7 @@ export async function ledgerRetrieveHistory(contract: Contract,documentID : stri
  * @returns 
  */
 export async function ledgerVerifyDocument(contract: Contract,documentID : string,documentHash : string):  Promise<boolean> {
-    console.log('\n--> Evaluate Transaction: checkDuplicate, checks for duplicates ');
+    console.log('\n--> Evaluate Transaction: ledgerVerifyDocument, verify a document ');
 
     const resultBytes = await contract.evaluateTransaction('CheckDocumentValidity',documentID,documentHash);
 

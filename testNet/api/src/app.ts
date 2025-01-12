@@ -308,8 +308,10 @@ app.delete("/documents", (req:Request, res:Response) => {
   
 });
 
+
+
 //verifies the document by checking the hash 
-app.post("/documents/verify" ,upload.single('file'), async (req:Request, res:Response) => { 
+app.post("/documents/verify" ,upload.single('file'),  (req:Request, res:Response) => { 
   console.log("/documents/verify")
   if(!req.file){
     console.error("NO FILE ATTACHED TO REQUEST - /documents/verify")
@@ -336,7 +338,7 @@ app.post("/documents/verify" ,upload.single('file'), async (req:Request, res:Res
 
   }).catch((err:Error)=>{
     console.log("error",err)
-    res.status(500).json({"Error verifying document":err.message,"DocID":req.params.id})
+    res.status(500).json({"Error verifying document":err.message,"DocID":req.body.id})
   })
 });
 
