@@ -344,7 +344,7 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
   })
   .then(() => {
     // Check if the name has changed
-    if (req.file!.originalname !== checkLedgerEntryExists.documentName) {
+    if (document.documentName !== checkLedgerEntryExists.documentName) {
       return ledgerRenameDocument(contract, req.params.documentid, req.file!.originalname,req.body.userID);
     }
   })
@@ -352,8 +352,9 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
     // Send the 200 response after all updates are successful
     res.status(200).json({ "Result": "Updates made" });
   })
-  .catch((err) => {
+  .catch((err : Error) => {
     // Handle any errors from any of the promises
+    console.log(err.message)
     res.status(500).json({ "Error": err.message || "An error occurred during the update process" });
   });
 
@@ -365,8 +366,9 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
  * id and user id provided in body
  */
 app.delete("/documents", (req:Request, res:Response) => {
-  console.log("/documents")
-  if (!req.body || !req.body.documentID || !req.body.userID) {
+  console.log("/documents - Delete")
+  if (!req.body.documentID || !req.body.userID) {
+    console.log(req)
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -501,6 +503,8 @@ function setupAPI(){
   
   //connect 
   try {
+    console.log('CONNECTING TO FABRIC GATEWAY');
+
     // Get a network instance representing the channel where the smart contract is deployed.
     network = gateway.getNetwork(channelName);
 
@@ -533,14 +537,19 @@ function setupAPI(){
           $addFields: {
             numericPart: {
               $toInt: {
-                $arrayElemAt: [
+                $ifNull: [
                   {
-                    $regexFind: {
-                      input: "$documentID",
-                      regex: /(\d+)$/, // Match digits at the end of the string
-                    },
+                    $arrayElemAt: [
+                      {
+                        $regexFind: {
+                          input: "$documentID",
+                          regex: /(\d+)$/, // Match digits at the end of the string
+                        },
+                      },
+                      "match", // Directly access the matched part from the result
+                    ],
                   },
-                  0,
+                  "0", // Default value when no match is found
                 ],
               },
             },

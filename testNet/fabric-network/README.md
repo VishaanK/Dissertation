@@ -3,7 +3,7 @@ This directory contains the base structure for a Hyperledger Fabric network.
 
 ## REMEMBER THE ADDRESS HAS MOVED INTO  Diss/Dissertation
 ## Packaging chaincode -> run this in the config folder so the command has access to core.yaml
-../bin/peer lifecycle chaincode package documentcc.tar.gz --path /home/vish/Diss/Dissertation/testNet/fabric-network/chaincode/documentChaincode/app --lang java --label documentcc1
+../bin/peer lifecycle chaincode package documentcc.tar.gz --path /home/vish/actualDiss/Dissertation/testNet/fabric-network/chaincode/documentChaincode/app --lang java --label documentcc1
 
 # Note EXPORT HE FABRIC_CFC_PATH directory like so before running the peer command 
 export FABRIC_CFG_PATH=/home/vish/Diss/Dissertation/testNet/fabric-network/config

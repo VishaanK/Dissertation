@@ -300,7 +300,8 @@ public final class DocumentTransfer implements ContractInterface {
 
         try {
             String documentJSON = stub.getStringState(documentID);
-
+            System.out.println("THE RETURNED JSON");
+            System.out.println(documentJSON);
             Document doc = genson.deserialize(documentJSON,Document.class);
             //update last action and ID of reader
             doc.setLastAction(DocumentAction.DELETED);
@@ -413,22 +414,45 @@ public final class DocumentTransfer implements ContractInterface {
     public Document[] retrieveHistory(final Context ctx,final String documentID)  {
         ChaincodeStub stub = ctx.getStub();
 
-        if (!CheckDocumentExists(ctx, documentID)) {
-            String errorMessage = String.format("Document %s does not exist", documentID);
-            System.out.println(errorMessage);
-            throw new ChaincodeException(errorMessage, DocumentTransferErrors.DOCUMENT_NOT_FOUND.toString());
-        }
+        //get the history of the asset
+        //convert to a list 
+        //use the length of the list to detect if that id has ever existed 
+        QueryResultsIterator<KeyModification> history;
+        try {
+            history = stub.getHistoryForKey(documentID);
 
-        QueryResultsIterator<KeyModification> history = stub.getHistoryForKey(documentID);
+        } catch (Exception e) {
+
+            String errorMessage = String.format("Error finding key");
+            System.out.println(errorMessage);
+            System.out.println(e.getMessage());
+            throw new ChaincodeException(errorMessage, DocumentTransferErrors.DOCUMENT_NOT_FOUND.toString());
+
+        }
+    
         ArrayList<Document> historyList= new ArrayList<>();
         for(KeyModification k : history){
-
-            Document doc = genson.deserialize(k.getStringValue(), Document.class);
-            historyList.add(doc);
+            //try with k.getisdeleted
+            if(k.getStringValue() != null){
+                try {
+                    Document doc = genson.deserialize(k.getStringValue(), Document.class);
+                    System.out.println(doc.toString());
+                    historyList.add(doc);
+                } catch (Exception e) {
+                    System.out.println("Error deserializing history entry: " + e.getMessage());
+                }
+            }else{
+                System.out.println(k.getStringValue());
+                System.out.println("Document has been deleted, but it's part of the history.");
+            }
+            
         }
 
-        //cast to a document Array 
+     
         return  historyList.toArray(new Document[0]);
+        
+   
+
     }
 
     /**

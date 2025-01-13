@@ -8,6 +8,8 @@ import Layout from './Layout.tsx';
 import Documenthistory from './Documenthistory.tsx';
 import Lognewdocument from './Lognewdocument.tsx';
 import Editdocument from './Editdocument.tsx';
+import Deletedocument from './Deletedocument.tsx';
+import Checkvalidity from './Checkvalidity.tsx';
 
 const root = document.getElementById("root");
 if(root){
@@ -20,7 +22,8 @@ if(root){
       <Route path = 'documentHistory' element = {<Documenthistory/>}/>
       <Route path ='addDocument' element = {<Lognewdocument/>}/>
       <Route path ='editDocument' element = {<Editdocument/>}/>
-      
+      <Route path = 'deleteDocument' element ={<Deletedocument/>}/> 
+      <Route path = 'Checkvalidity' element ={<Checkvalidity/>}/>
       </Route>
     </Routes>
      

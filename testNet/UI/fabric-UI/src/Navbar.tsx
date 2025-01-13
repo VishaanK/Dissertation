@@ -7,14 +7,16 @@ const Navbar: React.FC = () => {
     <header className="header">
       
       <div className="header-left">
-        <button className="home-button">Home</button>
+      <Link to={"/"}><button className="nav-button" >Home</button></Link> 
         <h2> Document tracking system</h2>
       </div>
       <div className="header-right">
-        <Link to={"/allDocuments"}><button className="nav-button" >View all documents</button></Link> 
-        <Link to= {"/documentHistory"}> <button className="nav-button">View edit history of a document</button></Link>
-        <Link to = {"/addDocument"}>  <button className="nav-button">Log a new document</button></Link>
-        <Link to = {'/editDocument'} ><button className="nav-button">Edit a document</button> </Link>
+        <Link to={"/allDocuments"}><button className="nav-button" >View all</button></Link> 
+        <Link to= {"/documentHistory"}> <button className="nav-button">Document History</button></Link>
+        <Link to = {"/addDocument"}>  <button className="nav-button">Log new document</button></Link>
+        <Link to = {'/editDocument'} ><button className="nav-button">Edit</button> </Link>
+        <Link to = {'/deleteDocument'} ><button className="nav-button">Delete</button> </Link>
+        <Link to = {'/checkValidity'} ><button className="nav-button">Verify</button> </Link>
       </div>
     </header>
 

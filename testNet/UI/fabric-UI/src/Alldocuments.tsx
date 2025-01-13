@@ -13,6 +13,9 @@ const Alldocuments: React.FC = () => {
             try {
                 const response = await axios.post(API, { userID: userID }); // Replace "yourUserID" with the actual ID
                 setData(response.data.Result);
+                if(response.data.Result.length == 0){
+                  alert("no data in the database")
+                }
             } catch (error) {
                 console.error("Error fetching data:", error);
             }

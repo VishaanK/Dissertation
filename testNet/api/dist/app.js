@@ -199,6 +199,38 @@ app.post("/documents", upload.single('file'), __assignType((req, res) => {
         res.status(500).json({ "Error": err });
     }, ['err', '', 'P"2!"/"']));
 }, ['req', 'res', '', 'P!2!!2""/#']));
+/**
+ * fetches the audit history with the semantic change scores
+ */
+app.get("/documents/audit", __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("/documents/audit");
+    try {
+        // Declare result as an object with the desired structure
+        const result = {};
+        // Iterate over the audit map
+        for (let [key, value] of auditMap) {
+            // Create a new list for the current document
+            const items = [];
+            let current = value;
+            // Traverse the linked list
+            while (current != null) {
+                items.push({
+                    "STATE": current.state,
+                    "CHANGE_SCORE": current.semanticChangeScore
+                });
+                current = current.next;
+            }
+            // Assign the list to the result object
+            result[key] = items;
+        }
+        // Send the result as a JSON response
+        res.json(result);
+    }
+    catch (error) {
+        console.error("Error fetching audit history:", error);
+        res.status(500).send("Internal Server Error");
+    }
+}), ['req', 'res', '', 'P!2!!2""/#']));
 /**Edit a document or its properties
  * need to reupload the document to recalculate the hash
  */
@@ -256,7 +288,7 @@ app.post("/documents/:documentid", upload.single('file'), __assignType((req, res
     })
         .then(() => {
         // Check if the name has changed
-        if (req.file.originalname !== checkLedgerEntryExists.documentName) {
+        if (document.documentName !== checkLedgerEntryExists.documentName) {
             return (0, documentInterface_1.ledgerRenameDocument)(exports.contract, req.params.documentid, req.file.originalname, req.body.userID);
         }
     })
@@ -266,16 +298,18 @@ app.post("/documents/:documentid", upload.single('file'), __assignType((req, res
     })
         .catch(__assignType((err) => {
         // Handle any errors from any of the promises
+        console.log(err.message);
         res.status(500).json({ "Error": err.message || "An error occurred during the update process" });
-    }, ['err', '', 'P"2!"/"']));
+    }, [() => __ΩError, 'err', '', 'Pn!2""/#']));
 }), ['req', 'res', '', 'P!2!!2""/#']));
 /**
  * Deleting a document
  * id and user id provided in body
  */
 app.delete("/documents", __assignType((req, res) => {
-    console.log("/documents");
-    if (!req.body || !req.body.documentID || !req.body.userID) {
+    console.log("/documents - Delete");
+    if (!req.body.documentID || !req.body.userID) {
+        console.log(req);
         return res.status(400).json({ error: "Missing required fields" });
     }
     (0, documentInterface_1.ledgerDelete)(exports.contract, req.body.documentID, req.body.userID).then(() => {
@@ -351,38 +385,6 @@ app.get("/documents/audit/setup", __assignType((req, res) => __awaiter(void 0, v
     }
     res.status(200).json({ "RESULT": "SUCCESS" });
 }), ['req', 'res', '', 'P!2!!2""/#']));
-/**
- * fetches the audit history with the semantic change scores
- */
-app.get("/documents/audit", __assignType((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("/documents/audit");
-    try {
-        // Declare result as an object with the desired structure
-        const result = {};
-        // Iterate over the audit map
-        for (let [key, value] of auditMap) {
-            // Create a new list for the current document
-            const items = [];
-            let current = value;
-            // Traverse the linked list
-            while (current != null) {
-                items.push({
-                    "STATE": current.state,
-                    "CHANGE_SCORE": current.semanticChangeScore
-                });
-                current = current.next;
-            }
-            // Assign the list to the result object
-            result[key] = items;
-        }
-        // Send the result as a JSON response
-        res.json(result);
-    }
-    catch (error) {
-        console.error("Error fetching audit history:", error);
-        res.status(500).send("Internal Server Error");
-    }
-}), ['req', 'res', '', 'P!2!!2""/#']));
 //set the api server listening 
 app.listen(3000, () => {
     setupAPI();
@@ -414,6 +416,7 @@ function setupAPI() {
     });
     //connect 
     try {
+        console.log('CONNECTING TO FABRIC GATEWAY');
         // Get a network instance representing the channel where the smart contract is deployed.
         exports.network = exports.gateway.getNetwork(constants_1.channelName);
         // Get the smart contract from the network.
@@ -441,14 +444,19 @@ function setupAPI() {
                     $addFields: {
                         numericPart: {
                             $toInt: {
-                                $arrayElemAt: [
+                                $ifNull: [
                                     {
-                                        $regexFind: {
-                                            input: "$documentID",
-                                            regex: /(\d+)$/, // Match digits at the end of the string
-                                        },
+                                        $arrayElemAt: [
+                                            {
+                                                $regexFind: {
+                                                    input: "$documentID",
+                                                    regex: /(\d+)$/, // Match digits at the end of the string
+                                                },
+                                            },
+                                            "match", // Directly access the matched part from the result
+                                        ],
                                     },
-                                    0,
+                                    "0", // Default value when no match is found
                                 ],
                             },
                         },

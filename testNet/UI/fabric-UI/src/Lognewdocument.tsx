@@ -51,6 +51,7 @@ const Lognewdocument: React.FC = () => {
       });
 
       if (response.status === 200) {
+        alert("file added")
         console.log("File uploaded successfully:", response.data);
       }
     } catch (error) {
@@ -59,7 +60,7 @@ const Lognewdocument: React.FC = () => {
   }
 
   return (
-    <form onSubmit={submitData} style={{ display: "flex", flexDirection: "column", gap: "1em", width: "300px" }}>
+    <><div><h2>This page enables a document to be logged in the system</h2></div><form onSubmit={submitData} style={{ display: "flex", flexDirection: "column", gap: "1em", width: "300px" }}>
       <div>
         <label htmlFor="userID">User ID:</label>
         <input type="text" name="userID" id="userID" value={formData.userID} onChange={handleInputChange} />
@@ -86,7 +87,7 @@ const Lognewdocument: React.FC = () => {
       </div>
 
       <button type="submit">Submit Document</button>
-    </form>
+    </form></>
   );
 };
 

@@ -51,6 +51,9 @@ const Editdocument: React.FC = () => {
 
       if (response.status === 200) {
         console.log("File uploaded successfully:", response.data);
+        alert("Edits made successfully")
+      }else{
+        alert("edits failed")
       }
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -58,12 +61,12 @@ const Editdocument: React.FC = () => {
   }
 
   return (
-    <form onSubmit={submitData} style={{ display: "flex", flexDirection: "column", gap: "1em", width: "300px" }}>
+    <><div><h2>This page enables a document to be edited</h2></div><form onSubmit={submitData} style={{ display: "flex", flexDirection: "column", gap: "1em", width: "300px" }}>
       <div>
         <label htmlFor="docID">docID ID:</label>
         <input type="text" name="docID" id="docID" value={formData.docID} onChange={handleInputChange} />
       </div>
-      
+
       <div>
         <label htmlFor="userID">userID:</label>
         <input type="text" name="userID" id="userID" value={formData.userID} onChange={handleInputChange} />
@@ -85,7 +88,7 @@ const Editdocument: React.FC = () => {
       </div>
 
       <button type="submit">Submit Document</button>
-    </form>
+    </form></>
   );
 };
 
