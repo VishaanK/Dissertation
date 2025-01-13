@@ -335,11 +335,11 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
   })
   .then(() => {
     // Check if the signable flag has changed
-    if(req.body.signable){
-      if (req.body.signable !== dbEntry.signable) {
-        return ledgerUpdateSignable(contract, req.params.documentid, req.body.signable,req.body.userID);
-      }
+  
+    if (document.signable !== checkLedgerEntryExists.signable) {
+      return ledgerUpdateSignable(contract, req.params.documentid, document.signable,req.body.userID);
     }
+  
 
   })
   .then(() => {
@@ -539,33 +539,38 @@ function setupAPI(){
               $toInt: {
                 $ifNull: [
                   {
-                    $arrayElemAt: [
-                      {
-                        $regexFind: {
-                          input: "$documentID",
-                          regex: /(\d+)$/, // Match digits at the end of the string
-                        },
+                    $let: {
+                      vars: {
+                        regexResult: {
+                          $regexFind: {
+                            input: "$documentID",
+                            regex: /(\\d+)$/ // Match digits at the end of the string
+                          }
+                        }
                       },
-                      "match", // Directly access the matched part from the result
-                    ],
+                      in: {
+                        $ifNull: ["$$regexResult.match", "0"] // Safely access `match` and provide a default value
+                      }
+                    }
                   },
-                  "0", // Default value when no match is found
-                ],
-              },
-            },
-          },
-        },
+                  "0" // Default value for the `ifNull`
+                ]
+              }
+            }
+          }
+        }
+        ,
         {
           // Step 2: Sort the documents in descending order based on the numeric part
-          $sort: { numericPart: -1 },
+          $sort: { numericPart: -1 }
         },
         {
           // Step 3: Limit the result to just one document (the one with the highest number)
-          $limit: 1,
-        },
+          $limit: 1
+        }
       ]).toArray().then((result) =>{
         if(result.length > 0){
-          highestAssetId = result[0].numericPart;
+          highestAssetId = result[0].numericPart + 1;
         }else{
           highestAssetId = 0;
         }

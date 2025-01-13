@@ -105,6 +105,7 @@ describe('API Endpoint Tests', () => {
     formData.append('file', fileBuffer,"Vishaan_Khanna_CV-5.pdf");
     formData.append('documentType', 'pdf');
     formData.append('userID', "testUser");
+    formData.append('signable', "true");
 
 
     const res = await apiClient.post('/documents/doc1', formData, {
