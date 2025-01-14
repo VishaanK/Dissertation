@@ -115,7 +115,7 @@ ledgerUpdateDocumentHash.__type = ['Contract', 'contract', 'docID', 'newHash', '
  */
 function ledgerRenameDocument(contract, docID, newName, userID) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('\n--> Evaluate Transaction: UpdateDocumentName, updates the hash to a new value to factor in changes');
+        console.log('\n--> Evaluate Transaction: UpdateDocumentName, renames the document');
         const resultBytes = yield contract.submitTransaction('UpdateDocumentName', docID, newName, userID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);
@@ -132,7 +132,7 @@ ledgerRenameDocument.__type = ['Contract', 'contract', 'docID', 'newName', 'user
  */
 function ledgerUpdateSignable(contract, docID, signable, userID) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('\n--> Evaluate Transaction: UpdateDocumentSignable, updates the hash to a new value to factor in changes');
+        console.log('\n--> Evaluate Transaction: UpdateDocumentSignable, makes the document signable');
         const resultBytes = yield contract.submitTransaction('UpdateDocumentSignable', docID, signable.toString(), userID);
         const resultJson = constants_1.utf8Decoder.decode(resultBytes);
         const result = JSON.parse(resultJson);

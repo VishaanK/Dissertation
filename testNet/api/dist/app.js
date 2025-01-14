@@ -259,9 +259,11 @@ app.post("/documents/:documentid", upload.single('file'), __assignType((req, res
         return;
     }
     //send file to data base 
+    console.log("the filename ");
+    console.log(req.file.originalname);
     let document = {
         "documentID": req.params.documentid,
-        "creatorID": dbEntry.creatorID, //not allowed to update the creator id 
+        "creatorID": checkLedgerEntryExists.creatorID, //not allowed to update the creator id 
         "documentName": req.file.originalname, //name always pulled from the file itself 
         "documentType": req.body.documentType || dbEntry.documentType,
         "signable": req.body.signable || dbEntry.signable,
@@ -273,7 +275,7 @@ app.post("/documents/:documentid", upload.single('file'), __assignType((req, res
         .then(() => {
         // Check if the document hash needs updating in the ledger
         if (document.documentHash !== checkLedgerEntryExists.documentID) {
-            controller.generateVectors.extract_and_embed_pdf(req.file.buffer).then(__assignType((result) => {
+            return controller.generateVectors.extract_and_embed_pdf(req.file.buffer).then(__assignType((result) => {
                 return (0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash, req.body.userID, result);
             }, ['result', '', 'P\'F2!"/"']));
         }
