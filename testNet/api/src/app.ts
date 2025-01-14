@@ -297,12 +297,14 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
     return;
   }
 
+
   //check the entered id is in the database 
   let dbEntry = await db.collection(collectionName).findOne({documentID:req.params.documentid});
   if(!dbEntry){
     res.status(404).json({"Result":"No entry in the database"});
     return;
   }
+
   //check the id exists in the ledger
   let checkLedgerEntryExists:DocumentLedger | null = await  ledgerReadDocument(contract,req.params.documentid,req.body.userID);
   if(!checkLedgerEntryExists){
@@ -311,9 +313,13 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
   }
 
   //send file to data base 
+  console.log("the filename ")
+  console.log(req.file.originalname)
+
+
   let document: DocumentDB = {
     "documentID":req.params.documentid,
-    "creatorID" :dbEntry.creatorID,//not allowed to update the creator id 
+    "creatorID" :checkLedgerEntryExists.creatorID,//not allowed to update the creator id 
     "documentName" : req.file.originalname,//name always pulled from the file itself 
     "documentType":req.body.documentType || dbEntry.documentType ,
     "signable":req.body.signable || dbEntry.signable,
@@ -326,7 +332,7 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
   .then(() => {
     // Check if the document hash needs updating in the ledger
     if (document.documentHash !== checkLedgerEntryExists.documentID) {
-      controller.generateVectors.extract_and_embed_pdf(req.file!.buffer).then((result:number[]) =>{
+      return controller.generateVectors.extract_and_embed_pdf(req.file!.buffer).then((result:number[]) =>{
         return ledgerUpdateDocumentHash(contract, req.params.documentid, document.documentHash,req.body.userID,result);
       
       })

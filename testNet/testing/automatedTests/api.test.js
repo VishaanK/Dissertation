@@ -49,8 +49,8 @@ describe('API Endpoint Tests', () => {
     const fileBuffer= fs.readFileSync(filePath);
     formData.append('file', fileBuffer,"Vishaan_Khanna_CV-3.pdf");
     formData.append('creatorID', 'testUser');
-    formData.append('documentType', 'testType');
-    formData.append('signable', "true");
+    formData.append('documentType', 'pdf');
+    formData.append('signable', "false");
 
     const res = await apiClient.post('/documents', formData, {
       headers: formData.getHeaders(),
@@ -105,7 +105,7 @@ describe('API Endpoint Tests', () => {
     formData.append('file', fileBuffer,"Vishaan_Khanna_CV-5.pdf");
     formData.append('documentType', 'pdf');
     formData.append('userID', "testUser");
-    formData.append('signable', "true");
+    formData.append('signable', "false");
 
 
     const res = await apiClient.post('/documents/doc1', formData, {

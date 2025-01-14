@@ -105,7 +105,7 @@ export async function ledgerUpdateDocumentHash(contract: Contract,docID : string
  * @param newName New Name of document
  */
 export async function ledgerRenameDocument(contract: Contract,docID : string,newName : string,userID:string): Promise<DocumentLedger> {
-    console.log('\n--> Evaluate Transaction: UpdateDocumentName, updates the hash to a new value to factor in changes');
+    console.log('\n--> Evaluate Transaction: UpdateDocumentName, renames the document');
 
     const resultBytes = await contract.submitTransaction('UpdateDocumentName', docID,newName,userID);
 
@@ -122,7 +122,7 @@ export async function ledgerRenameDocument(contract: Contract,docID : string,new
  * @param signable 
  */
 export async function ledgerUpdateSignable(contract: Contract,docID : string,signable : boolean,userID:string): Promise<DocumentLedger> {
-    console.log('\n--> Evaluate Transaction: UpdateDocumentSignable, updates the hash to a new value to factor in changes');
+    console.log('\n--> Evaluate Transaction: UpdateDocumentSignable, makes the document signable');
 
     const resultBytes = await contract.submitTransaction('UpdateDocumentSignable', docID,signable.toString(),userID);
 
