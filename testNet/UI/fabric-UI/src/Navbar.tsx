@@ -17,6 +17,7 @@ const Navbar: React.FC = () => {
         <Link to = {'/editDocument'} ><button className="nav-button">Edit</button> </Link>
         <Link to = {'/deleteDocument'} ><button className="nav-button">Delete</button> </Link>
         <Link to = {'/checkValidity'} ><button className="nav-button">Verify</button> </Link>
+        <Link to = {'/fetchFile'} ><button className="nav-button">Fetch a file</button></Link>
       </div>
     </header>
 

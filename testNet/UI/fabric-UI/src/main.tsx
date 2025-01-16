@@ -10,6 +10,7 @@ import Lognewdocument from './Lognewdocument.tsx';
 import Editdocument from './Editdocument.tsx';
 import Deletedocument from './Deletedocument.tsx';
 import Checkvalidity from './Checkvalidity.tsx';
+import Fetchfile from './FetchFile.tsx';
 
 const root = document.getElementById("root");
 if(root){
@@ -24,6 +25,7 @@ if(root){
       <Route path ='editDocument' element = {<Editdocument/>}/>
       <Route path = 'deleteDocument' element ={<Deletedocument/>}/> 
       <Route path = 'Checkvalidity' element ={<Checkvalidity/>}/>
+      <Route path = 'fetchFile' element = {<Fetchfile/>}/>
       </Route>
     </Routes>
      
