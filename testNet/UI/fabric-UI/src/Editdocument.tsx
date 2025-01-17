@@ -13,6 +13,7 @@ const Editdocument: React.FC = () => {
     signable: false,
   });
 
+  //handle an input from the form
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value, type, checked } = event.target;
     setFormData((prevState) => ({
@@ -21,11 +22,13 @@ const Editdocument: React.FC = () => {
     }));
   }
 
+  //handle a file being uploaded
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const uploadedFile = event.target.files ? event.target.files[0] : null;
     setFile(uploadedFile);
   }
 
+  //handle form submission
   async function submitData(event: React.FormEvent) {
     event.preventDefault(); // Prevent the default form submission
 
@@ -43,6 +46,7 @@ const Editdocument: React.FC = () => {
     data.append('signable', formData.signable ? 'true' : 'false');
     console.log(API + formData.docID)
     try {
+      //send request
       const response = await axios.post(API + formData.docID, data, {
         headers: {
           'Content-Type': 'multipart/form-data',

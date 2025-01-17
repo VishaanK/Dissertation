@@ -14,6 +14,7 @@ import Fetchfile from './FetchFile.tsx';
 
 const root = document.getElementById("root");
 if(root){
+  //the router componenet defines the different routes to various pages 
   ReactDOM.createRoot(root).render(
     <BrowserRouter>
     <Routes>

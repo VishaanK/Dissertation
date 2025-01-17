@@ -12,7 +12,7 @@ const Fetchfile: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-
+  //handle inputs from the form
   function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value} = event.target;
     setFormData((prevState) => ({
@@ -20,6 +20,7 @@ const Fetchfile: React.FC = () => {
       [name]: value,
     }));
   }
+  //handle form submission
   async function submitData(event: React.FormEvent) {
     event.preventDefault(); // Prevent the default form submission
     setLoading(true);
@@ -28,6 +29,7 @@ const Fetchfile: React.FC = () => {
     data.append('documentID' , formData.documentID);
     data.append('userID' , formData.userID);
     try {
+      //send post request 
       const response = await axios.post(API, data, {
         headers: {
           'Content-Type': 'application/json',
@@ -37,19 +39,20 @@ const Fetchfile: React.FC = () => {
       if (response.status === 200 && response.data.fileData) {
         console.log("File fetched successfully:", response.data);
 
-        // Decode the Base64 file data
+        //pass the file data into a blob
+        //convert from base 64 to an array of bytes
         const byteCharacters = atob(response.data.fileData);
         const byteNumbers = Array.from(byteCharacters, (char) => char.charCodeAt(0));
         const byteArray = new Uint8Array(byteNumbers);
 
-        // Create a Blob from the byte array
+        //Cast bytes to blob
         const fileBlob = new Blob([byteArray]);
         const downloadUrl = URL.createObjectURL(fileBlob);
 
         // Trigger the download
         const a = document.createElement('a');
         a.href = downloadUrl;
-        a.download = response.data.LedgerData.documentName; // You can dynamically set the filename here
+        a.download = response.data.LedgerData.documentName; //set the filename of the downloaded document
         document.body.appendChild(a);
         a.click();
         a.remove();

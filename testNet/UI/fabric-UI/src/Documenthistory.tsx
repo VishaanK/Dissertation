@@ -7,7 +7,7 @@ const API = "http://localhost:3000/documents/history/"
 const Documenthistory: React.FC = () => {
     const [data, setData] = useState<DocumentLedger[]>([]);
  
-
+    //handle form submission
     function submitForm(formData : FormData){
       if(!formData){
         return;
@@ -18,7 +18,7 @@ const Documenthistory: React.FC = () => {
       
       const fetch = async () => {
         try {
-            const response = await axios(url); // Replace "yourUserID" with the actual ID
+            const response = await axios(url); 
             setData(response.data.History);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -31,7 +31,7 @@ const Documenthistory: React.FC = () => {
         <div>
           <form onSubmit={(event) => {
             event.preventDefault(); // Prevent the default form submission
-            const formData = new FormData(event.currentTarget); // Extract FormData from the form
+            const formData = new FormData(event.currentTarget); 
             submitForm(formData); // Pass FormData to submitForm
             }}>
 

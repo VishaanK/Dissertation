@@ -11,7 +11,7 @@ const Alldocuments: React.FC = () => {
     useEffect(() => {
         const fetch = async () => {
             try {
-                const response = await axios.post(API, { userID: userID }); // Replace "yourUserID" with the actual ID
+                const response = await axios.post(API, { userID: userID }); 
                 setData(response.data.Result);
                 if(response.data.Result.length == 0){
                   alert("no data in the database")
@@ -21,7 +21,7 @@ const Alldocuments: React.FC = () => {
             }
         };
         fetch();
-    }, [refresh]); // Add dependencies as needed
+    }, [refresh]); 
         
     
     return(

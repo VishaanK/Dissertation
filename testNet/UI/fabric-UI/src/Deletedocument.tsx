@@ -9,7 +9,7 @@ const Deletedocument: React.FC = () => {
       });
 
 
-    
+    //handle an input from the form
     function handleInputChange(event: React.ChangeEvent<HTMLInputElement>) {
         const { name, value} = event.target;
         setFormData((prevState) => ({
