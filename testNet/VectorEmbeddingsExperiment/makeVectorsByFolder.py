@@ -9,7 +9,6 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
 
-# Step 1: Load the PDF and extract text
 def extract_text_from_pdf(pdf_path):
     """
     extract the pdf text from the pdf

@@ -1,0 +1,14 @@
+api contains the api implementation
+UI contains the UI implementation 
+VectorEmbeddingsExperiment contains the scripts used to run the experiment 
+testing contains the testing scripts 
+db contains the mongodb config files 
+fabric-network contains the blockchain network 
+
+## Intersting directories 
+# Smart contract
+The Smart contract implementation can be found at : testNet/fabric-network/chaincode/documentChaincode/app/src/main/java/org/example/
+# Start up scripts 
+The start up scripts can be found at : testNet/fabric-network/startnetwork.sh, with the other scripts at testNet/fabric-network/scripts
+# Docker compose
+The docker compose script can be found at : testNet/fabric-network/compose/docker-compose.yaml
