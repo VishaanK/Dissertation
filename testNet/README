@@ -12,3 +12,18 @@ The Smart contract implementation can be found at : testNet/fabric-network/chain
 The start up scripts can be found at : testNet/fabric-network/startnetwork.sh, with the other scripts at testNet/fabric-network/scripts
 # Docker compose
 The docker compose script can be found at : testNet/fabric-network/compose/docker-compose.yaml
+
+## Running instructions 
+
+1. Install NPM
+2. Install Docker
+3. Install the Fabric installer curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install
+4. Install Fabric with : ./install-fabric.sh docker samples binary
+5. Run npm install in the API folder and in the UI folder
+6. Unzip the provided folder
+7. Ensure that any absolute file paths in the docker compose file or any of the config files have
+been updated to your system
+8. ensure that ./startnetwork and all the scripts in /scripts have excecute permissions with chmod
++x FILENAME
+9. Call ./startNetwork to run the blockchain network
+10. in the UI/fabricUI folder run npm run dev to start the UI
