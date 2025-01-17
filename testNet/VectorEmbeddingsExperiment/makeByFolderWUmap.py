@@ -9,13 +9,13 @@ import matplotlib.pyplot as plt
 import umap.plot
 from matplotlib.lines import Line2D
 from sklearn.decomposition import PCA
-from scipy.cluster.hierarchy import dendrogram, linkage
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelEncoder
+from matplotlib.colors import ListedColormap
 
 # Step 1: Load the PDF and extract text
 def extract_text_from_pdf(pdf_path):
     """
-    extract the pdf text from the pdf at the file path provided 
+    extract the pdf text from the pdf
     Parameters:
         pdf_path : the file path 
     """
@@ -24,17 +24,17 @@ def extract_text_from_pdf(pdf_path):
         text = ''.join([page.extract_text() or "" for page in reader.pages])
     return text
 
-# Step 2: Load the Longformer tokenizer and model
+#load the model
 tokenizer = AutoTokenizer.from_pretrained("allenai/longformer-base-4096")
 model = AutoModel.from_pretrained("allenai/longformer-base-4096")
 
 def get_embeddings(text):
     """
-    extract the embedding from the text provided
+    extract the embedding
     Parameters:
         text : the text to process
     """
-    # Tokenize without truncation
+    # Tokenize
     tokens = tokenizer(text, return_tensors='pt', padding='longest', truncation=False)
     
     # Check if input length exceeds the model's limit
@@ -45,24 +45,18 @@ def get_embeddings(text):
     with torch.no_grad():  # Disable gradient calculation for inference
         outputs = model(**tokens)
         
-    # Perform mean pooling: average the token embeddings
-    #make sure that this is the pre softmax layer 
-    token_embeddings = outputs.last_hidden_state  # Shape: [batch_size=1, sequence_length, hidden_size]
-    mean_pooled_embedding = torch.mean(token_embeddings, dim=1).squeeze()  # Shape: [hidden_size]
+    # Average the token embeddings 
+    token_embeddings = outputs.last_hidden_state 
+    mean_pooled_embedding = torch.mean(token_embeddings, dim=1).squeeze()
     
     #normalize 
     doc_vectors_normalized = torch.nn.functional.normalize(mean_pooled_embedding,p=2.0,dim=0)
-    # Convert the tensor to a list (JSON-compatible format)
+    # convert to list
     embedding_list = doc_vectors_normalized.tolist()
     
     return embedding_list
 
 
-import numpy as np
-import umap
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import LabelEncoder
-from matplotlib.colors import ListedColormap
 
 def plot_umap(vectors, labels, n_neighbors=2, min_dist=0.5, n_components=2):
     """
@@ -100,8 +94,8 @@ def plot_umap(vectors, labels, n_neighbors=2, min_dist=0.5, n_components=2):
         alpha=0.8
     )
 
-    # Modify legend creation to preserve the order of appearance
-    unique_labels = list(dict.fromkeys(labels))  # Keep labels in their input order
+   #create legend
+    unique_labels = list(dict.fromkeys(labels))
     handles = [plt.Line2D([0], [0], marker='o', color=scatter.cmap(scatter.norm(i)), linestyle='') 
             for i in range(len(unique_labels))]
     plt.legend(handles, unique_labels, title="Labels", loc="best", fontsize="medium")
@@ -118,15 +112,14 @@ def plot_umap(vectors, labels, n_neighbors=2, min_dist=0.5, n_components=2):
     
 def plot_umap_P_vs_N(vectors, labels, n_neighbors=2, min_dist=0.5, n_components=2):
     """
-    Reduces the dimensionality of the input vectors using UMAP and plots the result, 
-    with points color-coded based on whether the label ends with 'P' or 'N'.
-
+    Uses Umap,
+    Plots a scatter graph with points color-coded based on whether the label ends with 'P' or 'N'
     Parameters:
-    - vectors: numpy array of shape [number of vectors, number of dimensions]
+    - emnbeddings : embedding array
     - labels: array of labels corresponding to each vector
-    - n_neighbors: int, number of neighbors for UMAP (default: 2)
-    - min_dist: float, minimum distance between points in UMAP projection (default: 0.0)
-    - n_components: int, target dimensionality of the projection (default: 2)
+    - n_neighbors: number of neighbors for UMAP
+    - min_dist: minimum distance between points in UMAP projection 
+    - n_components: dimensions in the resulting projection
     """
     # Validate input
     if len(vectors) != len(labels):
@@ -172,7 +165,7 @@ def plot_umap_P_vs_N(vectors, labels, n_neighbors=2, min_dist=0.5, n_components=
 
 
 # Load and process the PDF
-#folders = ['./TestData/ContractAndOpposite','./TestData/SingleDocVersions']
+folders = ['./TestData/ContractAndOpposite','./TestData/SingleDocVersions']
 folders = []
 for folder in folders:
 
@@ -187,7 +180,6 @@ for folder in folders:
         # Check if it is a file (not a directory)
         if os.path.isfile(file_path):
             print(f"Processing file: {filename}")
-            # Add your processing code here
             labels.append(str(filename))
             embeddings.append(get_embeddings(extract_text_from_pdf(file_path)))
 
@@ -200,7 +192,7 @@ for folder in folders:
     plot_umap(embeddings_array,labels,n_neighbors=num)
     
     
-
+#additional folder to process 
 embeddings = []
 labels = []
 
@@ -212,7 +204,6 @@ for filename in os.listdir('./TestData/postiveVsNegativeSentiment'):
     # Check if it is a file (not a directory)
     if os.path.isfile(file_path):
         print(f"Processing file: {filename}")
-        # Add your processing code here
         labels.append(str(filename).strip().removesuffix('.pdf'))
         embeddings.append(get_embeddings(extract_text_from_pdf(file_path)))
         
