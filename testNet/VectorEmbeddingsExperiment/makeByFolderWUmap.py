@@ -152,7 +152,6 @@ def plot_umap_P_vs_N(vectors, labels, n_neighbors=2, min_dist=0.5, n_components=
     plt.grid(True, alpha=0.5)
 
     # Add legend for color coding
-    # Add legend for color coding
    
     legend_elements = [
         Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='Positive Sentiment'),
