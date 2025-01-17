@@ -1,8 +1,3 @@
-# Copyright IBM Corp. All Rights Reserved.
-#
-# SPDX-License-Identifier: Apache-2.0
-#
-
 version: '3.7'
 
 volumes:
@@ -129,8 +124,6 @@ services:
 
     working_dir: /root
     command: peer node start
-    # peer channel fetch newest  channel1.block -c channel1 --orderer orderer.example.com:7050
-    #peer channel join -b /etc/hyperledger/fabric/genesisblocks/genesis_block.pb
     ports:
       - 7051:7051
       - 9444:9444
