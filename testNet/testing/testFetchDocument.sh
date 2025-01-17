@@ -13,7 +13,7 @@ if [[ -z "$encodedFile" || -z "$documentName" || "$documentName" == "null" ]]; t
   exit 1
 fi
 
-# Set the output file name (append .pdf if not already present)
+# Set the output file name
 outputFile="${documentName%.pdf}.pdf"s
 
 # Decode the Base64 data into a PDF file

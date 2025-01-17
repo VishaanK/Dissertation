@@ -1,2 +1,3 @@
 # Scripts
-This directory contains scripts for managing the Hyperledger Fabric network.
+This directory contains scripts for starting the network
+networkSetup runs the other scripts in the folder 

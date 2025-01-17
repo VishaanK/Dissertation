@@ -4,6 +4,7 @@
 peer="peer0.org1.example.com"
 peerPort="7051"
 
+#env variables
 export FABRIC_CFG_PATH=../config
 
 export CORE_PEER_ADDRESS="localhost:$peerPort" 

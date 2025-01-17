@@ -4,6 +4,7 @@
 peer="peer0.org1.example.com"
 peerPort="7051"
 
+#env variables
 export FABRIC_CFG_PATH=../config
 
 export CORE_PEER_ADDRESS="localhost:$peerPort" 
@@ -13,7 +14,7 @@ export CORE_PEER_TLS_ENABLED=true
 export CORE_PEER_MSPCONFIGPATH=../organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
 export ORDERER_GENERAL_TLS_ROOTCAS=../organizations/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt
 
-#create documents and delete them to empty the ledger -> NOTE UPDATE INIT LEDGER TO NOT CREATE ASSETS 
+#calls the initialise ledger function in the chaincode to instantiate the ledger
 echo "initialising the ledger" 
 
 ../bin/peer chaincode invoke --ctor '{"Function":"InitLedger", "Args":[]}' -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com \

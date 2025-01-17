@@ -1,5 +1,5 @@
 #!/bin/bash
-####This test renames the file and changes its contents i.e the hash 
+
 # Set the endpoint and file path
 URL="http://localhost:3000/documents/doc1"
 FILE_PATH="Vishaan_Khanna_CV-5.pdf"
@@ -24,7 +24,7 @@ echo after edit
 # Fetch JSON data from the endpoint
 response=$(curl -s -X POST "http://localhost:3000/documents/read" -H "Content-Type: application/json" -d '{"userID": "vk60","documentID":"doc1"}')
 
-# Extract the Base64 data and document name using jq
+# Extract the Base64 data and document name
 encodedFile=$(echo "$response" | jq -r '.fileData')
 documentName=$(echo "$response" | jq -r '.LedgerData.documentName')
 
@@ -34,7 +34,7 @@ if [[ -z "$encodedFile" || -z "$documentName" || "$documentName" == "null" ]]; t
   exit 1
 fi
 
-# Set the output file name (append .pdf if not already present)
+# Set the output file name 
 outputFile="${documentName%.pdf}.pdf"
 
 # Decode the Base64 data into a PDF file
