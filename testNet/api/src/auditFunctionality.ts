@@ -1,5 +1,10 @@
 import { DocumentLedger } from "./utils";
-
+/**
+ * Calculates the eucldean distance between vectors
+ * @param vector1 vector 1
+ * @param vector2 vector 2
+ * @returns 
+ */
 function euclideanDistance(vector1: number[], vector2: number[]): number {
     if (vector1.length !== vector2.length) {
         throw new Error('Vectors must be of the same length');
@@ -59,12 +64,5 @@ export class documentStateNode{
         }
     }    
 }
-
-
-//search using 2 documents to search by the transition between the two states 
-
-
-//use the vector embeddings to find a document 
-//search by the latest state of each documents vector and take the shortest distance one to be a match 
 
 

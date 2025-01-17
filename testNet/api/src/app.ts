@@ -21,14 +21,16 @@ const upload = multer({ storage: storage });
 //python bridge 
 const bridge = new PyBridge({python: 'python3', cwd: __dirname});
 const controller = new PythonController(bridge);
-//hyperledger connection detials to make available is different files 
+//hyperledger connection detials to make available in different files 
 export let gateway: Gateway;
 export let client:Client;
 export let network:Network;
 export let contract:Contract;
 export let db:Db;
 
+//audit map
 let auditMap : Map<string,documentStateNode> = new Map();
+//hashing algorithm 
 let hashingAlgo:Hash = createHash('sha256');
 
 let highestAssetId:number=0;
@@ -44,7 +46,7 @@ var app = express();
 
 app.use(cors());
 
-//enable logging each request that turns up 
+//log every request
 app.use((req:Request, res:Response, next:NextFunction) => {
   console.log('Time: ', Date.now());
   next();
@@ -516,7 +518,6 @@ function setupAPI(){
 
     // Get the smart contract from the network.
     contract = network.getContract(chaincodeName);
-            // Initialize a set of asset data on the ledger using the chaincode 'InitLedger' function.
     
     } catch (error) {
     console.error('FAILED TO CONNECT TO FABRIC GATEWAY', error);
@@ -539,7 +540,7 @@ function setupAPI(){
 
       db.collection(collectionName).aggregate([
         {
-          // Step 1: Add a new field that extracts the numeric part from `documentID`
+         
           $addFields: {
             numericPart: {
               $toInt: {
@@ -550,16 +551,16 @@ function setupAPI(){
                         regexResult: {
                           $regexFind: {
                             input: "$documentID",
-                            regex: /(\\d+)$/ // Match digits at the end of the string
+                            regex: /(\\d+)$/
                           }
                         }
                       },
                       in: {
-                        $ifNull: ["$$regexResult.match", "0"] // Safely access `match` and provide a default value
+                        $ifNull: ["$$regexResult.match", "0"] 
                       }
                     }
                   },
-                  "0" // Default value for the `ifNull`
+                  "0" 
                 ]
               }
             }
@@ -567,11 +568,11 @@ function setupAPI(){
         }
         ,
         {
-          // Step 2: Sort the documents in descending order based on the numeric part
+          // sort the results
           $sort: { numericPart: -1 }
         },
         {
-          // Step 3: Limit the result to just one document (the one with the highest number)
+          // Access the highest result
           $limit: 1
         }
       ]).toArray().then((result) =>{

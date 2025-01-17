@@ -2,7 +2,6 @@
 import { PyBridge } from 'pybridge';
 
 //database structure
-//TODO CHANGE TO MATCH THE STRUCTURE I HAVE GIVEN THE DB
 export interface DocumentDB {
     file: BinaryData, 
     creatorID: string,
@@ -25,8 +24,9 @@ export interface DocumentLedger {
     lastAction: DocumentAction;
     vector: number[];
     
-}//changes the data type of lastInteractedWithID check that didnt break anything
+}
 
+//enum of possible actions on a document
 export enum DocumentAction {
   CREATED = "CREATED",
   READ = "READ",
@@ -34,7 +34,7 @@ export enum DocumentAction {
   DELETED = "DELETED"
 }
 
-
+//python controller
 export interface pythonAPI {
   extract_and_embed_pdf(pdfBinary: Buffer): Promise<number[]>;
 }

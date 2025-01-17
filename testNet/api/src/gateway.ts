@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import {Identity, Signer, signers } from '@hyperledger/fabric-gateway';
 import * as crypto from 'crypto';
 
+//gateway methods 
 
 export function newGrpcConnection(): grpc.Client {
     

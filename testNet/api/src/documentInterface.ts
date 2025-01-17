@@ -116,7 +116,7 @@ export async function ledgerRenameDocument(contract: Contract,docID : string,new
 }
 
 /**
- * Update the signable statud of the document
+ * Update the signable status of the document
  * @param contract 
  * @param docID 
  * @param signable 
