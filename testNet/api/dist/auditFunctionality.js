@@ -3,6 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.documentStateNode = void 0;
 /*@ts-ignore*/
 const { __ΩDocumentLedger } = require("./utils");
+/**
+ * Calculates the eucldean distance between vectors
+ * @param vector1 vector 1
+ * @param vector2 vector 2
+ * @returns
+ */
 function euclideanDistance(vector1, vector2) {
     if (vector1.length !== vector2.length) {
         throw new Error('Vectors must be of the same length');

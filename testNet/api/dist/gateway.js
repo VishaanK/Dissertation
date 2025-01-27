@@ -31,6 +31,7 @@ const grpc = __importStar(require("@grpc/grpc-js"));
 const fs = __importStar(require("fs"));
 const fabric_gateway_1 = require("@hyperledger/fabric-gateway");
 const crypto = __importStar(require("crypto"));
+//gateway methods 
 function newGrpcConnection() {
     const tlsRootCert = fs.readFileSync(constants_1.tlsCertPath);
     const tlsCredentials = grpc.credentials.createSsl(tlsRootCert);

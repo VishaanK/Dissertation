@@ -37,7 +37,9 @@ const upload = (0, multer_1.default)({ storage: storage });
 //python bridge 
 const bridge = new pybridge_1.PyBridge({ python: 'python3', cwd: __dirname });
 const controller = new utils_1.PythonController(bridge);
+//audit map
 let auditMap = new Map();
+//hashing algorithm 
 let hashingAlgo = (0, crypto_1.createHash)('sha256');
 let highestAssetId = 0;
 function generatedNewID() {
@@ -47,7 +49,7 @@ function generatedNewID() {
 generatedNewID.__type = ['generatedNewID', 'P&/!'];
 var app = express();
 app.use(cors());
-//enable logging each request that turns up 
+//log every request
 app.use(__assignType((req, res, next) => {
     console.log('Time: ', Date.now());
     next();
@@ -175,16 +177,11 @@ app.post("/documents", upload.single('file'), __assignType((req, res) => {
             console.log("saving file to db", document);
             exports.db.collection(constants_1.collectionName).insertOne(document).then(__assignType((result) => {
                 console.log("inserted obj id", result);
-                controller.generateVectors.extract_and_embed_pdf(req.file.buffer).then(__assignType((result) => {
-                    //update the ledger now that the file has successfully been stored 
-                    (0, documentInterface_1.ledgerCreateDocument)(exports.contract, document.documentID, document.documentName, document.creatorID, document.documentHash, document.documentType, document.signable, result).then(() => {
-                        res.sendStatus(200);
-                    }).catch(__assignType((err) => {
-                        console.error("error logging in ledger", err);
-                        res.status(500).json({ "Error": err });
-                    }, ['err', '', 'P"2!"/"']));
-                }, ['result', '', 'P\'F2!"/"'])).catch(__assignType((err) => {
-                    console.error("error generating embedding", err);
+                //update the ledger now that the file has successfully been stored 
+                (0, documentInterface_1.ledgerCreateDocument)(exports.contract, document.documentID, document.documentName, document.creatorID, document.documentHash, document.documentType, document.signable, []).then(() => {
+                    res.sendStatus(200);
+                }).catch(__assignType((err) => {
+                    console.error("error logging in ledger", err);
                     res.status(500).json({ "Error": err });
                 }, ['err', '', 'P"2!"/"']));
             }, ['result', '', 'P"2!"/"'])).catch(__assignType((err) => {
@@ -275,9 +272,7 @@ app.post("/documents/:documentid", upload.single('file'), __assignType((req, res
         .then(() => {
         // Check if the document hash needs updating in the ledger
         if (document.documentHash !== checkLedgerEntryExists.documentID) {
-            return controller.generateVectors.extract_and_embed_pdf(req.file.buffer).then(__assignType((result) => {
-                return (0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash, req.body.userID, result);
-            }, ['result', '', 'P\'F2!"/"']));
+            return (0, documentInterface_1.ledgerUpdateDocumentHash)(exports.contract, req.params.documentid, document.documentHash, req.body.userID, []);
         }
     })
         .then(() => {
@@ -421,7 +416,6 @@ function setupAPI() {
         exports.network = exports.gateway.getNetwork(constants_1.channelName);
         // Get the smart contract from the network.
         exports.contract = exports.network.getContract(constants_1.chaincodeName);
-        // Initialize a set of asset data on the ledger using the chaincode 'InitLedger' function.
     }
     catch (error) {
         console.error('FAILED TO CONNECT TO FABRIC GATEWAY', error);
@@ -440,7 +434,6 @@ function setupAPI() {
             //get the highest id 
             exports.db.collection(constants_1.collectionName).aggregate([
                 {
-                    // Step 1: Add a new field that extracts the numeric part from `documentID`
                     $addFields: {
                         numericPart: {
                             $toInt: {
@@ -451,27 +444,27 @@ function setupAPI() {
                                                 regexResult: {
                                                     $regexFind: {
                                                         input: "$documentID",
-                                                        regex: /(\\d+)$/ // Match digits at the end of the string
+                                                        regex: /(\\d+)$/
                                                     }
                                                 }
                                             },
                                             in: {
-                                                $ifNull: ["$$regexResult.match", "0"] // Safely access `match` and provide a default value
+                                                $ifNull: ["$$regexResult.match", "0"]
                                             }
                                         }
                                     },
-                                    "0" // Default value for the `ifNull`
+                                    "0"
                                 ]
                             }
                         }
                     }
                 },
                 {
-                    // Step 2: Sort the documents in descending order based on the numeric part
+                    // sort the results
                     $sort: { numericPart: -1 }
                 },
                 {
-                    // Step 3: Limit the result to just one document (the one with the highest number)
+                    // Access the highest result
                     $limit: 1
                 }
             ]).toArray().then(__assignType((result) => {

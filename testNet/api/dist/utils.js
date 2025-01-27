@@ -8,6 +8,7 @@ const __ΩDocumentLedger = ['creatorID', 'documentHash', 'documentID', 'document
 exports.__ΩDocumentLedger = __ΩDocumentLedger;
 const __ΩDocumentAction = ['CREATED', () => "CREATED", 'READ', () => "READ", 'EDITED', () => "EDITED", 'DELETED', () => "DELETED", 'DocumentAction', 'PC!>"C#>$C%>&C\'>(Bw)'];
 exports.__ΩDocumentAction = __ΩDocumentAction;
+//enum of possible actions on a document
 var DocumentAction;
 (function (DocumentAction) {
     DocumentAction["CREATED"] = "CREATED";

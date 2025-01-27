@@ -125,7 +125,7 @@ function ledgerRenameDocument(contract, docID, newName, userID) {
 }
 ledgerRenameDocument.__type = ['Contract', 'contract', 'docID', 'newName', 'userID', () => __ΩDocumentLedger, 'ledgerRenameDocument', 'P"w!2"&2#&2$&2%n&`/\''];
 /**
- * Update the signable statud of the document
+ * Update the signable status of the document
  * @param contract
  * @param docID
  * @param signable
