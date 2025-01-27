@@ -205,10 +205,9 @@ app.post("/documents/verify" ,upload.single('file'),  (req:Request, res:Response
 
 
           console.log("inserted obj id",result);
-          controller.generateVectors.extract_and_embed_pdf(req.file!.buffer).then((result:number[]) =>{
             
             //update the ledger now that the file has successfully been stored 
-            ledgerCreateDocument(contract,document.documentID,document.documentName,document.creatorID,document.documentHash,document.documentType,document.signable,result).then(()=>{
+            ledgerCreateDocument(contract,document.documentID,document.documentName,document.creatorID,document.documentHash,document.documentType,document.signable,[]).then(()=>{
               res.sendStatus(200);
 
             
@@ -219,13 +218,6 @@ app.post("/documents/verify" ,upload.single('file'),  (req:Request, res:Response
               
             })
 
-          }).catch((err)=>{
-    
-            console.error("error generating embedding",err);
-            res.status(500).json({"Error":err});
-            
-          })
-          
     
         }).catch((err)=>{
           console.error("error saving in database",err)
@@ -334,10 +326,8 @@ app.post("/documents/:documentid", upload.single('file') ,async (req:Request,res
   .then(() => {
     // Check if the document hash needs updating in the ledger
     if (document.documentHash !== checkLedgerEntryExists.documentID) {
-      return controller.generateVectors.extract_and_embed_pdf(req.file!.buffer).then((result:number[]) =>{
-        return ledgerUpdateDocumentHash(contract, req.params.documentid, document.documentHash,req.body.userID,result);
+      return ledgerUpdateDocumentHash(contract, req.params.documentid, document.documentHash,req.body.userID,[]);
       
-      })
 
     }
   })
