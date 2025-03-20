@@ -6,7 +6,7 @@ db contains the mongodb config files
 fabric-network contains the blockchain network 
 
 ## Intersting directories 
-# Smart contract
+# Smart contract code written in Java
 The Smart contract implementation can be found at : testNet/fabric-network/chaincode/documentChaincode/app/src/main/java/org/example/
 # Start up scripts 
 The start up scripts can be found at : testNet/fabric-network/startnetwork.sh, with the other scripts at testNet/fabric-network/scripts
