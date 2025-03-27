@@ -3,7 +3,7 @@ UI contains the UI implementation in React in TS
 VectorEmbeddingsExperiment contains the scripts used to run the experiment 
 testing contains the testing scripts 
 db contains the mongodb config files 
-fabric-network contains the blockchain network 
+fabric-network contains the blockchain network, including the start up scripts to run the entire system 
 
 ## Intersting directories 
 # Smart contract code written in Java
